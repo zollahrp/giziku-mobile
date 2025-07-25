@@ -34,6 +34,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("HomeScreen dibuild");
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: _screens[_selectedIndex],

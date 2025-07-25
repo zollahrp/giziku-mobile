@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:giziku/screens/main_screen.dart';
-import 'home_screen.dart';
+import '../../repositories/auth_repository.dart';
+import '../../services/shared_prefs_service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -13,6 +14,12 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
+  bool _isLoading = false;
+
+  final AuthRepository _authRepository = AuthRepository(
+    baseUrl: 'https://kqt1clq7-8000.asse.devtunnels.ms/',
+    prefsService: SharedPrefsService(),
+  );
 
   @override
   void dispose() {
@@ -21,6 +28,56 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
+  bool isValidEmail(String email) {
+    final emailRegex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+    return emailRegex.hasMatch(email);
+  }
+
+  Future<void> _handleSignIn() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      _showError('Email dan Password tidak boleh kosong');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      _showError('Format email tidak valid');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final result = await _authRepository.signInWithEmailPassword(
+      email,
+      password,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (result.success) {
+      print('masuk');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
+    } else {
+      _showError(result.message ?? 'Login gagal');
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -30,13 +87,12 @@ class _SignInScreenState extends State<SignInScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Row untuk menyelaraskan tombol back dan judul
+              // Header
               Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Tombol back di kiri
                     InkWell(
                       onTap: () {
                         Navigator.pop(context);
@@ -55,8 +111,6 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                       ),
                     ),
-                    
-                    // Teks "Sign In" di tengah
                     const Text(
                       'Sign In',
                       style: TextStyle(
@@ -65,35 +119,31 @@ class _SignInScreenState extends State<SignInScreen> {
                         fontFamily: 'Poppins',
                       ),
                     ),
-                    
-                    // Widget kosong untuk menyeimbangkan layout
                     const SizedBox(width: 40),
                   ],
                 ),
               ),
-              
-              // Logo Giziku
+
+              // Logo
               Center(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 20.0),
                   child: Image.asset(
-                    'assets/gizikulabel.png', 
+                    'assets/gizikulabel.png',
                     height: 70,
                     color: const Color(0xFF2ECC71),
                   ),
                 ),
               ),
-              
+
+              // Ilustrasi
               Expanded(
                 flex: 4,
                 child: Center(
-                  child: Image.asset(
-                    'assets/signin.png',
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.asset('assets/signin.png', fit: BoxFit.contain),
                 ),
               ),
-              
+
               const Text(
                 'Hi ! Welcome Back',
                 style: TextStyle(
@@ -102,10 +152,10 @@ class _SignInScreenState extends State<SignInScreen> {
                   fontFamily: 'Poppins',
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
-              // Form email
+
+              // Email
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade300),
@@ -128,10 +178,10 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
-              // Form password
+
+              // Password
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade300),
@@ -153,7 +203,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     border: InputBorder.none,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                        _obscureText
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
                         color: Colors.grey,
                       ),
                       onPressed: () {
@@ -165,13 +217,12 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ),
               ),
-              
-              // Link lupa password
+
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    // Navigasi ke halaman lupa password
+                    // halaman lupa password
                   },
                   child: const Text(
                     'Forgot Password?',
@@ -183,7 +234,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ),
               ),
-              
+
               // Tombol Sign In
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -191,15 +242,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Navigasi ke halaman utama setelah sign in
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MainScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: _isLoading ? null : _handleSignIn,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2ECC71),
                       foregroundColor: Colors.white,
@@ -207,18 +250,24 @@ class _SignInScreenState extends State<SignInScreen> {
                         borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                    child: const Text(
-                      'Sign In',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
             ],
           ),

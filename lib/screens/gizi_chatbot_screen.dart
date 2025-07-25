@@ -34,18 +34,18 @@ class _GizikuChatbotScreenState extends State<GizikuChatbotScreen> {
     });
     _scrollToBottom();
 
-    try {
-      final reply = await sendMessageToBot(message); // Hapus token di sini
+    // try {
+    //   final reply = await sendMessageToBot(message); // Hapus token di sini
 
-      setState(() {
-        _messages.add(ChatMessage(
-          id: '',
-          role: 'bot',
-          content: reply,
-          createdAt: DateTime.now(),
-        ));
-      });
-    } catch (e) {
+    //   setState(() {
+    //     _messages.add(ChatMessage(
+    //       id: '',
+    //       role: 'bot',
+    //       content: reply,
+    //       createdAt: DateTime.now(),
+    //     ));
+    //   });
+    // } catch (e) {
       setState(() {
         _messages.add(ChatMessage(
           id: '',
@@ -54,10 +54,10 @@ class _GizikuChatbotScreenState extends State<GizikuChatbotScreen> {
           createdAt: DateTime.now(),
         ));
       });
-    } finally {
-      setState(() => _isTyping = false);
-      _scrollToBottom();
-    }
+    // } finally {
+    //   setState(() => _isTyping = false);
+    //   _scrollToBottom();
+    // }
   }
 
   void _scrollToBottom() {

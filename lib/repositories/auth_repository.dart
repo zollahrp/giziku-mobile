@@ -8,7 +8,7 @@ class AuthRepository {
   final String baseUrl;
   final http.Client client;
   final SharedPrefsService _prefsService;
- 
+
   AuthRepository({
     required this.baseUrl,
     http.Client? client,
@@ -16,33 +16,36 @@ class AuthRepository {
   }) : client = client ?? http.Client(),
        _prefsService = prefsService ?? SharedPrefsService();
 
-  Future<AuthResponse> signInWithEmailPassword(String email, String password) async {
+  Future<AuthResponse> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
     try {
       final response = await client.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+        Uri.parse('$baseUrl/api/auth/login/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'email': email, 'password': password}),
       );
 
       final data = jsonDecode(response.body);
-      
+
       if (response.statusCode == 200) {
         final authResponse = AuthResponse.fromJson(data);
-        
+
         // Simpan token ke SharedPreferences jika login berhasil
         if (authResponse.success && authResponse.token != null) {
           await _prefsService.setAuthToken(authResponse.token!);
-          
+
           // Jika API juga mengembalikan data user
           if (authResponse.userData != null) {
             final user = UserModel.fromJson(authResponse.userData!);
             await _prefsService.setCurrentUser(jsonEncode(user.toJson()));
           }
         }
-        
+
         return authResponse;
       } else {
         return AuthResponse.error(data['message'] ?? 'Failed to sign in');
@@ -53,34 +56,37 @@ class AuthRepository {
   }
 
   // Sign up dengan email dan password
-  Future<AuthResponse> signUpWithEmailPassword(String name, String email, String password) async {
+  Future<AuthResponse> signUpWithEmailPassword(
+    String name,
+    String email,
+    String password,
+  ) async {
     try {
       final response = await client.post(
-        Uri.parse('$baseUrl/auth/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name': name,
-          'email': email,
-          'password': password,
-        }),
+        Uri.parse('$baseUrl/api/auth/register/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'name': name, 'email': email, 'password': password}),
       );
 
       final data = jsonDecode(response.body);
-      
+
       if (response.statusCode == 201) {
         final authResponse = AuthResponse.fromJson(data);
-        
+
         // Simpan token ke SharedPreferences jika registrasi berhasil
         if (authResponse.success && authResponse.token != null) {
           await _prefsService.setAuthToken(authResponse.token!);
-          
+
           // Jika API juga mengembalikan data user
           if (authResponse.userData != null) {
             final user = UserModel.fromJson(authResponse.userData!);
             await _prefsService.setCurrentUser(jsonEncode(user.toJson()));
           }
         }
-        
+
         return authResponse;
       } else {
         return AuthResponse.error(data['message'] ?? 'Failed to sign up');
@@ -96,7 +102,7 @@ class AuthRepository {
       // Hapus token dari SharedPreferences
       await _prefsService.clearAuthToken();
       await _prefsService.clearCurrentUser();
-      
+
       // Opsional: Jika API memerlukan endpoint logout
       // final token = await _prefsService.getAuthToken();
       // await client.post(
@@ -106,7 +112,7 @@ class AuthRepository {
       //     'Content-Type': 'application/json',
       //   },
       // );
-      
+
       return true;
     } catch (e) {
       print('Error signing out: ${e.toString()}');
@@ -139,10 +145,10 @@ class AuthRepository {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final user = UserModel.fromJson(data);
-        
+
         // Update cached user data
         await _prefsService.setCurrentUser(jsonEncode(user.toJson()));
-        
+
         return user;
       } else {
         return null;
