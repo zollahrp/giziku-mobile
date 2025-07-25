@@ -34,4 +34,13 @@ class ProductRepository {
     );
     return response.statusCode == 200;
   }
+   Future<List<ProductModel>> fetchProductsByIngredients(List<String> ingredientNames) async {
+    final allProducts = await fetchProducts();
+
+    return allProducts.where((p) =>
+      ingredientNames.any((ing) =>
+        p.title.toLowerCase().contains(ing.toLowerCase())
+      )
+    ).toList();
+  }
 }

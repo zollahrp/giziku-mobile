@@ -5,8 +5,6 @@ import 'screens/login_screen.dart';
 import 'screens/splashlogo_screens.dart';
 import 'screens/profile_screen.dart';
 import 'screens/profiles/edit_profile_screen.dart';
-import 'screens/simulation_screen.dart';
-// import 'screens/edit_profile_screen.dart';
 import 'config/api_config.dart';
 import 'providers/auth_provider_new.dart';
 import 'providers/profile_provider.dart';

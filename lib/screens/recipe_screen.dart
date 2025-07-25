@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../models/recipe_model.dart';
+import '../screens/recipe/recipe_detail_screen.dart';
 
 class RecipeScreen extends StatefulWidget {
   const RecipeScreen({super.key});
@@ -13,6 +15,59 @@ class _RecipeScreenState extends State<RecipeScreen> {
   final List<String> _daysShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   final List<int> _dates = [22, 23, 24, 25, 26, 27, 28];
 
+  // Dummy recipes data
+  final List<RecipeModel> _recipes = [
+    RecipeModel(
+      id: "1",
+      title: "Caesar Roasted Bowl",
+      imageUrl: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?fit=crop&w=400&q=80",
+      category: "Veggie",
+      price: 149000,
+      nutrition: 220,
+      nutritionUnit: "g",
+      prepTime: 10,
+      cookTime: 10,
+      totalTime: 20,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      ingredients: [
+        RecipeIngredient(name: "Cooked rice", amount: "1 Cup"),
+        RecipeIngredient(name: "Roasted tofu or tempeh", amount: "1/2 Cup"),
+        RecipeIngredient(name: "Boiled Egg", amount: "1/2 Cup"),
+        RecipeIngredient(name: "Tomato or cucumber", amount: "1 Slice"),
+        RecipeIngredient(name: "Broccoli", amount: "1/2 cup"),
+      ],
+      instructions: [
+        "Mix all ingredients in a bowl.",
+        "Serve with your favorite sauce.",
+      ],
+    ),
+    RecipeModel(
+      id: "2",
+      title: "Green Box",
+      imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?fit=crop&w=400&q=80",
+      category: "Veggie",
+      price: 99000,
+      nutrition: 280,
+      nutritionUnit: "Calories",
+      prepTime: 8,
+      cookTime: 7,
+      totalTime: 15,
+      description: "A healthy and delicious green salad bowl for your daily nutrition.",
+      ingredients: [
+        RecipeIngredient(name: "Spinach", amount: "70g"),
+        RecipeIngredient(name: "Avocado", amount: "1/2"),
+        RecipeIngredient(name: "Egg", amount: "1"),
+        RecipeIngredient(name: "Quinoa", amount: "1 Cup"),
+      ],
+      instructions: [
+        "Prepare all ingredients.",
+        "Boil the egg and quinoa.",
+        "Mix with spinach and avocado.",
+        "Serve fresh.",
+      ],
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +77,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Logo and Heading
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
@@ -52,7 +106,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
               // Banner
               Padding(
-               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.asset(
@@ -85,14 +139,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
               // Recipe Cards
               SizedBox(
                 height: 160,
-                child: ListView(
+                child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: [
-                    _buildRecipeCard(),
-                    const SizedBox(width: 16),
-                    _buildRecipeCard(),
-                  ],
+                  itemCount: _recipes.length,
+                  itemBuilder: (context, idx) {
+                    return _buildRecipeCard(_recipes[idx]);
+                  },
+                  separatorBuilder: (_, __) => const SizedBox(width: 16),
                 ),
               ),
             ],
@@ -132,7 +186,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
           const SizedBox(width: 10),
           _buildCategoryPill("Meat"),
           const SizedBox(width: 10),
-          _buildCategoryPill("Meat"), // Add more categories if needed
+          _buildCategoryPill("Meat"),
         ],
       ),
     );
@@ -157,117 +211,133 @@ class _RecipeScreenState extends State<RecipeScreen> {
     );
   }
 
-  Widget _buildRecipeCard() {
-  return Stack(
-    clipBehavior: Clip.none,
-    children: [
-      Container(
-        width: 260,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        margin: const EdgeInsets.only(right: 50),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+  Widget _buildRecipeCard(RecipeModel recipe) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RecipeDetailScreen(recipe: recipe),
+          ),
+        );
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 260,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            margin: const EdgeInsets.only(right: 50),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Left Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Green Box',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: const [
-                      Icon(Icons.local_fire_department, color: Colors.red, size: 18),
-                      SizedBox(width: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Left Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        '280 Calories',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
+                        recipe.title,
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.local_fire_department, color: Colors.red, size: 18),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${recipe.nutrition} ${recipe.nutritionUnit}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.attach_money, color: Color(0xFF2ECC71), size: 18),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Estimated Cost: Rp ${recipe.price}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: 90,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => RecipeDetailScreen(recipe: recipe),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2ECC71),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'See Recipe',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: const [
-                      Icon(Icons.attach_money, color: Color(0xFF2ECC71), size: 18),
-                      SizedBox(width: 4),
-                      Text(
-                        'Estimated Cost: Rp 149.000',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: 90,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2ECC71),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'See Recipe',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+                const SizedBox(width: 16),
+                // Empty space to let image float
+              ],
+            ),
+          ),
+          Positioned(
+            top: 20,
+            right: 10,
+            child: CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.white,
+              child: CircleAvatar(
+                radius: 56,
+                backgroundImage: NetworkImage(recipe.imageUrl),
               ),
             ),
-            const SizedBox(width: 16),
-            // Empty space to let image float
-          ],
-        ),
-      ),
-      // Gambar Overlap ke Kanan
-      const Positioned(
-        top: 20,
-        right: 10,
-        child: CircleAvatar(
-          radius: 60,
-          backgroundColor: Colors.white,
-          child: CircleAvatar(
-            radius: 56,
-            backgroundImage: AssetImage('assets/recipe_today.png'),
           ),
-        ),
+        ],
       ),
-    ],
-  );  
+    );
   }
 }

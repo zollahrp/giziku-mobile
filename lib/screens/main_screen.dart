@@ -3,6 +3,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:giziku/screens/home_screen.dart';
 import 'package:giziku/screens/recipe_screen.dart';
 import 'package:giziku/screens/profile_screen.dart';
+import 'gizi_chatbot_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -20,8 +21,8 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     HomeScreen(),
-    // ScanScreen(),
     RecipeScreen(),
+    GizikuChatbotScreen(),
     ProfileScreen(),
   ];
 
@@ -52,6 +53,7 @@ class _MainScreenState extends State<MainScreen> {
           items: const [
             Icon(Icons.home, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
             Icon(Icons.restaurant_menu, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
+            Icon(Icons.chat_rounded, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
             Icon(Icons.person_outline, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
           
           ],
