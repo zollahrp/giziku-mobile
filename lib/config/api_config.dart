@@ -3,7 +3,8 @@ class ApiConfig {
   // For development, you might use a local server:
   // static const String baseUrl = 'http://10.0.2.2:8000/api'; // Android emulator accessing localhost
   // static const String baseUrl = 'http://localhost:8000/api'; // iOS simulator
-  static const String baseUrl = 'https://api.giziku.com/api/v1'; // Production
+  static const String baseUrl =
+      'https://kqt1clq7-8000.asse.devtunnels.ms'; // Development
 
   // Auth Endpoints
   static const String loginEndpoint = '/auth/login';
@@ -26,7 +27,7 @@ class ApiConfig {
   // Health Data Endpoints
   static const String healthMetricsEndpoint = '/health/metrics';
   static const String weightHistoryEndpoint = '/health/weight-history';
-  
+
   // Goals Endpoints
   static const String nutritionGoalsEndpoint = '/goals/nutrition';
   static const String activityGoalsEndpoint = '/goals/activity';
@@ -35,10 +36,10 @@ class ApiConfig {
   static const int connectionTimeout = 15000; // 15 seconds
   static const int receiveTimeout = 15000; // 15 seconds
   static const int sendTimeout = 15000; // 15 seconds
-  
+
   // Pagination defaults
   static const int defaultPageSize = 20;
-  
+
   // Header keys
   static const String authHeader = 'Authorization';
   static const String contentTypeHeader = 'Content-Type';

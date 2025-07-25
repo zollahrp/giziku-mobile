@@ -36,12 +36,24 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         final accessToken = data['access'];
+        final refreshToken = data['refresh'];
         final userData = data['data'];
 
         if (accessToken != null && userData != null) {
+          // Save access token
           await _prefsService.setAuthToken(accessToken);
+
+          // Save refresh token if available
+          if (refreshToken != null) {
+            await _prefsService.setRefreshToken(refreshToken);
+          }
+
           try {
-            final user = UserModel.fromJson(userData);
+            // Pass complete response data to properly extract tokens
+            final completeData = Map<String, dynamic>.from(data);
+            completeData['data'] = userData;
+
+            final user = UserModel.fromJson(completeData);
             await _prefsService.setCurrentUser(jsonEncode(user.toJson()));
 
             return AuthResponse(
@@ -87,12 +99,24 @@ class AuthRepository {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final accessToken = data['access'];
+        final refreshToken = data['refresh'];
         final userData = data['data'];
 
         if (accessToken != null && userData != null) {
+          // Save access token
           await _prefsService.setAuthToken(accessToken);
+
+          // Save refresh token if available
+          if (refreshToken != null) {
+            await _prefsService.setRefreshToken(refreshToken);
+          }
+
           try {
-            final user = UserModel.fromJson(userData);
+            // Pass complete response data to properly extract tokens
+            final completeData = Map<String, dynamic>.from(data);
+            completeData['data'] = userData;
+
+            final user = UserModel.fromJson(completeData);
             await _prefsService.setCurrentUser(jsonEncode(user.toJson()));
 
             return AuthResponse(
@@ -121,8 +145,11 @@ class AuthRepository {
   /// Logout
   Future<bool> signOut() async {
     try {
+      // Clear all authentication data
       await _prefsService.clearAuthToken();
+      await _prefsService.clearRefreshToken();
       await _prefsService.clearCurrentUser();
+      print('User signed out successfully');
       return true;
     } catch (e) {
       print('Error signing out: ${e.toString()}');
