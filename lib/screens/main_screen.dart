@@ -52,8 +52,6 @@ class _MainScreenState extends State<MainScreen> {
           items: const [
             Icon(Icons.home, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
             Icon(Icons.restaurant_menu, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
-            Icon(Icons.qr_code_scanner, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
-            Icon(Icons.menu_book_rounded, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
             Icon(Icons.person_outline, size: 30, color: Color.fromARGB(255, 255, 255, 255)),
           ],
           onTap: (index) {
