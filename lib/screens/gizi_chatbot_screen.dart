@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../models/chat_message.dart';
-import '../../services/bot_service.dart';
 import '../../widgets/chat_bubble.dart';
 
 class GizikuChatbotScreen extends StatefulWidget {
@@ -17,6 +16,25 @@ class _GizikuChatbotScreenState extends State<GizikuChatbotScreen> {
 
   List<ChatMessage> _messages = [];
   bool _isTyping = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _addBotMessage("Halo! Aku GiziBot dari Giziku 🤖\nAku bisa bantu rekomendasi makanan sehat sesuai kondisi kamu!");
+  }
+
+  void _addBotMessage(String content) {
+    setState(() {
+      _messages.add(ChatMessage(
+        id: '',
+        role: 'bot',
+        content: content,
+        createdAt: DateTime.now(),
+      ));
+      _isTyping = false;
+    });
+    _scrollToBottom();
+  }
 
   Future<void> _sendMessage([String? customText]) async {
     final message = (customText ?? _controller.text).trim();
@@ -34,30 +52,20 @@ class _GizikuChatbotScreenState extends State<GizikuChatbotScreen> {
     });
     _scrollToBottom();
 
-    // try {
-    //   final reply = await sendMessageToBot(message); // Hapus token di sini
+    await Future.delayed(const Duration(seconds: 1)); // efek delay bot
 
-    //   setState(() {
-    //     _messages.add(ChatMessage(
-    //       id: '',
-    //       role: 'bot',
-    //       content: reply,
-    //       createdAt: DateTime.now(),
-    //     ));
-    //   });
-    // } catch (e) {
-      setState(() {
-        _messages.add(ChatMessage(
-          id: '',
-          role: 'bot',
-          content: 'Oops! Gagal menghubungi bot.',
-          createdAt: DateTime.now(),
-        ));
-      });
-    // } finally {
-    //   setState(() => _isTyping = false);
-    //   _scrollToBottom();
-    // }
+    String reply;
+    if (message.toLowerCase().contains('makan')) {
+      reply = "Coba deh konsumsi sayur hijau, ikan, dan buah lokal 🍎🐟\nMau resep sederhana?";
+    } else if (message.toLowerCase().contains('malnutrisi')) {
+      reply = "Malnutrisi bisa dicegah dengan pola makan seimbang dan pemantauan berat badan.";
+    } else if (message.toLowerCase().contains('halo') || message.toLowerCase().contains('hai')) {
+      reply = "Hai juga! 👋 Ada yang bisa aku bantu?";
+    } else {
+      reply = "Hmm... aku masih belajar nih, bisa coba tanya yang lain?";
+    }
+
+    _addBotMessage(reply);
   }
 
   void _scrollToBottom() {

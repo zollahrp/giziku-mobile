@@ -135,36 +135,40 @@ class ProfileScreen extends StatelessWidget {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2ECC71),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        elevation: 0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(
-                            Icons.logout,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Logout',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+  onPressed: () {
+    // Navigasi ke halaman login dan hapus semua riwayat halaman sebelumnya
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFF2ECC71),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(30),
+    ),
+    padding: const EdgeInsets.symmetric(vertical: 16),
+    elevation: 0,
+  ),
+  child: const Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(
+        Icons.logout,
+        color: Colors.white,
+        size: 20,
+      ),
+      SizedBox(width: 8),
+      Text(
+        'Logout',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  ),
+),
+
                   ),
                 ),
 

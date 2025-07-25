@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:giziku/screens/main_screen.dart';
-import '../../models/auth_model.dart';
-import '../../repositories/auth_repository.dart';
-import '../../services/shared_prefs_service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -17,15 +14,12 @@ class _SignInScreenState extends State<SignInScreen> {
   bool _obscureText = true;
   bool _isLoading = false;
 
-  final AuthRepository _authRepository = AuthRepository(
-    baseUrl: 'https://kqt1clq7-8000.asse.devtunnels.ms',
-    prefsService: SharedPrefsService(),
-  );
-
   @override
   void initState() {
     super.initState();
-    _isLoading = false;
+    // Auto-fill email dan password untuk demo
+    _emailController.text = 'admin@gmail.com';
+    _passwordController.text = 'admin123';
   }
 
   @override
@@ -40,9 +34,7 @@ class _SignInScreenState extends State<SignInScreen> {
     return emailRegex.hasMatch(email);
   }
 
-  Future<void> _handleSignIn() async {
-    print('Mulai proses login');
-
+  void _handleStaticLogin() {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
@@ -60,32 +52,24 @@ class _SignInScreenState extends State<SignInScreen> {
       _isLoading = true;
     });
 
-    final loginRequest = LoginRequest(email: email, password: password);
+    Future.delayed(const Duration(seconds: 1), () {
+      setState(() {
+        _isLoading = false;
+      });
 
-    final result = await _authRepository.signInWithEmailPassword(loginRequest);
-
-    setState(() {
-      _isLoading = false;
+      if (email == 'admin@gmail.com' && password == 'admin123') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+        );
+      } else {
+        _showError('Email atau Password salah');
+      }
     });
-
-    print('Hasil login: ${result.success}');
-
-    if (result.success) {
-      print('Navigasi ke MainScreen...');
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-      );
-    } else {
-      _showError(result.message ?? 'Login gagal');
-    }
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -113,11 +97,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           color: const Color(0xFF2ECC71),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+                        child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
                       ),
                     ),
                     const Text(
@@ -179,10 +159,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       color: Colors.grey.shade400,
                       fontFamily: 'Poppins',
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     border: InputBorder.none,
                   ),
                 ),
@@ -205,16 +182,11 @@ class _SignInScreenState extends State<SignInScreen> {
                       color: Colors.grey.shade400,
                       fontFamily: 'Poppins',
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     border: InputBorder.none,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureText
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
+                        _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         color: Colors.grey,
                       ),
                       onPressed: () {
@@ -230,9 +202,7 @@ class _SignInScreenState extends State<SignInScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {
-                    // halaman lupa password
-                  },
+                  onPressed: () {},
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
@@ -251,12 +221,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () {
-                            print('Tombol Sign In ditekan');
-                            _handleSignIn();
-                          },
+                    onPressed: _isLoading ? null : _handleStaticLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2ECC71),
                       foregroundColor: Colors.white,
@@ -266,9 +231,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                     child: _isLoading
                         ? const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           )
                         : const Text(
                             'Sign In',
@@ -278,6 +241,20 @@ class _SignInScreenState extends State<SignInScreen> {
                               fontFamily: 'Poppins',
                             ),
                           ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Catatan akun demo
+              const Center(
+                child: Text(
+                  'Demo Login: admin@gmail.com / admin123',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontFamily: 'Poppins',
                   ),
                 ),
               ),
