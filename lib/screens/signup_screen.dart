@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giziku/screens/main_screen.dart';
 import '../../repositories/auth_repository.dart';
+import '../../models/auth_model.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -16,58 +16,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
   bool _isLoading = false;
 
-Future<void> _signUp() async {
-  final email = _emailController.text.trim();
-  final password = _passwordController.text;
-  final name = _nameController.text.trim();
+  Future<void> _signUp() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final name = _nameController.text.trim();
 
-  if (email.isEmpty || password.isEmpty || name.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Semua field harus diisi')),
-    );
-    return;
-  }
-
-  if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Format email tidak valid')),
-    );
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    final authRepo = AuthRepository(baseUrl: 'https://kqt1clq7-8000.asse.devtunnels.ms/');
-    final result = await authRepo.signUpWithEmailPassword(
-      name,
-      email,
-      password,
-    );
-
-    if (result.success) {
-      Navigator.pushReplacement(
+    if (email.isEmpty || password.isEmpty || name.isEmpty) {
+      ScaffoldMessenger.of(
         context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message ?? 'Registrasi gagal')),
-      );
+      ).showSnackBar(const SnackBar(content: Text('Semua field harus diisi')));
+      return;
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Terjadi kesalahan: $e')),
-    );
-  } finally {
-    setState(() {
-      _isLoading = false;
-    });
-  }
-}
 
+    if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(email)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Format email tidak valid')));
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authRepo = AuthRepository(
+        baseUrl: 'https://kqt1clq7-8000.asse.devtunnels.ms',
+      );
+      final registerRequest = RegisterRequest(
+        email: email,
+        password: password,
+        name: name,
+      );
+      final result = await authRepo.signUpWithEmailPassword(registerRequest);
+
+      if (result.success) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.message ?? 'Registrasi gagal')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void dispose() {

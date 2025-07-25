@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import '../models/auth_model.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 import 'google_auth_service.dart';
@@ -63,8 +64,11 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _authRepository.signInWithEmailPassword(email, password);
-      
+      final loginRequest = LoginRequest(email: email, password: password);
+      final response = await _authRepository.signInWithEmailPassword(
+        loginRequest,
+      );
+
       if (response.success) {
         await _loadUserFromPrefs();
         return true;
@@ -83,14 +87,25 @@ class AuthService extends ChangeNotifier {
   }
 
   // Register dengan email dan password
-  Future<bool> signUpWithEmailPassword(String name, String email, String password) async {
+  Future<bool> signUpWithEmailPassword(
+    String name,
+    String email,
+    String password,
+  ) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final response = await _authRepository.signUpWithEmailPassword(name, email, password);
-      
+      final registerRequest = RegisterRequest(
+        name: name,
+        email: email,
+        password: password,
+      );
+      final response = await _authRepository.signUpWithEmailPassword(
+        registerRequest,
+      );
+
       if (response.success) {
         await _loadUserFromPrefs();
         return true;
@@ -116,7 +131,7 @@ class AuthService extends ChangeNotifier {
 
     try {
       final response = await _googleAuthService.signInWithGoogle();
-      
+
       if (response.success) {
         await _loadUserFromPrefs();
         return true;
@@ -142,12 +157,12 @@ class AuthService extends ChangeNotifier {
     try {
       // Sign out from repository
       await _authRepository.signOut();
-      
+
       // Sign out from Google if using Google Sign-In
       if (_currentUser?.authProvider == AuthProvider.google) {
         await _googleAuthService.signOut();
       }
-      
+
       // Clear user data
       _currentUser = null;
     } catch (e) {

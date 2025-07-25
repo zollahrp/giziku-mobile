@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giziku/screens/main_screen.dart';
+import '../../models/auth_model.dart';
 import '../../repositories/auth_repository.dart';
 import '../../services/shared_prefs_service.dart';
 
@@ -17,9 +18,15 @@ class _SignInScreenState extends State<SignInScreen> {
   bool _isLoading = false;
 
   final AuthRepository _authRepository = AuthRepository(
-    baseUrl: 'https://kqt1clq7-8000.asse.devtunnels.ms/',
+    baseUrl: 'https://kqt1clq7-8000.asse.devtunnels.ms',
     prefsService: SharedPrefsService(),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _isLoading = false;
+  }
 
   @override
   void dispose() {
@@ -34,6 +41,8 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> _handleSignIn() async {
+    print('Mulai proses login');
+
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
@@ -51,17 +60,19 @@ class _SignInScreenState extends State<SignInScreen> {
       _isLoading = true;
     });
 
-    final result = await _authRepository.signInWithEmailPassword(
-      email,
-      password,
-    );
+    final loginRequest = LoginRequest(email: email, password: password);
+
+    final result = await _authRepository.signInWithEmailPassword(loginRequest);
 
     setState(() {
       _isLoading = false;
     });
 
+    print('Hasil login: ${result.success}');
+
     if (result.success) {
-      print('masuk');
+      print('Navigasi ke MainScreen...');
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MainScreen()),
@@ -94,9 +105,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     InkWell(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+                      onTap: () => Navigator.pop(context),
                       child: Container(
                         width: 40,
                         height: 40,
@@ -242,7 +251,12 @@ class _SignInScreenState extends State<SignInScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSignIn,
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            print('Tombol Sign In ditekan');
+                            _handleSignIn();
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2ECC71),
                       foregroundColor: Colors.white,

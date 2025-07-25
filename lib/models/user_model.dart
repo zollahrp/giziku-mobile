@@ -1,7 +1,4 @@
-enum AuthProvider {
-  email,
-  google,
-}
+enum AuthProvider { email, google }
 
 class UserModel {
   final String id;
@@ -12,7 +9,7 @@ class UserModel {
   final double? height; // in cm
   final double? weight; // in kg
   final int? age;
-  final String? gender; 
+  final String? gender;
   final int? targetCalories;
   final String? dateOfBirth;
   final DateTime createdAt;
@@ -42,23 +39,29 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? '',
+      id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       photoUrl: json['photo_url'],
       phoneNumber: json['phone_number'],
-      height: json['height'] != null ? (json['height'] as num).toDouble() : null,
-      weight: json['weight'] != null ? (json['weight'] as num).toDouble() : null,
-      age: json['age'],
+      height: json['height'] != null
+          ? (json['height'] as num).toDouble()
+          : null,
+      weight: json['weight'] != null
+          ? (json['weight'] as num).toDouble()
+          : null,
+      age: json['age'] != null ? (json['age'] as num).toInt() : null,
       gender: json['gender'],
-      targetCalories: json['target_calories'],
+      targetCalories: json['target_calories'] != null
+          ? (json['target_calories'] as num).toInt()
+          : null,
       dateOfBirth: json['date_of_birth'],
-      createdAt: json['created_at'] != null 
-        ? DateTime.parse(json['created_at']) 
-        : DateTime.now(),
-      updatedAt: json['updated_at'] != null 
-        ? DateTime.parse(json['updated_at']) 
-        : DateTime.now(),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
       authProvider: _parseAuthProvider(json['auth_provider'] ?? 'email'),
       token: json['token'],
       refreshToken: json['refresh_token'],
@@ -96,7 +99,7 @@ class UserModel {
         return AuthProvider.email;
     }
   }
-  
+
   UserModel copyWith({
     String? id,
     String? name,
