@@ -17,25 +17,25 @@ class LoginScreen extends StatelessWidget {
               children: [
                 Positioned(
                   top: 0,
-                  left: -100, 
-                  right: -100, 
+                  left: -100,
+                  right: -100,
                   height: 270,
                   child: Container(
                     decoration: const BoxDecoration(
                       color: Color(0xFF2ECC71),
                       borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(300), 
-                        bottomRight: Radius.circular(300), 
+                        bottomLeft: Radius.circular(300),
+                        bottomRight: Radius.circular(300),
                       ),
                     ),
                   ),
                 ),
-                
+
                 Positioned(
                   top: 110,
                   child: Container(
-                    width: 120, 
-                    height: 120, 
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
                       color: const Color(0xFF2ECC71).withOpacity(0.5),
                       borderRadius: BorderRadius.circular(10),
@@ -66,9 +66,9 @@ class LoginScreen extends StatelessWidget {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Teks "Makan Sehat, Hidup Hemat."
                 const Text(
                   'Makan Sehat, Hidup Hemat.',
@@ -79,9 +79,9 @@ class LoginScreen extends StatelessWidget {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                
+
                 const SizedBox(height: 50),
-                
+
                 // Tombol "Sign In"
                 SizedBox(
                   width: double.infinity,
@@ -112,9 +112,9 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Teks "Or sign up" dengan garis
                 Row(
                   children: [
@@ -143,9 +143,9 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Tombol "Sign up" (outline)
                 SizedBox(
                   width: double.infinity,
@@ -182,9 +182,9 @@ class LoginScreen extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const Spacer(),
-          
+
           // Teks copyright
           Padding(
             padding: const EdgeInsets.only(bottom: 16),

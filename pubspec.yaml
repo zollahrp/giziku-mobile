@@ -2,7 +2,7 @@ name: giziku
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -34,17 +34,18 @@ dependencies:
   percent_indicator: ^4.2.3
   intl: ^0.19.0
   curved_navigation_bar: ^1.0.6
-  
+  flutter_dotenv: ^5.1.0
+
   # API & Networking
   http: ^1.2.1
   dio: ^5.8.0+1
-  
+
   # State Management
   provider: ^6.1.2
-  
+
   # Storage
   shared_preferences: ^2.2.2
-  
+
   # Authentication
   google_sign_in: ^6.2.1
   firebase_core: ^2.27.1
@@ -75,7 +76,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -87,9 +87,7 @@ flutter:
     - assets/profile/
     - assets/simulation/
     - assets/fonts/
-
-    
-    
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -143,6 +141,6 @@ flutter:
         - asset: assets/fonts/Poppins-ExtraLightItalic.ttf
           weight: 200
           style: italic
-          
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
