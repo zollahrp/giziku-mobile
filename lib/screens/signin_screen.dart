@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giziku/screens/main_screen.dart';
 import 'home_screen.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -193,9 +194,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     onPressed: () {
                       // Navigasi ke halaman utama setelah sign in
                       Navigator.pushReplacement(
-                        context, 
+                        context,
                         MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
+                          builder: (context) => const MainScreen(),
                         ),
                       );
                     },
