@@ -9,349 +9,173 @@ class SimulationStep1 extends StatefulWidget {
 }
 
 class _SimulationStep1State extends State<SimulationStep1> {
-  // Gender selection
-  String _selectedGender = '';
+  final TextEditingController _budgetController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Step 1: Basic Information',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
-          ),
-        ),
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Progress indicator
-              Container(
-                margin: const EdgeInsets.only(bottom: 30),
-                width: double.infinity,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(10),
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Color(0xFF2ECC71)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.2, // 20% progress
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2ECC71),
-                        borderRadius: BorderRadius.circular(10),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildStepCircle(1, true),
+                _buildStepLine(),
+                _buildStepCircle(2, false),
+                _buildStepLine(),
+                _buildStepCircle(3, false),
+              ],
+            ),
+            const SizedBox(height: 40),
+            RichText(
+              textAlign: TextAlign.center,
+              text: const TextSpan(
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                children: [
+                  TextSpan(text: 'How much '),
+                  TextSpan(text: 'budget ', style: TextStyle(color: Color(0xFF2ECC71))),
+                  TextSpan(text: 'do you\nspend on food?'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'We will use this data to give you\na better nutrition type for you',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      'Rp',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        color: Colors.grey,
                       ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _budgetController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Your Budget',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 48),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SimulationStep2()),
+                );
+              },
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2ECC71),
+                      blurRadius: 0,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 0),
                     ),
                   ],
                 ),
-              ),
-
-              // Title
-              const Text(
-                'Tell us about yourself',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
+                child: const Center(
+                  child: Icon(Icons.arrow_forward, color: Colors.white, size: 28),
                 ),
               ),
+            ),
+          ],
+        ),
 
-              const SizedBox(height: 10),
+        ),
+      ),
+    );
+  }
 
-              const Text(
-                'This information helps us calculate your nutritional needs accurately.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Gender selection
-              const Text(
-                'Select your gender:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              Row(
-                children: [
-                  _buildGenderOption('Male', 'assets/simulation/male_icon.png'),
-                  const SizedBox(width: 15),
-                  _buildGenderOption('Female', 'assets/simulation/female_icon.png'),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
-              // Age field
-              const Text(
-                'Enter your age:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              TextFormField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Age in years',
-                  hintStyle: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Height field
-              const Text(
-                'Enter your height:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: 'Height',
-                        hintStyle: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 80,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: 'cm',
-                        items: ['cm', 'ft'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {},
-                        isExpanded: true,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
-              // Weight field
-              const Text(
-                'Enter your weight:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: 'Weight',
-                        hintStyle: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 80,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: 'kg',
-                        items: ['kg', 'lbs'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {},
-                        isExpanded: true,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 40),
-
-              // Next button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SimulationStep2()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2ECC71),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ),
-              ),
-            ],
+  Widget _buildStepCircle(int step, bool isActive) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: isActive ? const Color(0xFF2ECC71) : Colors.grey.shade200,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          step.toString(),
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: isActive ? Colors.white : Colors.grey,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildGenderOption(String gender, String iconPath) {
-    final isSelected = _selectedGender == gender;
-    
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedGender = gender;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFE7FCF1) : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(10),
-            border: isSelected
-                ? Border.all(color: const Color(0xFF2ECC71), width: 2)
-                : null,
-          ),
-          child: Column(
-            children: [
-              Image.asset(
-                iconPath,
-                height: 60,
-                width: 60,
-                color: isSelected ? const Color(0xFF2ECC71) : Colors.grey,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                gender,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: isSelected ? const Color(0xFF2ECC71) : Colors.black,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+  Widget _buildStepLine() {
+    return Container(
+      width: 32,
+      height: 2,
+      color: Colors.grey.shade300,
     );
   }
 }

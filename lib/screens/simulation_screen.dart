@@ -163,14 +163,13 @@ class _SimulationScreenState extends State<SimulationScreen> {
           // Spacer untuk memberikan ruang antara card dan no data
           const SizedBox(height: 30),
           
-          // No data content
           Expanded(
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/nodatasimulation.png',
+                    'assets/simulation/nodatasimulation.png',
                     width: 220,
                     height: 220,
                     fit: BoxFit.contain,
@@ -214,7 +213,6 @@ class _SimulationScreenState extends State<SimulationScreen> {
           _buildNavItem(Icons.home, 'Home', 0),
           _buildNavItem(Icons.pie_chart, 'Simulation', 1, isSelected: true),
           
-          // Centered circular button
           Container(
             width: 45, 
             height: 45, 

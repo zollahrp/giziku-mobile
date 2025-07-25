@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'simulation_step4.dart';
+import 'simulation_overview.dart';
 
 class SimulationStep3 extends StatefulWidget {
   const SimulationStep3({super.key});
@@ -9,251 +9,162 @@ class SimulationStep3 extends StatefulWidget {
 }
 
 class _SimulationStep3State extends State<SimulationStep3> {
-  String _selectedGoal = '';
-  
-  final List<Map<String, dynamic>> _goals = [
-    {
-      'goal': 'Lose Weight',
-      'icon': Icons.trending_down,
-      'description': 'Reduce calorie intake with a balanced nutrition plan',
-    },
-    {
-      'goal': 'Maintain Weight',
-      'icon': Icons.balance,
-      'description': 'Keep your current weight with optimal nutrition',
-    },
-    {
-      'goal': 'Gain Weight',
-      'icon': Icons.trending_up,
-      'description': 'Increase calorie intake healthily to gain weight',
-    },
-    {
-      'goal': 'Build Muscle',
-      'icon': Icons.fitness_center,
-      'description': 'Focus on protein and strength-building nutrients',
-    },
-    {
-      'goal': 'Improve Health',
-      'icon': Icons.favorite,
-      'description': 'Focus on balanced nutrition for overall wellness',
-    },
-  ];
+  final TextEditingController _budgetController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Step 3: Your Goal',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
-          ),
-        ),
-      ),
       body: SafeArea(
-        child: Column(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Progress indicator
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 30),
-                      width: double.infinity,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.6, // 60% progress
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2ECC71),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Title
-                    const Text(
-                      'What\'s your primary goal?',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    const Text(
-                      'This helps us customize your nutrition plan to achieve your specific goals.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    // Goal selection
-                    ..._goals.map((goal) => _buildGoalOption(
-                      goal: goal['goal'],
-                      icon: goal['icon'],
-                      description: goal['description'],
-                    )),
-                  ],
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Color(0xFF2ECC71)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                 ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildStepCircle(1, true),
+                _buildStepLine(),
+                _buildStepCircle(2, true),
+                _buildStepLine(),
+                _buildStepCircle(3, true),
+              ],
+            ),
+            const SizedBox(height: 40),
+            RichText(
+              textAlign: TextAlign.center,
+              text: const TextSpan(
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                children: [
+                  TextSpan(text: 'How '),
+                  TextSpan(text: 'many people ', style: TextStyle(color: Color(0xFF2ECC71))),
+                  TextSpan(text: 'do you\ncook for?'),
+                ],
               ),
             ),
-            
-            // Bottom button
+            const SizedBox(height: 16),
+            const Text(
+              'We will use this data to give you\na better nutrition type for you',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 32),
             Container(
-              padding: const EdgeInsets.all(20.0),
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade200,
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: const Offset(0, -2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _budgetController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Enter number of people',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _selectedGoal.isNotEmpty 
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const SimulationStep4()),
-                          );
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2ECC71),
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+            ),
+            const SizedBox(height: 48),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SimulationOverviewScreen()),
+                );
+              },
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2ECC71),
+                      blurRadius: 0,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 0),
                     ),
-                  ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(Icons.arrow_forward, color: Colors.white, size: 28),
                 ),
               ),
             ),
           ],
+        ),
+
         ),
       ),
     );
   }
 
-  Widget _buildGoalOption({
-    required String goal,
-    required IconData icon,
-    required String description,
-  }) {
-    final isSelected = _selectedGoal == goal;
-    
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedGoal = goal;
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 15),
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE7FCF1) : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF2ECC71) : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
+  Widget _buildStepCircle(int step, bool isActive) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: isActive ? const Color(0xFF2ECC71) : Colors.grey.shade200,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          step.toString(),
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: isActive ? Colors.white : Colors.grey,
           ),
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF2ECC71) : Colors.grey.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? Colors.white : Colors.grey,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    goal,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? const Color(0xFF2ECC71) : Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Radio<String>(
-              value: goal,
-              groupValue: _selectedGoal,
-              onChanged: (value) {
-                setState(() {
-                  _selectedGoal = value!;
-                });
-              },
-              activeColor: const Color(0xFF2ECC71),
-            ),
-          ],
-        ),
       ),
+    );
+  }
+
+  Widget _buildStepLine() {
+    return Container(
+      width: 32,
+      height: 2,
+      color: Colors.grey.shade300,
     );
   }
 }

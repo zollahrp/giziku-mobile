@@ -1,14 +1,20 @@
+enum AuthProvider {
+  email,
+  google,
+}
+
 class UserModel {
   final String id;
   final String name;
   final String email;
   final String? photoUrl;
   final String? phoneNumber;
-  final double? height; // dalam cm
-  final double? weight; // dalam kg
+  final double? height; // in cm
+  final double? weight; // in kg
   final int? age;
-  final String? gender; // 'male', 'female', 'other'
+  final String? gender; 
   final int? targetCalories;
+  final String? dateOfBirth;
   final DateTime createdAt;
   final DateTime updatedAt;
   final AuthProvider authProvider;
@@ -26,6 +32,7 @@ class UserModel {
     this.age,
     this.gender,
     this.targetCalories,
+    this.dateOfBirth,
     required this.createdAt,
     required this.updatedAt,
     required this.authProvider,
@@ -40,11 +47,12 @@ class UserModel {
       email: json['email'] ?? '',
       photoUrl: json['photo_url'],
       phoneNumber: json['phone_number'],
-      height: json['height']?.toDouble(),
-      weight: json['weight']?.toDouble(),
+      height: json['height'] != null ? (json['height'] as num).toDouble() : null,
+      weight: json['weight'] != null ? (json['weight'] as num).toDouble() : null,
       age: json['age'],
       gender: json['gender'],
       targetCalories: json['target_calories'],
+      dateOfBirth: json['date_of_birth'],
       createdAt: json['created_at'] != null 
         ? DateTime.parse(json['created_at']) 
         : DateTime.now(),
@@ -69,6 +77,7 @@ class UserModel {
       'age': age,
       'gender': gender,
       'target_calories': targetCalories,
+      'date_of_birth': dateOfBirth,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'auth_provider': authProvider.toString().split('.').last,
@@ -88,7 +97,6 @@ class UserModel {
     }
   }
   
-  // Membuat salinan objek dengan beberapa perubahan
   UserModel copyWith({
     String? id,
     String? name,
@@ -100,6 +108,7 @@ class UserModel {
     int? age,
     String? gender,
     int? targetCalories,
+    String? dateOfBirth,
     DateTime? createdAt,
     DateTime? updatedAt,
     AuthProvider? authProvider,
@@ -117,6 +126,7 @@ class UserModel {
       age: age ?? this.age,
       gender: gender ?? this.gender,
       targetCalories: targetCalories ?? this.targetCalories,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       authProvider: authProvider ?? this.authProvider,
@@ -124,9 +134,4 @@ class UserModel {
       refreshToken: refreshToken ?? this.refreshToken,
     );
   }
-}
-
-enum AuthProvider {
-  email,
-  google,
 }
