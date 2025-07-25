@@ -102,7 +102,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/profile': (context) => const ProfileScreen(),
         '/edit_profile': (context) => const EditProfileScreen(),
-        '/simulation': (context) => const SimulationScreen(),
       },
       ),
     );

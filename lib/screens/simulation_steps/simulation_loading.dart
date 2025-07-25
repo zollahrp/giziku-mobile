@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../simulation_screen.dart';
+import '../home_screen.dart';
 
 class SimulationLoadingScreen extends StatefulWidget {
   const SimulationLoadingScreen({super.key});
@@ -39,7 +39,7 @@ class _SimulationLoadingScreenState extends State<SimulationLoadingScreen> with 
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => SimulationScreen()),
+        MaterialPageRoute(builder: (_) => HomeScreen()),
       );
     });
   });
