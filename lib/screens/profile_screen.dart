@@ -15,191 +15,189 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // Header
-          Container(
-            width: double.infinity,
-            height: 250, 
-            decoration: const BoxDecoration(
-              color: Color(0xFF2ECC71),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
+        body: Stack(
+          children: [
+            Column(
               children: [
-                // Back Button
-                Positioned(
-                  top: 35,
-                  left: 20,
-                  child: InkWell(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 24,
+                // Header
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF2AD882),
+                        Color(0xFF2ECC71),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(40),
+                      bottomRight: Radius.circular(40),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 12,
+                      left: 20,
+                      right: 20,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Poppins',
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          email,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                // Name & Email
-                Positioned(
-                  top: 70,
-                  left: 0,
-                  right: 0,
+
+                const SizedBox(height: 80), // ruang untuk avatar
+                // Menu List
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Column(
                     children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Poppins',
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      _ProfileMenuItem(
+                        icon: Icons.person,
+                        label: 'My Profile',
+                        bgColor: Color(0xFFD4D4FC),
+                        iconColor: Colors.black,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ProfileDetailScreen()),
+                          );
+                        },
                       ),
-                      const SizedBox(height: 5),
-                      Text(
-                        email,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                        ),
+                      _ProfileMenuItem(
+                        icon: Icons.help_outline,
+                        label: 'FAQ',
+                        bgColor: Color(0xFF9BFFD0),
+                        iconColor: Colors.black,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const FAQScreen()),
+                          );
+                        },
+                      ),
+                      _ProfileMenuItem(
+                        icon: Icons.info_outline,
+                        label: 'About',
+                        bgColor: Color(0xFFE3D1FF),
+                        iconColor: Colors.black,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AboutScreen()),
+                          );
+                        },
+                      ),
+                      _ProfileMenuItem(
+                        icon: Icons.store_mall_directory_outlined,
+                        label: 'My Shop',
+                        bgColor: Color(0xFFADE0FF),
+                        iconColor: Colors.black,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const StoreProfileScreen()),
+                          );
+                        },
                       ),
                     ],
                   ),
                 ),
-                Positioned(
-                  bottom: -40,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 4,
+
+                const Spacer(),
+
+                // Logout Button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2ECC71),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
                       ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.yellow,
-                      backgroundImage: const AssetImage('assets/profile/profile.png'),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.logout,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Logout',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 20),
               ],
             ),
-          ),
 
-          const SizedBox(height: 60),
-
-          // Menu List
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              children: [
-                _ProfileMenuItem(
-                  icon: 'assets/profile/profile.png',
-                  label: 'My Profile',
-                  bgColor: const Color(0xFFD4D4FC),
-                  iconColor: null,
-                  onTap: () {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ProfileDetailScreen()),
-                        );
-                  },
-                ),
-                _ProfileMenuItem(
-                  icon: 'assets/profile/faq.png',
-                  label: 'FAQ',
-                  bgColor: const Color(0xFF9BFFD0),
-                  iconColor: null,
-                  onTap: () {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const FAQScreen()),
-                        );
-                    },
-                ),
-                _ProfileMenuItem(
-                  icon: 'assets/profile/about.png',
-                  label: 'About',
-                  bgColor: const Color(0xFFE3D1FF),
-                  iconColor: null,
-                  onTap: () {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const AboutScreen()),
-                        );
-                  },
-                ),
-                _ProfileMenuItem(
-                  icon: 'profile/shops.png', 
-                  label: 'My Shop',
-                  bgColor: const Color(0xFFADE0FF),
-                  iconColor: null,
-                  onTap: () {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const StoreProfileScreen()),
-                        );
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          const Spacer(),
-
-          // Logout Button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2ECC71),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(
-                      Icons.logout,
+            // Avatar - ditumpuk di atas header
+            Positioned(
+              top: 160,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(2), // GANTI: dari 5 → 2
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
                       color: Colors.white,
-                      size: 20,
+                      width: 2, // GANTI: dari 4 → 2
                     ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: const CircleAvatar(
+                    radius: 48,
+                    backgroundColor: Colors.yellow,
+                    backgroundImage: AssetImage('assets/profile/profile.png'),
+                  ),
                 ),
               ),
             ),
-          ),
-
-          const SizedBox(height: 20),
-        ],
-      ),
+          ],
+        ),
       // BottomNavigationBar dihapus
     );
   }
@@ -207,10 +205,10 @@ class ProfileScreen extends StatelessWidget {
 
 // Widget untuk menu item profil
 class _ProfileMenuItem extends StatelessWidget {
-  final String icon;
+  final IconData icon; // GANTI dari String ke IconData
   final String label;
   final Color bgColor;
-  final Color? iconColor; // null = tampilkan PNG asli
+  final Color? iconColor;
   final VoidCallback onTap;
 
   const _ProfileMenuItem({
@@ -239,10 +237,10 @@ class _ProfileMenuItem extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(10),
-                child: Image.asset(
+                child: Icon(
                   icon,
-                  fit: BoxFit.contain,
-                  // Jangan gunakan color agar PNG asli tampil
+                  color: iconColor ?? Colors.black,
+                  size: 24,
                 ),
               ),
             ),
