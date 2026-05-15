@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart'
-    as firebase_auth;
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/auth_model.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 import 'shared_prefs_service.dart';
+
+import 'firestore_service.dart';
 
 class AuthService extends ChangeNotifier {
   final AuthRepository _authRepository;
@@ -19,9 +20,9 @@ class AuthService extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email'],
-  );
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+
+  final FirestoreService _firestoreService = FirestoreService();
 
   // Getters
   UserModel? get currentUser => _currentUser;
@@ -48,20 +49,15 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final userJson =
-          await _prefsService.getCurrentUser();
+      final userJson = await _prefsService.getCurrentUser();
 
       if (userJson != null) {
-        _currentUser =
-            UserModel.fromJson(jsonDecode(userJson));
+        _currentUser = UserModel.fromJson(jsonDecode(userJson));
       }
     } catch (e) {
-      _errorMessage =
-          'Error loading user data';
+      _errorMessage = 'Error loading user data';
 
-      print(
-        'Error loading user data: ${e.toString()}',
-      );
+      print('Error loading user data: ${e.toString()}');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -69,24 +65,16 @@ class AuthService extends ChangeNotifier {
   }
 
   // LOGIN EMAIL
-  Future<bool> signInWithEmailPassword(
-    String email,
-    String password,
-  ) async {
+  Future<bool> signInWithEmailPassword(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
 
     notifyListeners();
 
     try {
-      final loginRequest = LoginRequest(
-        email: email,
-        password: password,
-      );
+      final loginRequest = LoginRequest(email: email, password: password);
 
-      final response =
-          await _authRepository
-              .signInWithEmailPassword(
+      final response = await _authRepository.signInWithEmailPassword(
         loginRequest,
       );
 
@@ -94,19 +82,14 @@ class AuthService extends ChangeNotifier {
         await _loadUserFromPrefs();
         return true;
       } else {
-        _errorMessage =
-            response.message ??
-            'Failed to sign in';
+        _errorMessage = response.message ?? 'Failed to sign in';
 
         return false;
       }
     } catch (e) {
-      _errorMessage =
-          'An error occurred during sign in';
+      _errorMessage = 'An error occurred during sign in';
 
-      print(
-        'Sign in error: ${e.toString()}',
-      );
+      print('Sign in error: ${e.toString()}');
 
       return false;
     } finally {
@@ -127,16 +110,13 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final registerRequest =
-          RegisterRequest(
+      final registerRequest = RegisterRequest(
         name: name,
         email: email,
         password: password,
       );
 
-      final response =
-          await _authRepository
-              .signUpWithEmailPassword(
+      final response = await _authRepository.signUpWithEmailPassword(
         registerRequest,
       );
 
@@ -144,19 +124,14 @@ class AuthService extends ChangeNotifier {
         await _loadUserFromPrefs();
         return true;
       } else {
-        _errorMessage =
-            response.message ??
-            'Failed to sign up';
+        _errorMessage = response.message ?? 'Failed to sign up';
 
         return false;
       }
     } catch (e) {
-      _errorMessage =
-          'An error occurred during registration';
+      _errorMessage = 'An error occurred during registration';
 
-      print(
-        'Sign up error: ${e.toString()}',
-      );
+      print('Sign up error: ${e.toString()}');
 
       return false;
     } finally {
@@ -173,79 +148,52 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final GoogleSignInAccount? googleUser =
-          await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        _errorMessage =
-            'Google sign in canceled';
+        _errorMessage = 'Google sign in canceled';
 
         return false;
       }
 
-      final GoogleSignInAuthentication
-      googleAuth =
+      final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      final credential =
-          firebase_auth
-              .GoogleAuthProvider
-              .credential(
-        accessToken:
-            googleAuth.accessToken,
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final userCredential =
-          await firebase_auth
-              .FirebaseAuth.instance
-              .signInWithCredential(
-        credential,
-      );
+      final userCredential = await firebase_auth.FirebaseAuth.instance
+          .signInWithCredential(credential);
 
-      final user =
-          userCredential.user;
+      final user = userCredential.user;
 
       if (user == null) {
-        _errorMessage =
-            'Failed to get user data';
+        _errorMessage = 'Failed to get user data';
 
         return false;
       }
 
       final userModel = UserModel(
         id: user.uid,
-        name:
-            user.displayName ?? '',
-        email:
-            user.email ?? '',
-        photoUrl:
-            user.photoURL,
-        authProvider:
-            AuthProvider.google,
-        createdAt:
-            DateTime.now(),
-        updatedAt:
-            DateTime.now(),
+        name: user.displayName ?? '',
+        email: user.email ?? '',
+        photoUrl: user.photoURL,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        authProvider: AuthProvider.google,
       );
 
-      _currentUser = userModel;
+      await _firestoreService.saveUser(userModel);
 
-      await _prefsService
-          .setCurrentUser(
-        jsonEncode(
-          userModel.toJson(),
-        ),
-      );
+      await _prefsService.setCurrentUser(jsonEncode(userModel.toJson()));
 
       return true;
     } catch (e) {
-      _errorMessage =
-          'Google sign in error: ${e.toString()}';
+      _errorMessage = 'Google sign in error: ${e.toString()}';
 
-      print(
-        'Google sign in error: ${e.toString()}',
-      );
+      print('Google sign in error: ${e.toString()}');
 
       return false;
     } finally {
@@ -263,21 +211,15 @@ class AuthService extends ChangeNotifier {
     try {
       await _googleSignIn.signOut();
 
-      await firebase_auth
-          .FirebaseAuth.instance
-          .signOut();
+      await firebase_auth.FirebaseAuth.instance.signOut();
 
-      await _prefsService
-          .clearCurrentUser();
+      await _prefsService.clearCurrentUser();
 
       _currentUser = null;
     } catch (e) {
-      _errorMessage =
-          'Error signing out';
+      _errorMessage = 'Error signing out';
 
-      print(
-        'Sign out error: ${e.toString()}',
-      );
+      print('Sign out error: ${e.toString()}');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -291,20 +233,15 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final user =
-          await _authRepository
-              .getUserProfile();
+      final user = await _authRepository.getUserProfile();
 
       if (user != null) {
         _currentUser = user;
       }
     } catch (e) {
-      _errorMessage =
-          'Error refreshing user profile';
+      _errorMessage = 'Error refreshing user profile';
 
-      print(
-        'Error refreshing user profile: ${e.toString()}',
-      );
+      print('Error refreshing user profile: ${e.toString()}');
     } finally {
       _isLoading = false;
       notifyListeners();
