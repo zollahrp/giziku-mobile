@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'signin_screen.dart';
-import 'signup_screen.dart';
+import 'package:provider/provider.dart';
+
+import '../services/auth_service.dart';
+import 'main_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -51,12 +53,11 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
 
-          // Konten halaman di bawah dengan padding
+          // CONTENT
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-                // Teks "Giziku solusi untuk"
                 const Text(
                   'Giziku solusi untuk',
                   style: TextStyle(
@@ -69,7 +70,6 @@ class LoginScreen extends StatelessWidget {
 
                 const SizedBox(height: 8),
 
-                // Teks "Makan Sehat, Hidup Hemat."
                 const Text(
                   'Makan Sehat, Hidup Hemat.',
                   style: TextStyle(
@@ -80,101 +80,66 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 50),
+                const SizedBox(height: 60),
 
-                // Tombol "Sign In"
+                // GOOGLE BUTTON
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignInScreen(),
-                        ),
-                      );
+                  height: 55,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final authService =
+                          context.read<AuthService>();
+
+                      final success =
+                          await authService.signInWithGoogle();
+
+                      if (success) {
+                        if (!context.mounted) return;
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const MainScreen(),
+                          ),
+                        );
+                      } else {
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              authService.errorMessage ??
+                                  'Google Login Failed',
+                            ),
+                          ),
+                        );
+                      }
                     },
+
+                    icon: Image.network(
+                      'https://cdn-icons-png.flaticon.com/512/281/281764.png',
+                      height: 24,
+                    ),
+
+                    label: const Text(
+                      'Continue with Google',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2ECC71),
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      elevation: 2,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      'Sign In',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Teks "Or sign up" dengan garis
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: Colors.grey.withOpacity(0.3),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        'Or sign up',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: Colors.grey.withOpacity(0.3),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                // Tombol "Sign up" (outline)
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignUpScreen(),
-                        ),
-                      );
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                        color: Color(0xFF2ECC71),
-                        width: 1,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      'Sign up',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2ECC71),
-                        fontFamily: 'Poppins',
+                        borderRadius:
+                            BorderRadius.circular(30),
                       ),
                     ),
                   ),
@@ -185,7 +150,7 @@ class LoginScreen extends StatelessWidget {
 
           const Spacer(),
 
-          // Teks copyright
+          // COPYRIGHT
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
