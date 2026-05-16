@@ -76,7 +76,23 @@ class _MainScreenState extends State<MainScreen> {
               color: Color.fromARGB(255, 255, 255, 255),
             ),
           ],
-          onTap: (index) {
+          onTap: (index) async {
+            // ================= SCANNER =================
+
+            if (index == 2) {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ScannerScreen()),
+              );
+
+              // navbar balik ke page sebelumnya
+              _bottomNavigationKey.currentState?.setPage(_selectedIndex);
+
+              return;
+            }
+
+            // ================= NORMAL TAB =================
+
             setState(() {
               _selectedIndex = index;
             });

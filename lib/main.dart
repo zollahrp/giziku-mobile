@@ -22,32 +22,30 @@ import 'services/api_client.dart';
 import 'services/auth_service.dart';
 import 'services/shared_prefs_service.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(
-    SecurityContext? context,
-  ) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
       ..badCertificateCallback =
-          (
-            X509Certificate cert,
-            String host,
-            int port,
-          ) => true;
+          (X509Certificate cert, String host, int port) => true;
   }
 }
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options:
-        DefaultFirebaseOptions
-            .currentPlatform,
+  await dotenv.load(
+    fileName: ".env",
   );
 
-  HttpOverrides.global =
-      MyHttpOverrides();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  HttpOverrides.global = MyHttpOverrides();
 
   runApp(const MyApp());
 }
@@ -60,196 +58,89 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         // Shared Preferences
-        Provider<SharedPrefsService>(
-          create:
-              (_) =>
-                  SharedPrefsService(),
-        ),
+        Provider<SharedPrefsService>(create: (_) => SharedPrefsService()),
 
         // API Client
         Provider<ApiClient>(
-          create:
-              (context) => ApiClient(
-                prefsService:
-                    context
-                        .read<
-                          SharedPrefsService
-                        >(),
-              ),
+          create: (context) =>
+              ApiClient(prefsService: context.read<SharedPrefsService>()),
         ),
 
         // Repository
         Provider<AuthRepository>(
-          create:
-              (context) => AuthRepository(
-                baseUrl:
-                    ApiConfig.baseUrl,
-                prefsService:
-                    context
-                        .read<
-                          SharedPrefsService
-                        >(),
-              ),
+          create: (context) => AuthRepository(
+            baseUrl: ApiConfig.baseUrl,
+            prefsService: context.read<SharedPrefsService>(),
+          ),
         ),
 
         // AUTH SERVICE
-        ChangeNotifierProvider<
-          AuthService
-        >(
-          create:
-              (context) => AuthService(
-                authRepository:
-                    context
-                        .read<
-                          AuthRepository
-                        >(),
-                prefsService:
-                    context
-                        .read<
-                          SharedPrefsService
-                        >(),
-              ),
+        ChangeNotifierProvider<AuthService>(
+          create: (context) => AuthService(
+            authRepository: context.read<AuthRepository>(),
+            prefsService: context.read<SharedPrefsService>(),
+          ),
         ),
 
         // PROFILE PROVIDER
-        ChangeNotifierProvider<
-          ProfileProvider
-        >(
-          create:
-              (_) =>
-                  ProfileProvider(),
+        ChangeNotifierProvider<ProfileProvider>(
+          create: (_) => ProfileProvider(),
         ),
       ],
 
       child: MaterialApp(
         title: 'Giziku',
 
-        debugShowCheckedModeBanner:
-            false,
+        debugShowCheckedModeBanner: false,
 
         theme: ThemeData(
-          colorScheme:
-              ColorScheme.fromSeed(
-                seedColor:
-                    const Color(
-                      0xFF2AD882,
-                    ),
-              ),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2AD882)),
 
           useMaterial3: true,
 
           fontFamily: 'Poppins',
 
-          textTheme:
-              const TextTheme(
-                displayLarge:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+          textTheme: const TextTheme(
+            displayLarge: TextStyle(fontFamily: 'Poppins'),
 
-                displayMedium:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            displayMedium: TextStyle(fontFamily: 'Poppins'),
 
-                displaySmall:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            displaySmall: TextStyle(fontFamily: 'Poppins'),
 
-                headlineLarge:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            headlineLarge: TextStyle(fontFamily: 'Poppins'),
 
-                headlineMedium:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            headlineMedium: TextStyle(fontFamily: 'Poppins'),
 
-                headlineSmall:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            headlineSmall: TextStyle(fontFamily: 'Poppins'),
 
-                titleLarge:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            titleLarge: TextStyle(fontFamily: 'Poppins'),
 
-                titleMedium:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            titleMedium: TextStyle(fontFamily: 'Poppins'),
 
-                titleSmall:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            titleSmall: TextStyle(fontFamily: 'Poppins'),
 
-                bodyLarge:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            bodyLarge: TextStyle(fontFamily: 'Poppins'),
 
-                bodyMedium:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            bodyMedium: TextStyle(fontFamily: 'Poppins'),
 
-                bodySmall:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            bodySmall: TextStyle(fontFamily: 'Poppins'),
 
-                labelLarge:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            labelLarge: TextStyle(fontFamily: 'Poppins'),
 
-                labelMedium:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
+            labelMedium: TextStyle(fontFamily: 'Poppins'),
 
-                labelSmall:
-                    TextStyle(
-                      fontFamily:
-                          'Poppins',
-                    ),
-              ),
+            labelSmall: TextStyle(fontFamily: 'Poppins'),
+          ),
         ),
 
         home: SplashLogoScreen(
-          nextScreen:
-              OnboardingScreen(
-                nextScreen:
-                    const LoginScreen(),
-              ),
+          nextScreen: OnboardingScreen(nextScreen: const LoginScreen()),
         ),
 
         routes: {
-          '/profile':
-              (context) =>
-                  const ProfileScreen(),
+          '/profile': (context) => const ProfileScreen(),
 
-          '/edit_profile':
-              (context) =>
-                  const EditProfileScreen(),
+          '/edit_profile': (context) => const EditProfileScreen(),
         },
       ),
     );

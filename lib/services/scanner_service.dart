@@ -3,13 +3,16 @@ import 'dart:io';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-import '../config/api_keys.dart';
 import '../models/food_scan_model.dart';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ScannerService {
   final model = GenerativeModel(
     model: 'models/gemini-2.5-flash',
-    apiKey: ApiKeys.geminiApiKey,
+
+    apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
+
     generationConfig: GenerationConfig(temperature: 0.2),
   );
 
