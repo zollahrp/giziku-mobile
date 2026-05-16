@@ -20,27 +20,67 @@ class ScannerService {
     final bytes = await image.readAsBytes();
 
     final prompt = '''
-Analyze this food image.
+Kamu adalah AI nutritionist dan food analyzer profesional.
 
-Return ONLY valid JSON.
+Analisis makanan dari gambar ini.
+
+Tugas kamu:
+1. Identifikasi nama makanan utama secara spesifik dalam Bahasa Indonesia.
+2. Estimasi total nutrisi secara realistis berdasarkan porsi pada gambar.
+3. Tentukan apakah makanan masih layak dimakan atau tidak berdasarkan visual.
+4. Berikan estimasi per serving/porsi.
+5. Gunakan nilai nutrisi realistis seperti aplikasi kesehatan profesional.
+6. Jika gambar blur atau makanan tidak jelas, tetap berikan estimasi terbaik.
+
+ATURAN:
+- Gunakan Bahasa Indonesia.
+- Return HANYA JSON valid.
+- Jangan gunakan markdown.
+- Jangan jelaskan apapun.
+- Jangan tambahkan teks selain JSON.
+
+FORMAT JSON:
 
 {
   "foodName": "",
+  "isEdible": true,
+  "estimatedServing": "",
   "calories": 0,
   "protein": 0,
   "carbs": 0,
   "fats": 0,
+  "sugars": 0,
+  "sodium": 0,
+  "fiber": 0,
+
+  "nutritionPerServing": "",
+
   "vitamins": {
     "vitaminA": "",
     "vitaminC": "",
     "iron": ""
   },
-  "healthScore": 0
+
+  "healthScore": 0,
+
+  "healthInsight": "",
+
+  "healthyLevel": ""
 }
 
-Estimate realistic nutrition values.
-Do not use markdown.
-Do not explain anything.
+CONTOH nutritionPerServing:
+"Tahu goreng (35Kcal, 2P, 3F, 1C) per potong"
+
+CONTOH healthyLevel:
+"Sangat Sehat"
+"Cukup Sehat"
+"Kurang Sehat"
+"Tidak Sehat"
+
+CONTOH healthInsight:
+"Makanan tinggi protein namun cukup tinggi minyak."
+
+Health score dari 1-10.
 ''';
 
     final response = await model.generateContent([
