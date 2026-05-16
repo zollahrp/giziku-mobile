@@ -1,10 +1,9 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'scanning_screen.dart';
 
-import '../../models/food_scan_model.dart';
-import '../../services/scanner_service.dart';
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
@@ -14,83 +13,217 @@ class ScannerScreen extends StatefulWidget {
 }
 
 class _ScannerScreenState extends State<ScannerScreen> {
+  CameraController? controller;
+  bool isCameraReady = false;
 
-  File? image;
-  bool isLoading = false;
+  @override
+  void initState() {
+    super.initState();
+    initCamera();
+  }
 
-  Future<void> scanFood() async {
+  Future<void> initCamera() async {
+    final cameras = await availableCameras();
 
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.camera,
+    controller = CameraController(
+      cameras[0],
+      ResolutionPreset.high,
+      enableAudio: false,
     );
 
-    if (pickedFile == null) return;
+    await controller!.initialize();
+
+    if (!mounted) return;
 
     setState(() {
-      image = File(pickedFile.path);
-      isLoading = true;
+      isCameraReady = true;
     });
+  }
 
-    try {
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
 
-      FoodScanModel result =
-          await ScannerService().scanFood(image!);
+  Future<void> takePicture() async {
+  if (controller == null || !controller!.value.isInitialized) {
+    return;
+  }
 
-      if (!mounted) return;
+  try {
 
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text(result.foodName),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Calories: ${result.calories} kcal'),
-              Text('Protein: ${result.protein} g'),
-              Text('Carbs: ${result.carbs} g'),
-              Text('Fats: ${result.fats} g'),
-              Text('Health Score: ${result.healthScore}/10'),
-            ],
+    final image = await controller!.takePicture();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ScanningScreen(
+          imageFile: File(image.path),
+        ),
+      ),
+    );
+
+  } catch (e) {
+
+    debugPrint(e.toString());
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Error: $e"),
+      ),
+    );
+  }
+}
+
+  Widget nutritionTile(IconData icon, String title, String value, Color color) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: color.withOpacity(0.15),
+            child: Icon(icon, color: color),
           ),
-        ),
-      );
 
-    } catch (e) {
+          const SizedBox(width: 16),
 
-      debugPrint(e.toString());
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ),
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-        ),
-      );
-
-    } finally {
-
-      setState(() {
-        isLoading = false;
-      });
-
-    }
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Food Scanner'),
-      ),
+      backgroundColor: Colors.black,
 
-      body: Center(
-        child: isLoading
-            ? const CircularProgressIndicator()
-            : ElevatedButton(
-                onPressed: scanFood,
-                child: const Text('Scan Food'),
-              ),
-      ),
+      body: isCameraReady
+          ? Stack(
+              children: [
+                /// CAMERA PREVIEW
+                Positioned.fill(
+                  child: CameraPreview(controller!),
+                ),
+
+                /// DARK OVERLAY
+                Positioned.fill(
+                  child: Container(color: Colors.black.withOpacity(0.35)),
+                ),
+
+                /// SCANNER FRAME
+                Center(
+                  child: Container(
+                    width: 260,
+                    height: 260,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: const Color(0xFF2AD882),
+                        width: 4,
+                      ),
+                    ),
+                  ),
+                ),
+
+                /// TOP BAR
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+
+                        const Text(
+                          "Food Scanner",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(width: 48),
+                      ],
+                    ),
+                  ),
+                ),
+
+                /// BOTTOM SECTION
+                Positioned(
+                  bottom: 60,
+                  left: 0,
+                  right: 0,
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Place your food inside the frame",
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      GestureDetector(
+                        onTap: takePicture,
+                        child: Container(
+                          width: 85,
+                          height: 85,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF2AD882),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2AD882).withOpacity(0.5),
+                                blurRadius: 20,
+                                spreadRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt_rounded,
+                            color: Colors.white,
+                            size: 38,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : const Center(
+              child: CircularProgressIndicator(color: Color(0xFF2AD882)),
+            ),
     );
   }
 }

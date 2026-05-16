@@ -40,9 +40,10 @@ dependencies:
   # API & Networking
   http: ^1.2.1
   dio: ^5.8.0+1
-  
+
   # State Management
   provider: ^6.1.2
+  camera: ^0.11.0
 
   # Storage
   shared_preferences: ^2.2.2
