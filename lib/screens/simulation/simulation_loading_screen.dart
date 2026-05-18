@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
+import '../../services/simulation_service.dart';
 import 'simulation_result_screen.dart';
 
 class SimulationLoadingScreen extends StatefulWidget {
@@ -21,8 +21,7 @@ class SimulationLoadingScreen extends StatefulWidget {
       _SimulationLoadingScreenState();
 }
 
-class _SimulationLoadingScreenState
-    extends State<SimulationLoadingScreen>
+class _SimulationLoadingScreenState extends State<SimulationLoadingScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
@@ -33,7 +32,7 @@ class _SimulationLoadingScreenState
     "Menghitung kebutuhan nutrisi...",
     "Menyesuaikan porsi makanan...",
     "Mencari menu terbaik...",
-    "Menyiapkan rekomendasi AI...",
+    "Menyiapkan rekomendasi dari model...",
   ];
 
   @override
@@ -49,12 +48,8 @@ class _SimulationLoadingScreenState
   }
 
   Future<void> startLoading() async {
-    for (int i = 0;
-        i < loadingMessages.length;
-        i++) {
-      await Future.delayed(
-        const Duration(milliseconds: 1200),
-      );
+    for (int i = 0; i < loadingMessages.length; i++) {
+      await Future.delayed(const Duration(milliseconds: 1200));
 
       if (!mounted) return;
 
@@ -63,22 +58,31 @@ class _SimulationLoadingScreenState
       });
     }
 
-    await Future.delayed(
-      const Duration(seconds: 1),
-    );
+    try {
+      final result = await SimulationService().generateMealPlan(
+        budget: widget.budget,
+        days: widget.days,
+        people: widget.people,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => SimulationResultScreen(
-          budget: widget.budget,
-          days: widget.days,
-          people: widget.people,
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SimulationResultScreen(
+            budget: widget.budget,
+            days: widget.days,
+            people: widget.people,
+            aiResult: result,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal generate rekomendasi: $e')));
+    }
   }
 
   @override
@@ -92,249 +96,198 @@ class _SimulationLoadingScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAF8),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-          ),
-          child: Column(
-            children: [
-              const Spacer(),
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
 
-              // AI Circle Animation
-              AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  return Transform.rotate(
-                    angle:
-                        _animationController.value *
-                        6.3,
-                    child: Container(
-                      width: 140,
-                      height: 140,
-                      padding: const EdgeInsets.all(
-                          4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: SweepGradient(
-                          colors: [
-                            const Color(0xFF2ECC71),
-                            const Color(0xFF2ECC71)
-                                .withOpacity(0.1),
-                          ],
+                  // AI Circle Animation
+                  AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return Transform.rotate(
+                        angle: _animationController.value * 6.3,
+                        child: Container(
+                          width: 95,
+                          height: 95,
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: SweepGradient(
+                              colors: [
+                                const Color(0xFF2ECC71),
+                                const Color(0xFF2ECC71).withOpacity(0.1),
+                              ],
+                            ),
+                          ),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.auto_awesome_rounded,
+                              size: 38,
+                              color: Color(0xFF2ECC71),
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Container(
-                        decoration:
-                            const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.auto_awesome_rounded,
-                          size: 54,
-                          color: Color(0xFF2ECC71),
-                        ),
-                      ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // Title
+                  const Text(
+                    "Giziku Sedang Membuat\nRencana Makananmu",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                      color: Colors.black,
                     ),
-                  );
-                },
-              ),
+                  ),
 
-              const SizedBox(height: 40),
+                  const SizedBox(height: 14),
 
-              // Title
-              const Text(
-                "AI Sedang Membuat\nRencana Makananmu",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
-                  color: Colors.black,
-                ),
-              ),
+                  Text(
+                    "Tunggu sebentar, kami sedang menyesuaikan menu terbaik untukmu.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.6,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
 
-              const SizedBox(height: 18),
+                  const SizedBox(height: 36),
 
-              Text(
-                "Tunggu sebentar, kami sedang\nmenyesuaikan menu terbaik untukmu.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  height: 1.7,
-                  color: Colors.grey.shade600,
-                ),
-              ),
+                  // Loading Messages
+                  Column(
+                    children: List.generate(loadingMessages.length, (index) {
+                      final isActive = index <= currentMessageIndex;
 
-              const SizedBox(height: 50),
-
-              // Loading Messages
-              Column(
-                children: List.generate(
-                  loadingMessages.length,
-                  (index) {
-                    final isActive =
-                        index <= currentMessageIndex;
-
-                    return AnimatedOpacity(
-                      duration:
-                          const Duration(
-                            milliseconds: 400,
+                      return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 400),
+                        opacity: isActive ? 1 : 0.35,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 400),
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
                           ),
-                      opacity:
-                          isActive ? 1 : 0.3,
-                      child: Container(
-                        margin:
-                            const EdgeInsets.only(
-                              bottom: 14,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: isActive
+                                  ? const Color(0xFF2ECC71).withOpacity(0.2)
+                                  : Colors.transparent,
                             ),
-                        padding:
-                            const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 16,
-                            ),
-                        decoration: BoxDecoration(
-                          color:
-                              isActive
-                                  ? Colors.white
-                                  : Colors.white
-                                      .withOpacity(
-                                        0.6,
-                                      ),
-                          borderRadius:
-                              BorderRadius.circular(
-                                20,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 18,
+                                offset: const Offset(0, 8),
                               ),
-                          border: Border.all(
-                            color:
-                                isActive
-                                    ? const Color(
-                                      0xFF2ECC71,
-                                    ).withOpacity(
-                                      0.2,
-                                    )
-                                    : Colors
-                                        .transparent,
+                            ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black
-                                  .withOpacity(
-                                    0.04,
-                                  ),
-                              blurRadius: 20,
-                              offset:
-                                  const Offset(
-                                    0,
-                                    8,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 28,
-                              height: 28,
-                              decoration:
-                                  BoxDecoration(
-                                    color:
-                                        isActive
-                                            ? const Color(
-                                              0xFF2ECC71,
-                                            )
-                                            : Colors
-                                                .grey
-                                                .shade300,
-                                    shape:
-                                        BoxShape
-                                            .circle,
-                                  ),
-                              child: Icon(
-                                isActive
-                                    ? Icons.check
-                                    : Icons
-                                        .more_horiz,
-                                color:
-                                    Colors.white,
-                                size: 18,
-                              ),
-                            ),
-
-                            const SizedBox(
-                              width: 14,
-                            ),
-
-                            Expanded(
-                              child: Text(
-                                loadingMessages[index],
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight:
-                                      FontWeight
-                                          .w600,
-                                  color:
-                                      isActive
-                                          ? Colors
-                                              .black
-                                          : Colors
-                                              .grey
-                                              .shade500,
+                          child: Row(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 400),
+                                width: 26,
+                                height: 26,
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? const Color(0xFF2ECC71)
+                                      : Colors.grey.shade300,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isActive ? Icons.check : Icons.more_horiz,
+                                  color: Colors.white,
+                                  size: 16,
                                 ),
                               ),
-                            ),
-                          ],
+
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                child: Text(
+                                  loadingMessages[index],
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: isActive
+                                        ? Colors.black
+                                        : Colors.grey.shade500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const Spacer(),
-
-              // Bottom Info
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 16,
-                    ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius:
-                      BorderRadius.circular(22),
-                  border: Border.all(
-                    color: const Color(
-                      0xFF2ECC71,
-                    ).withOpacity(0.15),
+                      );
+                    }),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.lightbulb_rounded,
-                      color: Color(0xFF2ECC71),
+
+                  const SizedBox(height: 28),
+
+                  // Bottom Info
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
                     ),
-
-                    const SizedBox(width: 14),
-
-                    Expanded(
-                      child: Text(
-                        "AI akan membuat rekomendasi menu berdasarkan budget, durasi, dan jumlah orang.",
-                        style: TextStyle(
-                          height: 1.5,
-                          color:
-                              Colors.grey.shade700,
-                        ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0xFF2ECC71).withOpacity(0.15),
                       ),
                     ),
-                  ],
-                ),
-              ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 2),
+                          child: Icon(
+                            Icons.lightbulb_rounded,
+                            color: Color(0xFF2ECC71),
+                            size: 22,
+                          ),
+                        ),
 
-              const SizedBox(height: 28),
-            ],
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: Text(
+                            "Giziku akan membuat rekomendasi menu berdasarkan budget, durasi, dan jumlah orang.",
+                            style: TextStyle(
+                              height: 1.5,
+                              fontSize: 14,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
           ),
         ),
       ),

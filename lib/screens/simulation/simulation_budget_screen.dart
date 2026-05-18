@@ -7,14 +7,11 @@ class SimulationBudgetScreen extends StatefulWidget {
   const SimulationBudgetScreen({super.key});
 
   @override
-  State<SimulationBudgetScreen> createState() =>
-      _SimulationBudgetScreenState();
+  State<SimulationBudgetScreen> createState() => _SimulationBudgetScreenState();
 }
 
-class _SimulationBudgetScreenState
-    extends State<SimulationBudgetScreen> {
-  final TextEditingController _budgetController =
-      TextEditingController();
+class _SimulationBudgetScreenState extends State<SimulationBudgetScreen> {
+  final TextEditingController _budgetController = TextEditingController();
 
   bool isButtonEnabled = false;
 
@@ -24,8 +21,7 @@ class _SimulationBudgetScreenState
 
     _budgetController.addListener(() {
       setState(() {
-        isButtonEnabled =
-            _budgetController.text.isNotEmpty;
+        isButtonEnabled = _budgetController.text.isNotEmpty;
       });
     });
   }
@@ -39,15 +35,12 @@ class _SimulationBudgetScreenState
   String formatRupiah(String value) {
     if (value.isEmpty) return '';
 
-    final number =
-        int.tryParse(value.replaceAll('.', '')) ?? 0;
+    final number = int.tryParse(value.replaceAll('.', '')) ?? 0;
 
-    final result = number
-        .toString()
-        .replaceAllMapped(
-          RegExp(r'\B(?=(\d{3})+(?!\d))'),
-          (match) => '.',
-        );
+    final result = number.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => '.',
+    );
 
     return result;
   }
@@ -59,303 +52,291 @@ class _SimulationBudgetScreenState
 
     _budgetController.value = TextEditingValue(
       text: formatted,
-      selection: TextSelection.collapsed(
-        offset: formatted.length,
-      ),
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 
   void goToNext() {
-    final rawBudget = _budgetController.text
-        .replaceAll('.', '');
+    final rawBudget = _budgetController.text.replaceAll('.', '');
 
     final budget = int.tryParse(rawBudget);
 
     if (budget == null || budget <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Masukkan budget yang valid',
-          ),
-        ),
+        const SnackBar(content: Text('Masukkan budget yang valid')),
       );
       return;
     }
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => SimulationDaysScreen(
-          budget: budget,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => SimulationDaysScreen(budget: budget)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFF8FAF8),
+
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 20,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 20,
+            bottom: keyboardHeight + 24,
           ),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              // Back Button
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius:
-                      BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black
-                          .withOpacity(0.04),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    color: Color(0xFF2ECC71),
-                    size: 20,
-                  ),
-                ),
-              ),
 
-              const SizedBox(height: 40),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top,
+            ),
 
-              // Progress
-              Row(
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
-                  Expanded(
-                    child: Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color:
-                            const Color(0xFF2ECC71),
-                        borderRadius:
-                            BorderRadius.circular(
-                                100),
+                  // Back Button
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Color(0xFF2ECC71),
+                        size: 20,
                       ),
                     ),
                   ),
 
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 40),
 
-                  Expanded(
-                    child: Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius:
-                            BorderRadius.circular(
-                                100),
+                  // Progress
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2ECC71),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
                       ),
+
+                      const SizedBox(width: 8),
+
+                      Expanded(
+                        child: Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      Expanded(
+                        child: Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Text(
+                    "STEP 1 DARI 3",
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      letterSpacing: 1,
                     ),
                   ),
 
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 50),
 
-                  Expanded(
-                    child: Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius:
-                            BorderRadius.circular(
-                                100),
+                  // Icon
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2ECC71).withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.payments_rounded,
+                      color: Color(0xFF2ECC71),
+                      size: 42,
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Title
+                  const Text(
+                    "Berapa budget\nmakananmu?",
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                      color: Colors.black,
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  Text(
+                    "Kami akan membantu membuat\nrencana makan terbaik sesuai budgetmu.",
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.6,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Input
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.grey.shade200),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+
+                    child: Row(
+                      children: [
+                        const Text(
+                          "Rp",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF2ECC71),
+                          ),
+                        ),
+
+                        const SizedBox(width: 14),
+
+                        Expanded(
+                          child: TextField(
+                            controller: _budgetController,
+
+                            keyboardType: TextInputType.number,
+
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+
+                            onChanged: onBudgetChanged,
+
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                            ),
+
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "2.000.000",
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+
+                    child: ElevatedButton(
+                      onPressed: isButtonEnabled ? goToNext : null,
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2ECC71),
+
+                        disabledBackgroundColor: Colors.grey.shade300,
+
+                        elevation: 0,
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                      ),
+
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Text(
+                            "Lanjut",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+
+                          SizedBox(width: 10),
+
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 16),
-
-              Text(
-                "STEP 1 DARI 3",
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  letterSpacing: 1,
-                ),
-              ),
-
-              const Spacer(),
-
-              // Icon
-              Container(
-                width: 88,
-                height: 88,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2ECC71)
-                      .withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.payments_rounded,
-                  color: Color(0xFF2ECC71),
-                  size: 42,
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Title
-              const Text(
-                "Berapa budget\nmakananmu?",
-                style: TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  height: 1.2,
-                  color: Colors.black,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              Text(
-                "Kami akan membantu membuat\nrencana makan terbaik sesuai budgetmu.",
-                style: TextStyle(
-                  fontSize: 16,
-                  height: 1.6,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Input
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius:
-                      BorderRadius.circular(24),
-                  border: Border.all(
-                    color: Colors.grey.shade200,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black
-                          .withOpacity(0.04),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    const Text(
-                      "Rp",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF2ECC71),
-                      ),
-                    ),
-
-                    const SizedBox(width: 14),
-
-                    Expanded(
-                      child: TextField(
-                        controller:
-                            _budgetController,
-                        keyboardType:
-                            TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter
-                              .digitsOnly,
-                        ],
-                        onChanged:
-                            onBudgetChanged,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight:
-                              FontWeight.w600,
-                        ),
-                        decoration:
-                            const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "2.000.000",
-                          hintStyle: TextStyle(
-                            color: Colors.grey,
-                            fontWeight:
-                                FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Spacer(),
-
-              // Next Button
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: ElevatedButton(
-                  onPressed:
-                      isButtonEnabled
-                          ? goToNext
-                          : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        const Color(0xFF2ECC71),
-                    disabledBackgroundColor:
-                        Colors.grey.shade300,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(
-                              22),
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Lanjut",
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight:
-                              FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-
-                      SizedBox(width: 10),
-
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

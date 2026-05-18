@@ -1,62 +1,121 @@
-import 'recipe_model.dart';
-
 class SimulationAiModel {
+
   final String summary;
 
-  final int totalBudget;
   final int dailyBudget;
-
-  final int totalDays;
-  final int totalPeople;
 
   final String nutritionInsight;
 
-  final String healthyLevel;
-
   final String tips;
 
-  final List<RecipeModel> recipes;
+  final List<MealDay> mealPlan;
 
   SimulationAiModel({
     required this.summary,
-    required this.totalBudget,
     required this.dailyBudget,
-    required this.totalDays,
-    required this.totalPeople,
     required this.nutritionInsight,
-    required this.healthyLevel,
     required this.tips,
-    required this.recipes,
+    required this.mealPlan,
   });
 
   factory SimulationAiModel.fromJson(
     Map<String, dynamic> json,
   ) {
+
     return SimulationAiModel(
-      summary: json['summary'] ?? '',
 
-      totalBudget: json['total_budget'] ?? 0,
+      summary:
+          json['summary'] ?? '',
 
-      dailyBudget: json['daily_budget'] ?? 0,
-
-      totalDays: json['total_days'] ?? 0,
-
-      totalPeople: json['total_people'] ?? 0,
+      dailyBudget:
+          json['daily_budget'] ?? 0,
 
       nutritionInsight:
           json['nutrition_insight'] ?? '',
 
-      healthyLevel:
-          json['healthy_level'] ?? '',
+      tips:
+          json['tips'] ?? '',
 
-      tips: json['tips'] ?? '',
-
-      recipes:
-          (json['recipes'] as List? ?? [])
+      mealPlan:
+          (json['meal_plan'] as List? ?? [])
               .map(
-                (e) => RecipeModel.fromJson(e),
+                (e) => MealDay.fromJson(e),
               )
               .toList(),
+    );
+  }
+}
+
+class MealDay {
+
+  final int day;
+
+  final List<MealItem> meals;
+
+  MealDay({
+    required this.day,
+    required this.meals,
+  });
+
+  factory MealDay.fromJson(
+    Map<String, dynamic> json,
+  ) {
+
+    return MealDay(
+
+      day:
+          json['day'] ?? 0,
+
+      meals:
+          (json['meals'] as List? ?? [])
+              .map(
+                (e) => MealItem.fromJson(e),
+              )
+              .toList(),
+    );
+  }
+}
+
+class MealItem {
+
+  final String mealType;
+
+  final String title;
+
+  final String description;
+
+  final int estimatedCalories;
+
+  final int estimatedPrice;
+
+  MealItem({
+    required this.mealType,
+    required this.title,
+    required this.description,
+    required this.estimatedCalories,
+    required this.estimatedPrice,
+  });
+
+  factory MealItem.fromJson(
+    Map<String, dynamic> json,
+  ) {
+
+    return MealItem(
+
+      mealType:
+          json['meal_type'] ?? '',
+
+      title:
+          json['title'] ?? '',
+
+      description:
+          json['description'] ?? '',
+
+      estimatedCalories:
+          json['estimated_calories'] ?? 0,
+
+      estimatedPrice:
+          json['estimated_price'] ?? 0,
     );
   }
 }

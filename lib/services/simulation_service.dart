@@ -6,6 +6,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/simulation_ai_model.dart';
 
 class SimulationService {
+
   final model = GenerativeModel(
     model: 'models/gemini-2.5-flash',
     apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
@@ -19,10 +20,11 @@ class SimulationService {
     required int days,
     required int people,
   }) async {
+
     final prompt = '''
 Kamu adalah AI nutrition planner profesional.
 
-Buatkan meal plan hemat dan sehat.
+Buatkan meal plan sehat, hemat, realistis, dan variatif.
 
 DATA USER:
 - Budget: Rp$budget
@@ -32,8 +34,14 @@ DATA USER:
 ATURAN:
 - Gunakan Bahasa Indonesia
 - Fokus makanan Indonesia
-- Budget harus realistis
-- Makanan sederhana dan sehat
+- Budget realistis
+- Makanan sederhana dan mudah dibuat
+- Variasikan menu setiap hari
+- Setiap hari wajib ada:
+  - Sarapan
+  - Makan Siang
+  - Makan Malam
+- Hitung estimasi kalori dan harga
 - Return HANYA JSON valid
 - Jangan gunakan markdown
 - Jangan tambahkan teks selain JSON
@@ -42,16 +50,39 @@ FORMAT JSON:
 
 {
   "summary": "",
-  "dailyBudget": 0,
-  "nutritionInsight": "",
+  "daily_budget": 0,
+  "nutrition_insight": "",
   "tips": "",
 
-  "mealPlans": [
+  "meal_plan": [
     {
-      "title": "",
-      "description": "",
-      "estimatedCalories": 0,
-      "estimatedPrice": 0
+      "day": 1,
+
+      "meals": [
+        {
+          "meal_type": "Sarapan",
+          "title": "",
+          "description": "",
+          "estimated_calories": 0,
+          "estimated_price": 0
+        },
+
+        {
+          "meal_type": "Makan Siang",
+          "title": "",
+          "description": "",
+          "estimated_calories": 0,
+          "estimated_price": 0
+        },
+
+        {
+          "meal_type": "Makan Malam",
+          "title": "",
+          "description": "",
+          "estimated_calories": 0,
+          "estimated_price": 0
+        }
+      ]
     }
   ]
 }
@@ -66,6 +97,8 @@ FORMAT JSON:
     text = text.replaceAll('```json', '');
     text = text.replaceAll('```', '');
     text = text.trim();
+
+    print(text);
 
     final jsonMap = jsonDecode(text);
 
