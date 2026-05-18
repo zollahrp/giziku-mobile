@@ -3,16 +3,16 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../models/simulation_ai_model.dart';
 
 class SimulationService {
-
   final model = GenerativeModel(
     model: 'models/gemini-2.5-flash',
     apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
-    generationConfig: GenerationConfig(
-      temperature: 0.4,
-    ),
+    generationConfig: GenerationConfig(temperature: 0.4),
   );
 
   Future<SimulationAiModel> generateMealPlan({
@@ -20,33 +20,86 @@ class SimulationService {
     required int days,
     required int people,
   }) async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
 
-    final prompt = '''
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final userData = userDoc.data() ?? {};
+
+    final allergies = List<String>.from(userData['allergies'] ?? []);
+
+    final favoriteFoods = userData['favorite_foods'] ?? '';
+
+    final dislikedFoods = userData['disliked_foods'] ?? '';
+
+    final bodyGoal = userData['body_goal'] ?? '';
+
+    final calories = userData['daily_calories'] ?? 2000;
+
+    final diseases = List<String>.from(userData['chronic_disease'] ?? []);
+
+    final foodTypes = List<String>.from(userData['food_type'] ?? []);
+
+    final prompt =
+        '''
 Kamu adalah AI nutrition planner profesional.
 
-Buatkan meal plan sehat, hemat, realistis, dan variatif.
+Buatkan meal plan sehat, hemat, realistis, variatif, dan sesuai profil user.
 
-DATA USER:
+========================
+DATA USER
+========================
+
 - Budget: Rp$budget
 - Durasi: $days hari
 - Jumlah orang: $people orang
 
-ATURAN:
+========================
+PROFIL USER
+========================
+
+- Target tubuh: $bodyGoal
+- Kebutuhan kalori: $calories kcal
+- Alergi: ${allergies.join(', ')}
+- Makanan favorit: $favoriteFoods
+- Makanan tidak disukai: $dislikedFoods
+- Riwayat penyakit: ${diseases.join(', ')}
+- Preferensi makanan: ${foodTypes.join(', ')}
+
+========================
+ATURAN
+========================
+
 - Gunakan Bahasa Indonesia
 - Fokus makanan Indonesia
 - Budget realistis
 - Makanan sederhana dan mudah dibuat
 - Variasikan menu setiap hari
+
+- Jangan gunakan makanan yang mengandung alergi user
+- Hindari makanan yang tidak disukai
+- Prioritaskan makanan favorit jika memungkinkan
+- Sesuaikan menu dengan target tubuh user
+- Sesuaikan menu dengan kondisi kesehatan user
+
 - Setiap hari wajib ada:
   - Sarapan
   - Makan Siang
   - Makan Malam
-- Hitung estimasi kalori dan harga
+
+- Hitung estimasi kalori
+- Hitung estimasi harga
+
 - Return HANYA JSON valid
 - Jangan gunakan markdown
 - Jangan tambahkan teks selain JSON
 
-FORMAT JSON:
+========================
+FORMAT JSON
+========================
 
 {
   "summary": "",
@@ -88,9 +141,7 @@ FORMAT JSON:
 }
 ''';
 
-    final response = await model.generateContent([
-      Content.text(prompt),
-    ]);
+    final response = await model.generateContent([Content.text(prompt)]);
 
     String text = response.text ?? '';
 
@@ -102,8 +153,6 @@ FORMAT JSON:
 
     final jsonMap = jsonDecode(text);
 
-    return SimulationAiModel.fromJson(
-      jsonMap,
-    );
+    return SimulationAiModel.fromJson(jsonMap);
   }
 }

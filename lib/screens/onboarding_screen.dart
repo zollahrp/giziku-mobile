@@ -18,26 +18,37 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     OnboardingItem(
       image: 'assets/hero1.png',
       svgImage: 'assets/hero1.svg',
-      title: 'Know Your Nutrition',
+
+      title: 'Pahami Nutrisi Tubuhmu',
+
       description:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed',
-      buttonText: 'Get Started',
+          'Pantau kebutuhan kalori, BMI, dan pola makan sehat dengan cara yang lebih mudah dan modern.',
+
+      buttonText: 'Lanjut',
     ),
+
     OnboardingItem(
       image: 'assets/hero2.png',
       svgImage: 'assets/hero2.svg',
-      title: 'Track Your Progress',
+
+      title: 'AI Meal Planner',
+
       description:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed',
-      buttonText: 'Next',
+          'Dapatkan rekomendasi menu makanan pintar sesuai budget, alergi, target tubuh, dan preferensi makanmu.',
+
+      buttonText: 'Lanjut',
     ),
+
     OnboardingItem(
       image: 'assets/hero3.png',
       svgImage: 'assets/hero3.svg',
-      title: 'Achieve Your Goals',
+
+      title: 'Hidup Sehat Jadi Mudah',
+
       description:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed',
-      buttonText: 'Start',
+          'Bangun kebiasaan sehat setiap hari bersama Giziku dengan pengalaman yang personal dan interaktif.',
+
+      buttonText: 'Mulai',
     ),
   ];
 
@@ -48,7 +59,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _goToNextPage() {
-    print("_goToNextPage called, current page: $_currentPage, total pages: ${_pages.length}");
+    print(
+      "_goToNextPage called, current page: $_currentPage, total pages: ${_pages.length}",
+    );
     if (_currentPage < _pages.length - 1) {
       print("Moving to next page");
       _pageController.nextPage(
@@ -56,7 +69,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else if (widget.nextScreen != null) {
-      print("On last page, navigating to main app screen: ${widget.nextScreen.runtimeType}");
+      print(
+        "On last page, navigating to main app screen: ${widget.nextScreen.runtimeType}",
+      );
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => widget.nextScreen!),
@@ -67,69 +82,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: Stack(
-      children: [
-        // The actual PageView - NOT wrapped in AbsorbPointer
-        PageView.builder(
-          controller: _pageController,
-          // Only use physics prevention, not AbsorbPointer
-          physics: const NeverScrollableScrollPhysics(),
-          onPageChanged: (index) {
-            setState(() {
-              _currentPage = index;
-            });
-          },
-          itemCount: _pages.length,
-          itemBuilder: (context, index) {
-            return OnboardingPage(
-              item: _pages[index],
-              onButtonPressed: _goToNextPage,
-            );
-          },
-        ),
-        
-        // Positioned dots at the bottom
-        Positioned(
-          bottom: 240, // Position above the title section
-          left: 0,
-          right: 0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              _pages.length,
-              (index) => Container(
-                margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _currentPage == index
-                      ? const Color(0xFF2ECC71)
-                      : Colors.grey.shade300,
-                ),
-              ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          // The actual PageView - NOT wrapped in AbsorbPointer
+          PageView.builder(
+            controller: _pageController,
+            // Only use physics prevention, not AbsorbPointer
+            physics: const NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            itemCount: _pages.length,
+            itemBuilder: (context, index) {
+              return OnboardingPage(
+                item: _pages[index],
+                onButtonPressed: _goToNextPage,
+                currentPage: _currentPage,
+                totalPages: _pages.length,
+              );
+            },
+          ),
+
+          // Invisible overlay to block swipes but allow button presses
+          Positioned.fill(
+            child: GestureDetector(
+              // This will consume horizontal swipes only
+              onHorizontalDragStart: (_) {},
+              onHorizontalDragUpdate: (_) {},
+              onHorizontalDragEnd: (_) {},
+              // Make it transparent so buttons can be clicked
+              behavior: HitTestBehavior.translucent,
             ),
           ),
-        ),
-        
-        // Invisible overlay to block swipes but allow button presses
-        Positioned.fill(
-          child: GestureDetector(
-            // This will consume horizontal swipes only
-            onHorizontalDragStart: (_) {},
-            onHorizontalDragUpdate: (_) {},
-            onHorizontalDragEnd: (_) {},
-            // Make it transparent so buttons can be clicked
-            behavior: HitTestBehavior.translucent,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 }
 
 class OnboardingItem {
@@ -152,105 +144,159 @@ class OnboardingPage extends StatelessWidget {
   final OnboardingItem item;
   final VoidCallback onButtonPressed;
 
+  final int currentPage;
+  final int totalPages;
+
   const OnboardingPage({
     super.key,
     required this.item,
     required this.onButtonPressed,
+    required this.currentPage,
+    required this.totalPages,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey.shade50, // Light background color
-      child: Column(
-        children: [
-          // Logo at top left
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 40.0, left: 20.0),
-              child: Image.asset(
-                'assets/gizikulabel.png',
-                height: 30,
-                color: const Color(0xFF2ECC71),
-              ),
-            ),
-          ),
-          
-          // Illustration
-          Expanded(
-            child: Center(
-              child: item.svgImage != null
-                  ? SvgPicture.asset(
-                      item.svgImage!,
-                      fit: BoxFit.contain,
-                    )
-                  : Image.asset(
-                      item.image,
-                      fit: BoxFit.contain,
-                    ),
-            ),
-          ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF4FFF8), Color(0xFFFFFFFF)],
+        ),
+      ),
 
-          // Bottom part with white background
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24.0),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // ================= LOGO =================
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+
+              child: Row(
+                children: [Image.asset('assets/gizikulogo.png', height: 34)],
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Poppins',
-                  ),
+
+            // ================= IMAGE =================
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+
+                child: Hero(
+                  tag: item.title,
+
+                  child: item.svgImage != null
+                      ? SvgPicture.asset(item.svgImage!, fit: BoxFit.contain)
+                      : Image.asset(item.image, fit: BoxFit.contain),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  item.description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                const SizedBox(height: 40),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: onButtonPressed,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2ECC71),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: Text(
-                      item.buttonText,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+
+            // ================= CONTENT =================
+            Container(
+              width: double.infinity,
+
+              padding: const EdgeInsets.fromLTRB(28, 34, 28, 34),
+
+              decoration: BoxDecoration(
+                color: Colors.white,
+
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(38),
+                  topRight: Radius.circular(38),
+                ),
+
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 30,
+                    offset: const Offset(0, -8),
+                  ),
+                ],
+              ),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  // TITLE
+                  Text(
+                    item.title,
+
+                    style: const TextStyle(
+                      fontSize: 30,
+                      height: 1.2,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                      color: Color(0xFF111827),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // DESCRIPTION
+                  Text(
+                    item.description,
+
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.8,
+                      color: Colors.grey.shade600,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+
+                  const SizedBox(height: 34),
+
+                  // BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+
+                    child: ElevatedButton(
+                      onPressed: onButtonPressed,
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2ECC71),
+
+                        elevation: 0,
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                      ),
+
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Text(
+                            item.buttonText,
+
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                              color: Colors.white,
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

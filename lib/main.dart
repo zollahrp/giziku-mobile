@@ -10,7 +10,6 @@ import 'config/api_config.dart';
 
 import 'screens/onboarding_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/splashlogo_screens.dart';
 import 'screens/profile_screen.dart';
 import 'screens/profiles/edit_profile_screen.dart';
 
@@ -34,16 +33,11 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(
-    fileName: ".env",
-  );
+  await dotenv.load(fileName: ".env");
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   HttpOverrides.global = MyHttpOverrides();
 
@@ -133,9 +127,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        home: SplashLogoScreen(
-          nextScreen: OnboardingScreen(nextScreen: const LoginScreen()),
-        ),
+        home: OnboardingScreen(nextScreen: const LoginScreen()),
 
         routes: {
           '/profile': (context) => const ProfileScreen(),

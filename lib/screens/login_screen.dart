@@ -10,159 +10,164 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            flex: 8,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned(
-                  top: 0,
-                  left: -100,
-                  right: -100,
-                  height: 270,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2ECC71),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(300),
-                        bottomRight: Radius.circular(300),
-                      ),
-                    ),
-                  ),
+      backgroundColor: Colors.white,
+
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+
+            children: [
+              const SizedBox(height: 10),
+
+              // ================= TOP =================
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+
+                child: Image.asset(
+                  'assets/gizikulogohitam.png',
+                  height: 80,
+                  fit: BoxFit.contain,
                 ),
-
-                Positioned(
-                  top: 110,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2ECC71).withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.all(10),
-                    child: Image.asset(
-                      'assets/gizikulogo.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // CONTENT
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                const Text(
-                  'Giziku solusi untuk',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                const Text(
-                  'Makan Sehat, Hidup Hemat.',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF2ECC71),
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-
-                const SizedBox(height: 60),
-
-                // GOOGLE BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final authService =
-                          context.read<AuthService>();
-
-                      final success =
-                          await authService.signInWithGoogle();
-
-                      if (success) {
-                        if (!context.mounted) return;
-
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                const MainScreen(),
-                          ),
-                        );
-                      } else {
-                        if (!context.mounted) return;
-
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              authService.errorMessage ??
-                                  'Google Login Failed',
-                            ),
-                          ),
-                        );
-                      }
-                    },
-
-                    icon: Image.network(
-                      'https://cdn-icons-png.flaticon.com/512/281/281764.png',
-                      height: 24,
-                    ),
-
-                    label: const Text(
-                      'Continue with Google',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const Spacer(),
-
-          // COPYRIGHT
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              '© 2024 . All rights reserved.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-                fontFamily: 'Poppins',
               ),
-            ),
+
+              // ================= IMAGE =================
+              Expanded(
+                child: Center(
+                  child: Image.asset(
+                    'assets/login_hero.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+
+              // ================= TEXT =================
+              const Text(
+                'Makan sehat,\nlebih pintar.',
+                style: TextStyle(
+                  fontSize: 38,
+                  height: 1.15,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                  color: Color(0xFF111827),
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              Text(
+                'Atur pola makan sehat dengan bantuan AI, rekomendasi nutrisi personal, dan meal plan sesuai kebutuhan tubuhmu.',
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.8,
+                  color: Colors.grey.shade600,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // ================= BUTTON =================
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final authService = context.read<AuthService>();
+
+                    final success = await authService.signInWithGoogle();
+
+                    if (success) {
+                      if (!context.mounted) return;
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const MainScreen()),
+                      );
+                    } else {
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            authService.errorMessage ?? 'Google Login Failed',
+                          ),
+                        ),
+                      );
+                    }
+                  },
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2ECC71),
+
+                    elevation: 0,
+
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                  ),
+
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+
+                          child: Image.network(
+                            'https://cdn-icons-png.flaticon.com/512/281/281764.png',
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      const Text(
+                        'Lanjut dengan Google',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              Center(
+                child: Text(
+                  'Dengan melanjutkan, kamu menyetujui Syarat & Kebijakan Privasi kami',
+                  textAlign: TextAlign.center,
+
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.6,
+                    color: Colors.grey.shade500,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
