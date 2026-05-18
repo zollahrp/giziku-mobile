@@ -3,6 +3,7 @@ import 'package:giziku/screens/simulation/simulation_budget_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -141,68 +142,202 @@ class _HomeScreenState extends State<HomeScreen> {
         color: const Color(0xFF2ECC71),
         borderRadius: BorderRadius.circular(15),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              // STATIC VALUES:
-              _SimulationItem(label: "Budget", value: "Rp 500.000"),
-              _SimulationItem(label: "Days", value: "3 Days"),
-              _SimulationItem(label: "People", value: "4 People"),
-            ],
-          ),
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SimulationBudgetScreen(),
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .collection('scheduled_meals')
+            .snapshots(),
+        builder: (context, snapshot) {
+          final docs = snapshot.data?.docs ?? [];
+
+          final bool hasMealPlan = docs.isNotEmpty;
+
+          int totalBudget = 0;
+
+          for (var doc in docs) {
+            totalBudget += (doc['estimated_price'] ?? 0) as int;
+          }
+
+          final uniqueDates = docs
+              .map((e) => e['date'].toString())
+              .toSet()
+              .length;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Start Simulation',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                  _SimulationItem(
+                    label: "Budget",
+                    value: hasMealPlan
+                        ? "Rp ${NumberFormat('#,###', 'id_ID').format(totalBudget)}"
+                        : "-",
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(9),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: Color(0xFF2ECC71),
-                        size: 10,
-                      ),
-                    ),
+
+                  _SimulationItem(
+                    label: "Hari",
+                    value: hasMealPlan ? "$uniqueDates Hari" : "-",
+                  ),
+
+                  _SimulationItem(
+                    label: "Menu",
+                    value: hasMealPlan ? "${docs.length} Item" : "-",
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
+
+              const SizedBox(height: 16),
+
+              GestureDetector(
+                onTap: () async {
+                  // KALAU BELUM ADA MENU
+                  if (!hasMealPlan) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SimulationBudgetScreen(),
+                      ),
+                    );
+
+                    return;
+                  }
+
+                  // KALAU SUDAH ADA MENU
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+
+                        title: const Text(
+                          "Rencana Menu Aktif",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+
+                        content: const Text(
+                          "Kamu sudah memiliki rencana menu.\n\nJika membuat simulasi baru, maka semua menu sebelumnya akan dihapus.",
+                          style: TextStyle(height: 1.5),
+                        ),
+
+                        actions: [
+                          // TUTUP
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+
+                            child: const Text(
+                              "Batal",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+
+                          // HAPUS & BUAT BARU
+                          ElevatedButton(
+                            onPressed: () async {
+                              final batch = FirebaseFirestore.instance.batch();
+
+                              for (var doc in docs) {
+                                batch.delete(doc.reference);
+                              }
+
+                              await batch.commit();
+
+                              Navigator.pop(context);
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const SimulationBudgetScreen(),
+                                ),
+                              );
+                            },
+
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2ECC71),
+
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+
+                            child: const Text(
+                              "Buat Baru",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+
+                  width: double.infinity,
+
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+
+                    children: [
+                      Text(
+                        hasMealPlan ? 'Rencana Menu Aktif' : 'Mulai Simulasi',
+
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      Container(
+                        width: 18,
+                        height: 18,
+
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+
+                        child: Center(
+                          child: Icon(
+                            hasMealPlan
+                                ? Icons.restaurant
+                                : Icons.arrow_forward_ios,
+
+                            color: const Color(0xFF2ECC71),
+
+                            size: 10,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -469,37 +604,128 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecipeTodaySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            'Recipe Today',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
+    final formattedDate =
+        "${selectedDate.year}-"
+        "${selectedDate.month.toString().padLeft(2, '0')}-"
+        "${selectedDate.day.toString().padLeft(2, '0')}";
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .collection('scheduled_meals')
+          .where('date', isEqualTo: formattedDate)
+          .snapshots(),
+
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(),
             ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 160,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 5,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemBuilder: (context, index) {
-              return _buildRecipeCard();
-            },
-          ),
-        ),
-      ],
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              child: Text(
+                'Recipe Today',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // KALAU BELUM ADA MENU
+            if (docs.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.restaurant_menu,
+                        size: 48,
+                        color: Color(0xFF2ECC71),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      const Text(
+                        "Belum Ada Menu",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        "Belum ada jadwal makanan untuk tanggal ini.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            // KALAU ADA MENU
+            else
+              SizedBox(
+                height: 160,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: docs.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+
+                    return _buildRecipeCard(
+                      title: data['title'] ?? '',
+                      calories: "${data['estimated_calories']} Calories",
+                      price: "Rp ${data['estimated_price']}",
+                    );
+                  },
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildRecipeCard() {
+  Widget _buildRecipeCard({
+    required String title,
+    required String calories,
+    required String price,
+  }) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -507,6 +733,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 260,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           margin: const EdgeInsets.only(right: 50),
+
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
@@ -518,33 +745,39 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
-                    const Text(
-                      'Green Box',
-                      style: TextStyle(
+                    Text(
+                      title,
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+
                     const SizedBox(height: 8),
+
                     Row(
-                      children: const [
-                        Icon(
+                      children: [
+                        const Icon(
                           Icons.local_fire_department,
                           color: Colors.red,
                           size: 18,
                         ),
-                        SizedBox(width: 4),
+
+                        const SizedBox(width: 4),
+
                         Text(
-                          '280 Calories',
-                          style: TextStyle(
+                          calories,
+                          style: const TextStyle(
                             fontSize: 10,
                             color: Colors.grey,
                             fontFamily: 'Poppins',
@@ -552,18 +785,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 4),
+
                     Row(
-                      children: const [
-                        Icon(
+                      children: [
+                        const Icon(
                           Icons.attach_money,
                           color: Color(0xFF2ECC71),
                           size: 18,
                         ),
-                        SizedBox(width: 4),
+
+                        const SizedBox(width: 4),
+
                         Text(
-                          'Estimated Cost: Rp 149.000',
-                          style: TextStyle(
+                          price,
+                          style: const TextStyle(
                             fontSize: 10,
                             color: Colors.grey,
                             fontFamily: 'Poppins',
@@ -571,19 +808,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 12),
+
                     SizedBox(
-                      width: 90,
+                      width: 110,
+
                       child: ElevatedButton(
                         onPressed: () {},
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2ECC71),
+
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25),
                           ),
+
                           padding: const EdgeInsets.symmetric(vertical: 5),
+
                           elevation: 0,
                         ),
+
                         child: const Text(
                           'See Recipe',
                           style: TextStyle(
@@ -598,10 +843,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+
               const SizedBox(width: 16),
             ],
           ),
         ),
+
         const Positioned(
           top: 20,
           right: 10,

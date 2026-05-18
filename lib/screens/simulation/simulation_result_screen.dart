@@ -119,57 +119,77 @@ class SimulationResultScreen extends StatelessWidget {
 
     if (user == null) return;
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('saved_meal_plans')
-        .add({
-      'summary': aiResult.summary,
+    // PILIH TANGGAL MULAI
+    DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2030),
+    );
 
-      'total_budget': budget,
+    if (selectedDate == null) return;
 
-      'daily_budget': aiResult.dailyBudget,
+    // SIMPAN SEMUA HARI
+    for (int i = 0; i < aiResult.mealPlan.length; i++) {
+      final mealDay = aiResult.mealPlan[i];
 
-      'total_days': days,
+      final scheduledDate = selectedDate.add(
+        Duration(days: i),
+      );
 
-      'total_people': people,
+      final formattedDate =
+          "${scheduledDate.year}-"
+          "${scheduledDate.month.toString().padLeft(2, '0')}-"
+          "${scheduledDate.day.toString().padLeft(2, '0')}";
 
-      'nutrition_insight': aiResult.nutritionInsight,
+      for (final meal in mealDay.meals) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('scheduled_meals')
+            .add({
+          'date': formattedDate,
 
-      'healthy_level': 'Seimbang',
+          'day': mealDay.day,
 
-      'tips': aiResult.tips,
+          'meal_type': meal.mealType,
 
-      'created_at': Timestamp.now(),
+          'title': meal.title,
 
-      'meal_plan': aiResult.mealPlan.map((day) {
-        return {
-          'day': day.day,
+          'description': meal.description,
 
-          'meals': day.meals.map((meal) {
-            return {
-              'meal_type': meal.mealType,
-              'title': meal.title,
-              'description': meal.description,
-              'estimated_calories': meal.estimatedCalories,
-              'estimated_price': meal.estimatedPrice,
-            };
-          }).toList(),
-        };
-      }).toList(),
-    });
+          'estimated_calories':
+              meal.estimatedCalories,
+
+          'estimated_price':
+              meal.estimatedPrice,
+
+          'created_at': Timestamp.now(),
+        });
+      }
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text("Menu berhasil disimpan 🎉"),
+        content: Text(
+          "Menu berhasil dijadwalkan 🎉",
+        ),
       ),
+    );
+
+    // BALIK KE HOME
+    Navigator.popUntil(
+      context,
+      (route) => route.isFirst,
     );
   } catch (e) {
     print(e);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text("Gagal menyimpan menu"),
+        content: Text(
+          "Gagal menyimpan menu",
+        ),
       ),
     );
   }
