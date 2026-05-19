@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/recipe_model.dart';
+import '../../models/vitamins_model.dart';
 import '../screens/recipe/recipe_detail_screen.dart';
 
 class RecipeScreen extends StatefulWidget {
@@ -12,7 +13,15 @@ class RecipeScreen extends StatefulWidget {
 class _RecipeScreenState extends State<RecipeScreen> {
   int _selectedDayIndex = 0;
 
-  final List<String> _daysShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final List<String> _daysShort = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
   final List<int> _dates = [22, 23, 24, 25, 26, 27, 28];
 
   // Dummy recipes data
@@ -20,15 +29,34 @@ class _RecipeScreenState extends State<RecipeScreen> {
     RecipeModel(
       id: "1",
       title: "Caesar Roasted Bowl",
-      imageUrl: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?fit=crop&w=400&q=80",
+      imageUrl:
+          "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?fit=crop&w=400&q=80",
       category: "Veggie",
       price: 149000,
-      nutrition: 220,
-      nutritionUnit: "g",
+      calories: 220,
+
+      protein: 18,
+      carbs: 24,
+      fats: 9,
+
+      sugars: 4,
+      sodium: 210,
+      fiber: 6,
+
+      healthScore: 8,
+
+      healthyLevel: "Sangat Sehat",
+
+      healthInsight: "Tinggi protein dan serat, cocok untuk diet sehat.",
+
+      nutritionPerServing: "220 kcal per serving",
+
+      vitamins: VitaminsModel(vitaminA: "15%", vitaminC: "12%", iron: "10%"),
       prepTime: 10,
       cookTime: 10,
       totalTime: 20,
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
       ingredients: [
         RecipeIngredient(name: "Cooked rice", amount: "1 Cup"),
         RecipeIngredient(name: "Roasted tofu or tempeh", amount: "1/2 Cup"),
@@ -44,15 +72,34 @@ class _RecipeScreenState extends State<RecipeScreen> {
     RecipeModel(
       id: "2",
       title: "Green Box",
-      imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?fit=crop&w=400&q=80",
+      imageUrl:
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?fit=crop&w=400&q=80",
       category: "Veggie",
       price: 99000,
-      nutrition: 280,
-      nutritionUnit: "Calories",
+      calories: 280,
+
+      protein: 14,
+      carbs: 30,
+      fats: 11,
+
+      sugars: 5,
+      sodium: 180,
+      fiber: 8,
+
+      healthScore: 9,
+
+      healthyLevel: "Sangat Sehat",
+
+      healthInsight: "Kaya vitamin dan serat untuk kebutuhan harian.",
+
+      nutritionPerServing: "280 kcal per serving",
+
+      vitamins: VitaminsModel(vitaminA: "20%", vitaminC: "18%", iron: "14%"),
       prepTime: 8,
       cookTime: 7,
       totalTime: 15,
-      description: "A healthy and delicious green salad bowl for your daily nutrition.",
+      description:
+          "A healthy and delicious green salad bowl for your daily nutrition.",
       ingredients: [
         RecipeIngredient(name: "Spinach", amount: "70g"),
         RecipeIngredient(name: "Avocado", amount: "1/2"),
@@ -78,14 +125,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image.asset(
-                      'assets/gizikulabel.png',
-                      width: 100,
-                    ),
+                    Image.asset('assets/gizikulabel.png', width: 100),
                     const SizedBox(height: 12),
                     const Text(
                       "Let’s find Your\nHealty Food!",
@@ -106,7 +153,10 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
               // Banner
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 16.0,
+                ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.asset(
@@ -216,9 +266,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => RecipeDetailScreen(recipe: recipe),
-          ),
+          MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe)),
         );
       },
       child: Stack(
@@ -258,10 +306,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.local_fire_department, color: Colors.red, size: 18),
+                          const Icon(
+                            Icons.local_fire_department,
+                            color: Colors.red,
+                            size: 18,
+                          ),
                           const SizedBox(width: 4),
                           Text(
-                            '${recipe.nutrition} ${recipe.nutritionUnit}',
+                            '${recipe.calories} kcal',
                             style: const TextStyle(
                               fontSize: 10,
                               color: Colors.grey,
@@ -273,7 +325,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.attach_money, color: Color(0xFF2ECC71), size: 18),
+                          const Icon(
+                            Icons.attach_money,
+                            color: Color(0xFF2ECC71),
+                            size: 18,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'Estimated Cost: Rp ${recipe.price}',
@@ -293,7 +349,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => RecipeDetailScreen(recipe: recipe),
+                                builder: (_) =>
+                                    RecipeDetailScreen(recipe: recipe),
                               ),
                             );
                           },

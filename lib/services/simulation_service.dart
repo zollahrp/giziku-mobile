@@ -78,12 +78,29 @@ ATURAN
 - Budget realistis
 - Makanan sederhana dan mudah dibuat
 - Variasikan menu setiap hari
+- Berikan resep lengkap untuk setiap menu
 
 - Jangan gunakan makanan yang mengandung alergi user
 - Hindari makanan yang tidak disukai
 - Prioritaskan makanan favorit jika memungkinkan
 - Sesuaikan menu dengan target tubuh user
 - Sesuaikan menu dengan kondisi kesehatan user
+
+- Gunakan estimasi nutrisi realistis seperti aplikasi kesehatan profesional
+- health_score wajib 1-10
+- healthy_level wajib:
+  "Sangat Sehat"
+  "Cukup Sehat"
+  "Kurang Sehat"
+  "Tidak Sehat"
+
+- nutrition_per_serving wajib format seperti:
+  "Ayam bakar (220Kcal, 18P, 12F, 8C) per porsi"
+
+- vitamins wajib berisi:
+  vitaminA
+  vitaminC
+  iron
 
 - Setiap hari wajib ada:
   - Sarapan
@@ -92,6 +109,12 @@ ATURAN
 
 - Hitung estimasi kalori
 - Hitung estimasi harga
+
+- ingredients wajib berupa array
+- instructions wajib berupa array
+- prep_time, cook_time, total_time wajib integer
+
+- image_url gunakan URL gambar makanan random dari Unsplash atau sumber public image
 
 - Return HANYA JSON valid
 - Jangan gunakan markdown
@@ -113,28 +136,64 @@ FORMAT JSON
 
       "meals": [
         {
-          "meal_type": "Sarapan",
-          "title": "",
-          "description": "",
-          "estimated_calories": 0,
-          "estimated_price": 0
-        },
+  "meal_type": "Sarapan",
 
-        {
-          "meal_type": "Makan Siang",
-          "title": "",
-          "description": "",
-          "estimated_calories": 0,
-          "estimated_price": 0
-        },
+  "title": "",
 
-        {
-          "meal_type": "Makan Malam",
-          "title": "",
-          "description": "",
-          "estimated_calories": 0,
-          "estimated_price": 0
-        }
+  "description": "",
+
+  "category": "",
+
+  "image_url": "",
+
+  "estimated_calories": 0,
+
+  "estimated_price": 0,
+
+  "prep_time": 0,
+
+  "cook_time": 0,
+
+  "total_time": 0,
+
+  "health_score": 0,
+
+  "healthy_level": "",
+
+  "health_insight": "",
+
+  "nutrition_per_serving": "",
+
+  "protein": 0,
+
+  "carbs": 0,
+
+  "fats": 0,
+
+  "sugars": 0,
+
+  "sodium": 0,
+
+  "fiber": 0,
+
+  "vitamins": {
+    "vitaminA": "",
+    "vitaminC": "",
+    "iron": ""
+  },
+
+  "ingredients": [
+    {
+      "name": "",
+      "amount": ""
+    }
+  ],
+
+  "instructions": [
+    "",
+    ""
+  ]
+}
       ]
     }
   ]

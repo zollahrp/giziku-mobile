@@ -4,7 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:giziku/screens/recipe/recipe_detail_screen.dart';
+import 'package:giziku/models/recipe_model.dart';
+import 'package:giziku/screens/recipe/recipe_detail_screen.dart';
+import 'package:giziku/models/vitamins_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -344,47 +347,94 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNutritionSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            'Nutrition Intake',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1F2937),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNutritionItem('88', '/120', 'Carbs', 0.73, Colors.white),
-                _buildNutritionItem('24', '/70', 'Protein', 0.34, Colors.white),
-                _buildNutritionItem(
-                  '32',
-                  '/52',
-                  'Vitamin',
-                  0.62,
-                  const Color(0xFF2ECC71),
+    final formattedDate =
+        "${selectedDate.year}-"
+        "${selectedDate.month.toString().padLeft(2, '0')}-"
+        "${selectedDate.day.toString().padLeft(2, '0')}";
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .collection('scheduled_meals')
+          .where('date', isEqualTo: formattedDate)
+          .snapshots(),
+
+      builder: (context, snapshot) {
+        final docs = snapshot.data?.docs ?? [];
+
+        int totalProtein = 0;
+        int totalCarbs = 0;
+        int totalFats = 0;
+
+        for (var doc in docs) {
+          totalProtein += (doc['protein'] ?? 0) as int;
+          totalCarbs += (doc['carbs'] ?? 0) as int;
+          totalFats += (doc['fats'] ?? 0) as int;
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              child: Text(
+                'Nutrition Intake',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ],
+
+            const SizedBox(height: 8),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(15),
+
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1F2937),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+                  children: [
+                    _buildNutritionItem(
+                      '$totalCarbs',
+                      '/250',
+                      'Carbs',
+                      (totalCarbs / 250).clamp(0.0, 1.0),
+                      Colors.white,
+                    ),
+
+                    _buildNutritionItem(
+                      '$totalProtein',
+                      '/120',
+                      'Protein',
+                      (totalProtein / 120).clamp(0.0, 1.0),
+                      const Color(0xFF2ECC71),
+                    ),
+
+                    _buildNutritionItem(
+                      '$totalFats',
+                      '/70',
+                      'Fat',
+                      (totalFats / 70).clamp(0.0, 1.0),
+                      Colors.orange,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -440,6 +490,33 @@ class _HomeScreenState extends State<HomeScreen> {
           barRadius: const Radius.circular(10),
         ),
       ],
+    );
+  }
+
+  Widget _buildMacroChip(IconData icon, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+
+          const SizedBox(width: 4),
+
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -699,7 +776,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // KALAU ADA MENU
             else
               SizedBox(
-                height: 160,
+                height: 350,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: docs.length,
@@ -708,7 +785,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final data = docs[index].data() as Map<String, dynamic>;
 
+                    final recipe = RecipeModel(
+                      id: data['id'] ?? '',
+                      title: data['title'] ?? '',
+                      description: data['description'] ?? '',
+                      imageUrl: data['image_url'] ?? '',
+                      category: data['category'] ?? '',
+
+                      price: (data['estimated_price'] as num?)?.toInt() ?? 0,
+
+                      calories: (data['calories'] as num?)?.toInt() ?? 0,
+                      protein: (data['protein'] as num?)?.toInt() ?? 0,
+                      carbs: (data['carbs'] as num?)?.toInt() ?? 0,
+                      fats: (data['fats'] as num?)?.toInt() ?? 0,
+                      sugars: (data['sugars'] as num?)?.toInt() ?? 0,
+                      sodium: (data['sodium'] as num?)?.toInt() ?? 0,
+                      fiber: (data['fiber'] as num?)?.toInt() ?? 0,
+
+                      healthScore: (data['health_score'] as num?)?.toInt() ?? 0,
+                      healthyLevel: data['healthy_level'] ?? '',
+                      healthInsight: data['health_insight'] ?? '',
+                      nutritionPerServing: data['nutrition_per_serving'] ?? '',
+
+                      vitamins: VitaminsModel.fromJson(data['vitamins'] ?? {}),
+
+                      prepTime: (data['prep_time'] as num?)?.toInt() ?? 0,
+                      cookTime: (data['cook_time'] as num?)?.toInt() ?? 0,
+                      totalTime: (data['total_time'] as num?)?.toInt() ?? 0,
+
+                      ingredients: (data['ingredients'] as List? ?? [])
+                          .map((e) => RecipeIngredient.fromJson(e))
+                          .toList(),
+
+                      instructions: List<String>.from(
+                        data['instructions'] ?? [],
+                      ),
+                    );
+
                     return _buildRecipeCard(
+                      recipe: recipe,
                       title: data['title'] ?? '',
                       calories: "${data['estimated_calories']} Calories",
                       price: "Rp ${data['estimated_price']}",
@@ -723,6 +838,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecipeCard({
+    required RecipeModel recipe,
     required String title,
     required String calories,
     required String price,
@@ -731,7 +847,7 @@ class _HomeScreenState extends State<HomeScreen> {
       clipBehavior: Clip.none,
       children: [
         Container(
-          height: 165,
+          height: 330,
 
           width: 260,
 
@@ -827,9 +943,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         const Icon(
                           Icons.attach_money,
-
                           color: Color(0xFF2ECC71),
-
                           size: 18,
                         ),
 
@@ -838,14 +952,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: Text(
                             price,
-
                             overflow: TextOverflow.ellipsis,
-
                             style: const TextStyle(
                               fontSize: 10,
-
                               color: Colors.grey,
-
                               fontFamily: 'Poppins',
                             ),
                           ),
@@ -853,15 +963,117 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
 
-                    const Spacer(),
+                    // =====================
+                    // HEALTH SCORE
+                    // =====================
+                    const SizedBox(height: 8),
 
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2ECC71).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: Text(
+                        "Health Score ${recipe.healthScore}/10",
+                        style: const TextStyle(
+                          color: Color(0xFF2ECC71),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+
+                    // =====================
+                    // HEALTHY LEVEL
+                    // =====================
+                    const SizedBox(height: 6),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: Text(
+                        recipe.healthyLevel,
+                        style: const TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+
+                    // =====================
+                    // MINI MACRO
+                    // =====================
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: [
+                        _buildMacroChip(
+                          Icons.fitness_center,
+                          "${recipe.protein}g",
+                          Colors.blue,
+                        ),
+
+                        const SizedBox(width: 6),
+
+                        _buildMacroChip(
+                          Icons.rice_bowl,
+                          "${recipe.carbs}g",
+                          Colors.green,
+                        ),
+
+                        const SizedBox(width: 6),
+
+                        _buildMacroChip(
+                          Icons.opacity,
+                          "${recipe.fats}g",
+                          Colors.red,
+                        ),
+                      ],
+                    ),
+
+                    // =====================
+                    // AI INSIGHT
+                    // =====================
+                    const SizedBox(height: 10),
+
+                    Text(
+                      recipe.healthInsight,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        height: 1.4,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
                     // BUTTON
                     SizedBox(
                       width: 110,
                       height: 36,
 
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  RecipeDetailScreen(recipe: recipe),
+                            ),
+                          );
+                        },
 
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2ECC71),

@@ -114,86 +114,105 @@ class SimulationResultScreen extends StatelessWidget {
   }
 
   Future<void> saveMealPlan(BuildContext context) async {
-  try {
-    final user = FirebaseAuth.instance.currentUser;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
 
-    if (user == null) return;
+      if (user == null) return;
 
-    // PILIH TANGGAL MULAI
-    DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-    );
-
-    if (selectedDate == null) return;
-
-    // SIMPAN SEMUA HARI
-    for (int i = 0; i < aiResult.mealPlan.length; i++) {
-      final mealDay = aiResult.mealPlan[i];
-
-      final scheduledDate = selectedDate.add(
-        Duration(days: i),
+      // PILIH TANGGAL MULAI
+      DateTime? selectedDate = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime.now(),
+        lastDate: DateTime(2030),
       );
 
-      final formattedDate =
-          "${scheduledDate.year}-"
-          "${scheduledDate.month.toString().padLeft(2, '0')}-"
-          "${scheduledDate.day.toString().padLeft(2, '0')}";
+      if (selectedDate == null) return;
 
-      for (final meal in mealDay.meals) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('scheduled_meals')
-            .add({
-          'date': formattedDate,
+      // SIMPAN SEMUA HARI
+      for (int i = 0; i < aiResult.mealPlan.length; i++) {
+        final mealDay = aiResult.mealPlan[i];
 
-          'day': mealDay.day,
+        final scheduledDate = selectedDate.add(Duration(days: i));
 
-          'meal_type': meal.mealType,
+        final formattedDate =
+            "${scheduledDate.year}-"
+            "${scheduledDate.month.toString().padLeft(2, '0')}-"
+            "${scheduledDate.day.toString().padLeft(2, '0')}";
 
-          'title': meal.title,
+        for (final meal in mealDay.meals) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('scheduled_meals')
+              .add({
+                'date': formattedDate,
 
-          'description': meal.description,
+                'day': mealDay.day,
 
-          'estimated_calories':
-              meal.estimatedCalories,
+                'meal_type': meal.mealType,
 
-          'estimated_price':
-              meal.estimatedPrice,
+                'title': meal.title,
 
-          'created_at': Timestamp.now(),
-        });
+                'description': meal.description,
+
+                'estimated_calories': meal.estimatedCalories,
+                'calories': meal.calories,
+
+                'protein': meal.protein,
+                'carbs': meal.carbs,
+                'fats': meal.fats,
+
+                'sugars': meal.sugars,
+                'sodium': meal.sodium,
+                'fiber': meal.fiber,
+
+                'health_score': meal.healthScore,
+
+                'healthy_level': meal.healthyLevel,
+
+                'health_insight': meal.healthInsight,
+
+                'nutrition_per_serving': meal.nutritionPerServing,
+
+                'vitamins': meal.vitamins.toJson(),
+
+                'estimated_price': meal.estimatedPrice,
+
+                // TAMBAHAN
+                'prep_time': meal.prepTime,
+
+                'cook_time': meal.cookTime,
+
+                'total_time': meal.totalTime,
+
+                'image_url': meal.imageUrl,
+
+                'category': meal.category,
+
+                'instructions': meal.instructions,
+
+                'ingredients': meal.ingredients.map((e) => e.toJson()).toList(),
+
+                'created_at': Timestamp.now(),
+              });
+        }
       }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Menu berhasil dijadwalkan 🎉")),
+      );
+
+      // BALIK KE HOME
+      Navigator.popUntil(context, (route) => route.isFirst);
+    } catch (e) {
+      print(e);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Gagal menyimpan menu")));
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Menu berhasil dijadwalkan 🎉",
-        ),
-      ),
-    );
-
-    // BALIK KE HOME
-    Navigator.popUntil(
-      context,
-      (route) => route.isFirst,
-    );
-  } catch (e) {
-    print(e);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Gagal menyimpan menu",
-        ),
-      ),
-    );
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +392,169 @@ class SimulationResultScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 30),
+              // OVERALL HEALTH SCORE
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(26),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.health_and_safety_rounded,
+                          color: Color(0xFF2ECC71),
+                        ),
 
+                        const SizedBox(width: 10),
+
+                        const Text(
+                          "Healthy Score",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const Spacer(),
+
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2ECC71).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: const Text(
+                            "Excellent",
+                            style: TextStyle(
+                              color: Color(0xFF2ECC71),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 26),
+
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xFF2ECC71),
+                                width: 10,
+                              ),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                "8.9/10",
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2ECC71),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          Text(
+                            "Meal plan kamu sudah cukup seimbang\nuntuk kebutuhan harian.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              height: 1.6,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: buildHealthStat(
+                            "Kalori",
+                            "1850",
+                            Icons.local_fire_department,
+                            Colors.orange,
+                          ),
+                        ),
+
+                        Expanded(
+                          child: buildHealthStat(
+                            "Protein",
+                            "92g",
+                            Icons.fitness_center,
+                            Colors.blue,
+                          ),
+                        ),
+
+                        Expanded(
+                          child: buildHealthStat(
+                            "Fiber",
+                            "28g",
+                            Icons.eco,
+                            Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.orange,
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: Text(
+                              "Beberapa menu memiliki sodium cukup tinggi. Disarankan memperbanyak konsumsi air putih.",
+                              style: TextStyle(
+                                height: 1.5,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               // AI Insight
               Container(
                 padding: const EdgeInsets.all(22),
@@ -613,79 +794,73 @@ class SimulationResultScreen extends StatelessWidget {
 
               // Button
               Row(
-  children: [
+                children: [
+                  // BATAL
+                  Expanded(
+                    child: SizedBox(
+                      height: 58,
 
-    // BATAL
-    Expanded(
-      child: SizedBox(
-        height: 58,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.popUntil(context, (route) => route.isFirst);
+                        },
 
-        child: OutlinedButton(
-          onPressed: () {
-            Navigator.popUntil(
-              context,
-              (route) => route.isFirst,
-            );
-          },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF2ECC71)),
 
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(
-              color: Color(0xFF2ECC71),
-            ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
 
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
+                        child: const Text(
+                          "Batal",
+                          style: TextStyle(
+                            color: Color(0xFF2ECC71),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
 
-          child: const Text(
-            "Batal",
-            style: TextStyle(
-              color: Color(0xFF2ECC71),
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-        ),
-      ),
-    ),
+                  const SizedBox(width: 16),
 
-    const SizedBox(width: 16),
+                  // SIMPAN
+                  Expanded(
+                    flex: 2,
+                    child: SizedBox(
+                      height: 58,
 
-    // SIMPAN
-    Expanded(
-      flex: 2,
-      child: SizedBox(
-        height: 58,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await saveMealPlan(context);
+                        },
 
-        child: ElevatedButton(
-          onPressed: () async {
-            await saveMealPlan(context);
-          },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2ECC71),
 
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2ECC71),
+                          elevation: 0,
 
-            elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
 
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-
-          child: const Text(
-            "Simpan Menu",
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    ),
-  ],
-),
+                        child: const Text(
+                          "Simpan Menu",
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 20),
             ],
@@ -794,7 +969,169 @@ class SimulationResultScreen extends StatelessWidget {
                           ),
                         ),
 
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
+
+                        /// HEALTH SCORE + LEVEL
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFF2ECC71,
+                                ).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Text(
+                                "Score ${meal.healthScore}/10",
+                                style: const TextStyle(
+                                  color: Color(0xFF2ECC71),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Text(
+                                meal.healthyLevel,
+                                style: const TextStyle(
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        /// MACRO NUTRITION
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            buildMiniNutrition(
+                              Icons.fitness_center,
+                              "${meal.protein}g",
+                              "Protein",
+                              Colors.blue,
+                            ),
+
+                            buildMiniNutrition(
+                              Icons.rice_bowl,
+                              "${meal.carbs}g",
+                              "Karbo",
+                              Colors.green,
+                            ),
+
+                            buildMiniNutrition(
+                              Icons.opacity,
+                              "${meal.fats}g",
+                              "Lemak",
+                              Colors.red,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        /// DETAIL NUTRISI
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Column(
+                            children: [
+                              buildNutritionInfoTile(
+                                "Gula",
+                                "${meal.sugars} g",
+                              ),
+
+                              buildNutritionInfoTile(
+                                "Sodium",
+                                "${meal.sodium} mg",
+                              ),
+
+                              buildNutritionInfoTile(
+                                "Serat",
+                                "${meal.fiber} g",
+                              ),
+
+                              buildNutritionInfoTile(
+                                "Vitamin A",
+                                meal.vitamins.vitaminA,
+                              ),
+
+                              buildNutritionInfoTile(
+                                "Vitamin C",
+                                meal.vitamins.vitaminC,
+                              ),
+
+                              buildNutritionInfoTile(
+                                "Zat Besi",
+                                meal.vitamins.iron,
+                              ),
+
+                              buildNutritionInfoTile(
+                                "Takaran Saji",
+                                meal.nutritionPerServing,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        /// AI INSIGHT
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2ECC71).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.auto_awesome_rounded,
+                                color: Color(0xFF2ECC71),
+                                size: 20,
+                              ),
+
+                              const SizedBox(width: 10),
+
+                              Expanded(
+                                child: Text(
+                                  meal.healthInsight,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                    height: 1.5,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
 
                         Row(
                           children: [
@@ -978,6 +1315,107 @@ class SimulationResultScreen extends StatelessWidget {
 
         Text(title, style: TextStyle(color: Colors.grey.shade600)),
       ],
+    );
+  }
+
+  Widget buildMiniNutrition(
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+  ) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 20),
+
+            const SizedBox(height: 8),
+
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(
+              label,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildNutritionInfoTile(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+            ),
+          ),
+
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildHealthStat(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 22),
+
+          const SizedBox(height: 10),
+
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            title,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,10 +1,13 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../models/recipe_model.dart';
+
 import '../../models/product_model.dart';
+import '../../models/recipe_model.dart';
 import '../../repositories/product_repository.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final RecipeModel recipe;
+
   const RecipeDetailScreen({super.key, required this.recipe});
 
   @override
@@ -16,6 +19,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   List<ProductModel> _buyProducts = [];
   bool _isLoadingBuy = false;
 
+  final Color primary = const Color(0xFF2ECC71);
+  final Color secondary = const Color(0xFF27AE60);
+  final Color softGreen = const Color(0xFFEAFBF1);
+  final Color dark = const Color(0xFF1F2937);
+
   @override
   void initState() {
     super.initState();
@@ -24,167 +32,334 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   Future<void> _loadBuyIngredients() async {
     setState(() => _isLoadingBuy = true);
-    final repo = ProductRepository(apiUrl: "https://dummy.api.io"); // Ganti ke endpoint API kamu
-    final ingredientNames = widget.recipe.ingredients.map((e) => e.name).toList();
+
+    final repo = ProductRepository(apiUrl: "https://dummy.api.io");
+
+    final ingredientNames = widget.recipe.ingredients
+        .map((e) => e.name)
+        .toList();
+
     final products = await repo.fetchProductsByIngredients(ingredientNames);
+
     setState(() {
       _buyProducts = products;
       _isLoadingBuy = false;
     });
   }
 
-  Widget _infoRow(String title, String value, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, color: const Color(0xFF2ECC71), size: 20),
-        const SizedBox(width: 8),
-        Text(
-          "$title ",
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            color: Color(0xFF8C8C8C),
+  Widget _glassCard({required Widget child, EdgeInsets? padding}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: padding ?? const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: Colors.white.withOpacity(0.15)),
           ),
+          child: child,
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: Color(0xFF222222),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _timeInfo(String label, int min, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 12,
-            color: color,
-            fontWeight: FontWeight.w600,
+  Widget _infoCard(IconData icon, String title, String value) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withOpacity(0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
-        ),
-        Text(
-          "$min min",
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 13,
-            color: Color(0xFF8C8C8C),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [primary, secondary]),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: Colors.white),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: Colors.grey.shade500,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _tabButton(String label, int index) {
-    final active = _tabIndex == index;
+  Widget _timeCard(String label, String value, IconData icon) {
     return Expanded(
-      child: ElevatedButton(
-        onPressed: () => setState(() => _tabIndex = index),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: active ? const Color(0xFF2ECC71) : const Color(0xFFF7FDFC),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(22),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.bold,
-            color: active ? Colors.white : const Color(0xFF2ECC71),
-            fontSize: 15,
+        child: Column(
+          children: [
+            Icon(icon, color: primary, size: 22),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tabButton(String title, int index) {
+    final active = _tabIndex == index;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _tabIndex = index;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            gradient: active
+                ? LinearGradient(colors: [primary, secondary])
+                : null,
+            color: active ? null : Colors.transparent,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: active ? Colors.white : Colors.grey.shade600,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buyIngredientsSection() {
-    if (_isLoadingBuy) {
-      return const Center(child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 14),
-        child: CircularProgressIndicator(),
-      ));
-    }
-
-    if (_buyProducts.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 18),
-        child: Center(
-          child: Text(
-            "No ingredients found",
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.grey),
+  Widget _ingredientItem(String name, String amount) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
           ),
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: 140,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _buyProducts.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 14),
-        itemBuilder: (context, idx) {
-          final prod = _buyProducts[idx];
-          return Container(
-            width: 130,
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [primary, secondary]),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.restaurant_menu_rounded,
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.07),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
-            margin: const EdgeInsets.only(left: 8, bottom: 8, top: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-                  child: Image.network(
-                    prod.imageUrl,
-                    height: 60, width: double.infinity, fit: BoxFit.cover,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(prod.title,
-                        style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 13),
-                        maxLines: 1, overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text("Exp: ${prod.expiredDate}", style: const TextStyle(fontSize: 10, color: Color(0xFF8C8C8C))),
-                      const SizedBox(height: 2),
-                      Text("Rp ${prod.price.toStringAsFixed(0)}", style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 2),
-                      Text(prod.location.address, style: const TextStyle(fontSize: 10, color: Color(0xFF8C8C8C))),
-                    ],
-                  ),
-                ),
-              ],
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              name,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
             ),
-          );
-        },
+          ),
+          Text(
+            amount,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              color: Colors.grey.shade500,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _instructionItem(int index, String text) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [primary, secondary]),
+              borderRadius: BorderRadius.circular(100),
+            ),
+            child: Center(
+              child: Text(
+                "${index + 1}",
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.grey.shade700,
+                height: 1.6,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget nutritionBox(IconData icon, String title, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color),
+
+          const SizedBox(height: 10),
+
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              fontFamily: 'Poppins',
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            title,
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 12,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget nutritionTile(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ),
+
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -192,67 +367,483 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final r = widget.recipe;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FDFC),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Section: Image & brief info
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: const Color(0xFFF7FFF9),
+
+      body: Stack(
+        children: [
+          /// TOP GRADIENT
+          Container(
+            height: 330,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+
+              child: Column(
                 children: [
-                  // Back button & Image
-                  Column(
-                    children: [
-                      InkWell(
-                        onTap: () => Navigator.pop(context),
-                        borderRadius: BorderRadius.circular(100),
-                        child: Container(
-                          width: 38, height: 38,
-                          margin: const EdgeInsets.only(bottom: 10),
+                  /// HEADER
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 18,
+                    ),
+
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+
+                          child: Container(
+                            width: 46,
+                            height: 46,
+
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.18),
+
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+
+                        Container(
+                          width: 46,
+                          height: 46,
+
                           decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.18),
+
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+
+                          child: const Icon(
+                            Icons.favorite_border_rounded,
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(100),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// IMAGE
+                  Hero(
+                    tag: r.imageUrl,
+
+                    child: Container(
+                      width: 240,
+                      height: 240,
+
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(38),
+
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 30,
+                            offset: const Offset(0, 16),
+                          ),
+                        ],
+                      ),
+
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(38),
+
+                        child: Image.network(r.imageUrl, fit: BoxFit.cover),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  /// CONTENT
+                  Container(
+                    width: double.infinity,
+
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40),
+                      ),
+                    ),
+
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          /// CATEGORY
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEAFBF1),
+
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+
+                            child: Text(
+                              r.category,
+
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                color: Color(0xFF2ECC71),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          /// TITLE
+                          Text(
+                            r.title,
+
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1F2937),
+                              height: 1.2,
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          /// DESCRIPTION
+                          Text(
+                            r.description,
+
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              height: 1.7,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          /// STATS
+                          Row(
+                            children: [
+                              _timeCard(
+                                "Prep",
+                                "${r.prepTime}m",
+                                Icons.timer_outlined,
+                              ),
+
+                              const SizedBox(width: 12),
+
+                              _timeCard(
+                                "Cook",
+                                "${r.cookTime}m",
+                                Icons.local_fire_department_outlined,
+                              ),
+
+                              const SizedBox(width: 12),
+
+                              _timeCard(
+                                "Total",
+                                "${r.totalTime}m",
+                                Icons.schedule_rounded,
                               ),
                             ],
                           ),
-                          child: const Icon(Icons.arrow_back, color: Color(0xFF2ECC71)),
-                        ),
-                      ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(120),
-                        child: Image.network(
-                          r.imageUrl,
-                          width: 120, height: 120, fit: BoxFit.cover,
-                          errorBuilder: (c, o, s) => Container(
-                            width: 120, height: 120,
-                            color: Colors.grey[200],
-                            child: const Icon(Icons.broken_image, size: 48),
+
+                          const SizedBox(height: 24),
+
+                          /// INFO CARD
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _infoCard(
+                                  Icons.favorite_rounded,
+                                  "Health Score",
+                                  "${r.healthScore}/10",
+                                ),
+                              ),
+
+                              const SizedBox(width: 14),
+
+                              Expanded(
+                                child: _infoCard(
+                                  Icons.payments_outlined,
+                                  "Estimated Price",
+                                  "Rp ${r.price.toStringAsFixed(0)}",
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 24),
-                  // Category, Price, Nutrition
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _infoRow("Category", r.category, Icons.category_rounded),
-                          const SizedBox(height: 16),
-                          _infoRow("Price", "Rp. ${r.price.toStringAsFixed(0)}", Icons.attach_money),
-                          const SizedBox(height: 16),
-                          _infoRow("Nutrition", "${r.nutrition} ${r.nutritionUnit}", Icons.restaurant),
+
+                          const SizedBox(height: 30),
+
+                          /// HEALTH STATUS
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(26),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: primary.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        "Health Score ${r.healthScore}/10",
+                                        style: TextStyle(
+                                          color: primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 10),
+
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        r.healthyLevel,
+                                        style: const TextStyle(
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 22),
+
+                                /// MACROS
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: nutritionBox(
+                                        Icons.fitness_center,
+                                        "Protein",
+                                        "${r.protein}g",
+                                        Colors.blue,
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 12),
+
+                                    Expanded(
+                                      child: nutritionBox(
+                                        Icons.rice_bowl,
+                                        "Karbo",
+                                        "${r.carbs}g",
+                                        Colors.green,
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 12),
+
+                                    Expanded(
+                                      child: nutritionBox(
+                                        Icons.opacity,
+                                        "Lemak",
+                                        "${r.fats}g",
+                                        Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 22),
+
+                                nutritionTile("Kalori", "${r.calories} kcal"),
+                                nutritionTile("Gula", "${r.sugars} g"),
+                                nutritionTile("Sodium", "${r.sodium} mg"),
+                                nutritionTile("Serat", "${r.fiber} g"),
+
+                                nutritionTile(
+                                  "Takaran Saji",
+                                  r.nutritionPerServing,
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                Divider(color: Colors.grey.shade200),
+
+                                const SizedBox(height: 14),
+
+                                nutritionTile("Vitamin A", r.vitamins.vitaminA),
+
+                                nutritionTile("Vitamin C", r.vitamins.vitaminC),
+
+                                nutritionTile("Zat Besi", r.vitamins.iron),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          /// AI INSIGHT
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(22),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  primary.withOpacity(0.12),
+                                  Colors.white,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.auto_awesome_rounded,
+                                      color: primary,
+                                    ),
+
+                                    const SizedBox(width: 10),
+
+                                    const Text(
+                                      "AI Nutrition Insight",
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                Text(
+                                  r.healthInsight,
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    color: Colors.grey.shade700,
+                                    height: 1.7,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+
+                          /// TAB
+                          Container(
+                            padding: const EdgeInsets.all(6),
+
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F4F6),
+
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+
+                            child: Row(
+                              children: [
+                                _tabButton("Ingredients", 0),
+
+                                _tabButton("Instructions", 1),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          /// TAB CONTENT
+                          if (_tabIndex == 0)
+                            ...r.ingredients.map(
+                              (e) => _ingredientItem(e.name, e.amount),
+                            ),
+
+                          if (_tabIndex == 1)
+                            ...r.instructions.asMap().entries.map(
+                              (e) => _instructionItem(e.key, e.value),
+                            ),
+
+                          const SizedBox(height: 34),
+
+                          /// BUTTON
+                          SizedBox(
+                            width: double.infinity,
+                            height: 60,
+
+                            child: ElevatedButton(
+                              onPressed: () {},
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2ECC71),
+
+                                elevation: 0,
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(22),
+                                ),
+                              ),
+
+                              child: const Text(
+                                "Add To Eat 🍃",
+
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ),
@@ -260,169 +851,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ],
               ),
             ),
-            // Body section
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.only(top: 18),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(36),
-                    topRight: Radius.circular(36),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Text(
-                      r.title,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Prep/Cook/Total time
-                    Row(
-                      children: [
-                        _timeInfo("Prep Time", r.prepTime, const Color(0xFF2ECC71)),
-                        const SizedBox(width: 16),
-                        _timeInfo("Cook Time", r.cookTime, const Color(0xFF36C1F4)),
-                        const SizedBox(width: 16),
-                        _timeInfo("Total Time", r.totalTime, const Color(0xFF14C89B)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // Description
-                    Text(
-                      r.description,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 13,
-                        color: Color(0xFF8C8C8C),
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    // Tabs: Ingredients / Instructions
-                    Row(
-                      children: [
-                        _tabButton("Ingridients", 0),
-                        const SizedBox(width: 10),
-                        _tabButton("Instructions", 1),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // Tab content + buy ingredients (ListView agar tidak overflow)
-                    Expanded(
-                      child: ListView(
-                        padding: EdgeInsets.zero,
-                        children: [
-                          if (_tabIndex == 0)
-                            ...r.ingredients.map((ing) => Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.add, size: 20, color: Color(0xFF2ECC71)),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          ing.name,
-                                          style: const TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14,
-                                            color: Color(0xFF222222),
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        ing.amount,
-                                        style: const TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14,
-                                          color: Color(0xFF8C8C8C),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )),
-                          if (_tabIndex == 1)
-                            ...r.instructions.asMap().entries.map((entry) => Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 24,
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF2ECC71),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          "${entry.key + 1}",
-                                          style: const TextStyle(
-                                            fontFamily: 'Poppins',
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          entry.value,
-                                          style: const TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14,
-                                            color: Color(0xFF222222),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )),
-                          // Buy Ingredients Section
-                          const SizedBox(height: 10),
-                          _buyIngredientsSection(),
-                        ],
-                      ),
-                    ),
-                    // Add To Eat Button
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2ECC71),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                        ),
-                        onPressed: () {},
-                        child: const Text(
-                          "Add To Eat",
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

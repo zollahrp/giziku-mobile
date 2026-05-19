@@ -3,43 +3,40 @@ import 'dart:io';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+
 import '../models/food_scan_model.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ScannerService {
   final model = GenerativeModel(
-    model: 'models/gemini-2.5-flash',
-
+    model: 'models/gemini-3.1-flash-lite',
     apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
-
     generationConfig: GenerationConfig(temperature: 0.2),
   );
 
   Future<FoodScanModel> scanFood(File image) async {
-    final bytes = await image.readAsBytes();
+    final compressed = await FlutterImageCompress.compressWithFile(
+      image.absolute.path,
+      quality: 40,
+      minWidth: 512,
+      minHeight: 512,
+    );
 
+    final bytes = compressed!;
     final prompt = '''
-Kamu adalah AI nutritionist dan food analyzer profesional.
+Kamu adalah AI nutritionist profesional.
 
-Analisis makanan dari gambar ini.
-
-Tugas kamu:
-1. Identifikasi nama makanan utama secara spesifik dalam Bahasa Indonesia.
-2. Estimasi total nutrisi secara realistis berdasarkan porsi pada gambar.
-3. Tentukan apakah makanan masih layak dimakan atau tidak berdasarkan visual.
-4. Berikan estimasi per serving/porsi.
-5. Gunakan nilai nutrisi realistis seperti aplikasi kesehatan profesional.
-6. Jika gambar blur atau makanan tidak jelas, tetap berikan estimasi terbaik.
+Analisis makanan dari gambar.
 
 ATURAN:
 - Gunakan Bahasa Indonesia.
-- Return HANYA JSON valid.
+- Return JSON valid saja.
 - Jangan gunakan markdown.
-- Jangan jelaskan apapun.
-- Jangan tambahkan teks selain JSON.
+- Jangan tambahkan penjelasan.
 
-FORMAT JSON:
+FORMAT:
 
 {
   "foodName": "",
@@ -62,25 +59,14 @@ FORMAT JSON:
   },
 
   "healthScore": 0,
-
   "healthInsight": "",
-
   "healthyLevel": ""
 }
 
-CONTOH nutritionPerServing:
-"Tahu goreng (35Kcal, 2P, 3F, 1C) per potong"
-
-CONTOH healthyLevel:
-"Sangat Sehat"
-"Cukup Sehat"
-"Kurang Sehat"
-"Tidak Sehat"
-
-CONTOH healthInsight:
-"Makanan tinggi protein namun cukup tinggi minyak."
-
-Health score dari 1-10.
+KETENTUAN:
+- Estimasi nutrisi harus realistis.
+- Jika gambar blur, tetap berikan estimasi terbaik.
+- Health score dari 1-10.
 ''';
 
     final response = await model.generateContent([

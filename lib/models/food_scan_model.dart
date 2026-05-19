@@ -1,3 +1,4 @@
+import 'vitamins_model.dart';
 class FoodScanModel {
   final String foodName;
   final bool isEdible;
@@ -83,24 +84,24 @@ class FoodScanModel {
   }
 }
 
-class VitaminsModel {
-  final String vitaminA;
-  final String vitaminC;
-  final String iron;
+// class VitaminsModel {
+//   final String vitaminA;
+//   final String vitaminC;
+//   final String iron;
 
-  VitaminsModel({
-    required this.vitaminA,
-    required this.vitaminC,
-    required this.iron,
-  });
+//   VitaminsModel({
+//     required this.vitaminA,
+//     required this.vitaminC,
+//     required this.iron,
+//   });
 
-  factory VitaminsModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
-    return VitaminsModel(
-      vitaminA: json['vitaminA'] ?? '',
-      vitaminC: json['vitaminC'] ?? '',
-      iron: json['iron'] ?? '',
-    );
-  }
-}
+//   factory VitaminsModel.fromJson(
+//     Map<String, dynamic> json,
+//   ) {
+//     return VitaminsModel(
+//       vitaminA: json['vitaminA'] ?? '',
+//       vitaminC: json['vitaminC'] ?? '',
+//       iron: json['iron'] ?? '',
+//     );
+//   }
+// }

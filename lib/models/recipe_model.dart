@@ -1,30 +1,88 @@
+import 'vitamins_model.dart';
+
 class RecipeModel {
   final String? id;
+
   final String title;
   final String imageUrl;
   final String category;
+
   final int price;
-  final int nutrition; 
-  final String nutritionUnit; 
-  final int prepTime; 
-  final int cookTime; 
-  final int totalTime; 
+
+  /// NUTRITION
+  final int calories;
+
+  final int protein;
+  final int carbs;
+  final int fats;
+
+  final int sugars;
+  final int sodium;
+  final int fiber;
+
+  /// HEALTH
+  final int healthScore;
+
+  final String healthyLevel;
+  final String healthInsight;
+
+  final String nutritionPerServing;
+
+  /// VITAMINS
+  final VitaminsModel vitamins;
+
+  /// TIME
+  final int prepTime;
+  final int cookTime;
+  final int totalTime;
+
+  /// DESC
   final String description;
+
+  /// RECIPE
   final List<RecipeIngredient> ingredients;
   final List<String> instructions;
 
   RecipeModel({
     this.id,
+
     required this.title,
     required this.imageUrl,
     required this.category,
+
     required this.price,
-    required this.nutrition,
-    required this.nutritionUnit,
+
+    /// NUTRITION
+    required this.calories,
+
+    required this.protein,
+    required this.carbs,
+    required this.fats,
+
+    required this.sugars,
+    required this.sodium,
+    required this.fiber,
+
+    /// HEALTH
+    required this.healthScore,
+
+    required this.healthyLevel,
+    required this.healthInsight,
+
+    required this.nutritionPerServing,
+
+    /// VITAMINS
+    required this.vitamins,
+
+    /// TIME
     required this.prepTime,
     required this.cookTime,
     required this.totalTime,
+
+    /// DESC
     required this.description,
+
+    /// RECIPE
     required this.ingredients,
     required this.instructions,
   });
@@ -32,37 +90,121 @@ class RecipeModel {
   factory RecipeModel.fromJson(Map<String, dynamic> json) {
     return RecipeModel(
       id: json['id'],
-      title: json['title'],
-      imageUrl: json['image_url'],
-      category: json['category'],
-      price: json['price'],
-      nutrition: json['nutrition'],
-      nutritionUnit: json['nutrition_unit'] ?? "g",
-      prepTime: json['prep_time'],
-      cookTime: json['cook_time'],
-      totalTime: json['total_time'],
-      description: json['description'],
-      ingredients: (json['ingredients'] as List)
+
+      title: json['title'] ?? '',
+
+      imageUrl: json['image_url'] ?? '',
+
+      category: json['category'] ?? '',
+
+      price: json['price'] ?? 0,
+
+      /// NUTRITION
+      calories: json['calories'] ?? 0,
+
+      protein: json['protein'] ?? 0,
+
+      carbs: json['carbs'] ?? 0,
+
+      fats: json['fats'] ?? 0,
+
+      sugars: json['sugars'] ?? 0,
+
+      sodium: json['sodium'] ?? 0,
+
+      fiber: json['fiber'] ?? 0,
+
+      /// HEALTH
+      healthScore: json['health_score'] ?? 0,
+
+      healthyLevel: json['healthy_level'] ?? '',
+
+      healthInsight: json['health_insight'] ?? '',
+
+      nutritionPerServing:
+          json['nutrition_per_serving'] ?? '',
+
+      /// VITAMINS
+      vitamins: VitaminsModel.fromJson(
+        json['vitamins'] ?? {},
+      ),
+
+      /// TIME
+      prepTime: json['prep_time'] ?? 0,
+
+      cookTime: json['cook_time'] ?? 0,
+
+      totalTime: json['total_time'] ?? 0,
+
+      /// DESC
+      description: json['description'] ?? '',
+
+      /// INGREDIENTS
+      ingredients: (json['ingredients'] as List? ?? [])
           .map((e) => RecipeIngredient.fromJson(e))
           .toList(),
-      instructions: List<String>.from(json['instructions']),
+
+      /// INSTRUCTIONS
+      instructions: List<String>.from(
+        json['instructions'] ?? [],
+      ),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+
       'title': title,
+
       'image_url': imageUrl,
+
       'category': category,
+
       'price': price,
-      'nutrition': nutrition,
-      'nutrition_unit': nutritionUnit,
+
+      /// NUTRITION
+      'calories': calories,
+
+      'protein': protein,
+
+      'carbs': carbs,
+
+      'fats': fats,
+
+      'sugars': sugars,
+
+      'sodium': sodium,
+
+      'fiber': fiber,
+
+      /// HEALTH
+      'health_score': healthScore,
+
+      'healthy_level': healthyLevel,
+
+      'health_insight': healthInsight,
+
+      'nutrition_per_serving': nutritionPerServing,
+
+      /// VITAMINS
+      'vitamins': vitamins.toJson(),
+
+      /// TIME
       'prep_time': prepTime,
+
       'cook_time': cookTime,
+
       'total_time': totalTime,
+
+      /// DESC
       'description': description,
-      'ingredients': ingredients.map((e) => e.toJson()).toList(),
+
+      /// INGREDIENTS
+      'ingredients':
+          ingredients.map((e) => e.toJson()).toList(),
+
+      /// INSTRUCTIONS
       'instructions': instructions,
     };
   }
@@ -77,10 +219,12 @@ class RecipeIngredient {
     required this.amount,
   });
 
-  factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
+  factory RecipeIngredient.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return RecipeIngredient(
-      name: json['name'],
-      amount: json['amount'],
+      name: json['name'] ?? '',
+      amount: json['amount'] ?? '',
     );
   }
 
@@ -91,7 +235,6 @@ class RecipeIngredient {
     };
   }
 }
-
 // class RecipeModel {
 //   final String? id;
 
