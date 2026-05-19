@@ -21,6 +21,93 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final user = FirebaseAuth.instance.currentUser;
 
+  String getFoodImage(String title) {
+    final lower = title.toLowerCase();
+
+    // NASI
+    if (lower.contains('nasi goreng')) {
+      return 'assets/foods/nasi_goreng.jpg';
+    }
+
+    if (lower.contains('nasi')) {
+      return 'assets/foods/nasi_putih.jpg';
+    }
+
+    // AYAM
+    if (lower.contains('ayam bakar')) {
+      return 'assets/foods/ayam_bakar.jpg';
+    }
+
+    if (lower.contains('ayam goreng')) {
+      return 'assets/foods/ayam_goreng.jpg';
+    }
+
+    if (lower.contains('ayam')) {
+      return 'assets/foods/ayam.jpg';
+    }
+
+    // TEMPE & TAHU
+    if (lower.contains('tempe')) {
+      return 'assets/foods/tempe.jpg';
+    }
+
+    if (lower.contains('tahu')) {
+      return 'assets/foods/tahu.jpg';
+    }
+
+    // SAYUR
+    if (lower.contains('brokoli')) {
+      return 'assets/foods/brokoli.jpg';
+    }
+
+    if (lower.contains('salad')) {
+      return 'assets/foods/salad.jpg';
+    }
+
+    if (lower.contains('sayur')) {
+      return 'assets/foods/sayur.jpg';
+    }
+
+    // SEAFOOD
+    if (lower.contains('ikan')) {
+      return 'assets/foods/ikan.jpg';
+    }
+
+    if (lower.contains('udang')) {
+      return 'assets/foods/udang.jpg';
+    }
+
+    // SARAPAN
+    if (lower.contains('oat')) {
+      return 'assets/foods/oatmeal.jpg';
+    }
+
+    if (lower.contains('roti')) {
+      return 'assets/foods/roti.jpg';
+    }
+
+    if (lower.contains('telur')) {
+      return 'assets/foods/telur.jpg';
+    }
+
+    // BUAH
+    if (lower.contains('pisang')) {
+      return 'assets/foods/pisang.jpg';
+    }
+
+    if (lower.contains('alpukat')) {
+      return 'assets/foods/alpukat.jpg';
+    }
+
+    // MIE
+    if (lower.contains('mie')) {
+      return 'assets/foods/mie.jpg';
+    }
+
+    // DEFAULT
+    return 'assets/foods/default.jpg';
+  }
+
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
@@ -794,7 +881,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       price: (data['estimated_price'] as num?)?.toInt() ?? 0,
 
-                      calories: (data['calories'] as num?)?.toInt() ?? 0,
+                      calories: (data['estimated_calories'] as num?)?.toInt() ?? 0,
                       protein: (data['protein'] as num?)?.toInt() ?? 0,
                       carbs: (data['carbs'] as num?)?.toInt() ?? 0,
                       fats: (data['fats'] as num?)?.toInt() ?? 0,
@@ -827,6 +914,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: data['title'] ?? '',
                       calories: "${data['estimated_calories']} Calories",
                       price: "Rp ${data['estimated_price']}",
+                      image: getFoodImage(data['title'] ?? ''),
                     );
                   },
                 ),
@@ -842,6 +930,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String title,
     required String calories,
     required String price,
+    required String image,
   }) {
     return Stack(
       clipBehavior: Clip.none,
@@ -1111,19 +1200,32 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
-        const Positioned(
+        Positioned(
           top: 20,
           right: 10,
 
-          child: CircleAvatar(
-            radius: 60,
+          child: Container(
+            width: 120,
+            height: 120,
 
-            backgroundColor: Colors.white,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                ),
+              ],
+            ),
 
             child: CircleAvatar(
-              radius: 56,
+              radius: 60,
+              backgroundColor: Colors.white,
 
-              backgroundImage: AssetImage('assets/recipe_today.png'),
+              child: CircleAvatar(
+                radius: 56,
+                backgroundImage: AssetImage(image),
+              ),
             ),
           ),
         ),

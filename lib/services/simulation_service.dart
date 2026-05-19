@@ -49,18 +49,12 @@ Kamu adalah AI nutrition planner profesional.
 
 Buatkan meal plan sehat, hemat, realistis, variatif, dan sesuai profil user.
 
-========================
-DATA USER
-========================
-
+DATA USER:
 - Budget: Rp$budget
 - Durasi: $days hari
 - Jumlah orang: $people orang
 
-========================
-PROFIL USER
-========================
-
+PROFILE USER::
 - Target tubuh: $bodyGoal
 - Kebutuhan kalori: $calories kcal
 - Alergi: ${allergies.join(', ')}
@@ -69,10 +63,7 @@ PROFIL USER
 - Riwayat penyakit: ${diseases.join(', ')}
 - Preferensi makanan: ${foodTypes.join(', ')}
 
-========================
-ATURAN
-========================
-
+ATURAN:
 - Gunakan Bahasa Indonesia
 - Fokus makanan Indonesia
 - Budget realistis
@@ -114,16 +105,12 @@ ATURAN
 - instructions wajib berupa array
 - prep_time, cook_time, total_time wajib integer
 
-- image_url gunakan URL gambar makanan random dari Unsplash atau sumber public image
 
 - Return HANYA JSON valid
 - Jangan gunakan markdown
 - Jangan tambahkan teks selain JSON
 
-========================
-FORMAT JSON
-========================
-
+FORMAT JSON:
 {
   "summary": "",
   "daily_budget": 0,

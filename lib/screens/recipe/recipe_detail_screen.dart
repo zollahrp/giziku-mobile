@@ -5,6 +5,8 @@ import '../../models/product_model.dart';
 import '../../models/recipe_model.dart';
 import '../../repositories/product_repository.dart';
 
+import 'package:flutter/rendering.dart';
+
 class RecipeDetailScreen extends StatefulWidget {
   final RecipeModel recipe;
 
@@ -15,6 +17,9 @@ class RecipeDetailScreen extends StatefulWidget {
 }
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  bool _showBottomBar = true;
   int _tabIndex = 0;
   List<ProductModel> _buyProducts = [];
   bool _isLoadingBuy = false;
@@ -24,10 +29,131 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   final Color softGreen = const Color(0xFFEAFBF1);
   final Color dark = const Color(0xFF1F2937);
 
+  String getFoodImage(String title) {
+    final lower = title.toLowerCase();
+
+    // NASI
+    if (lower.contains('nasi goreng')) {
+      return 'assets/foods/nasi_goreng.jpg';
+    }
+
+    if (lower.contains('nasi')) {
+      return 'assets/foods/nasi_putih.jpg';
+    }
+
+    // AYAM
+    if (lower.contains('ayam bakar')) {
+      return 'assets/foods/ayam_bakar.jpg';
+    }
+
+    if (lower.contains('ayam goreng')) {
+      return 'assets/foods/ayam_goreng.jpg';
+    }
+
+    if (lower.contains('ayam')) {
+      return 'assets/foods/ayam.jpg';
+    }
+
+    // TEMPE & TAHU
+    if (lower.contains('tempe')) {
+      return 'assets/foods/tempe.jpg';
+    }
+
+    if (lower.contains('tahu')) {
+      return 'assets/foods/tahu.jpg';
+    }
+
+    // SAYUR
+    if (lower.contains('brokoli')) {
+      return 'assets/foods/brokoli.jpg';
+    }
+
+    if (lower.contains('salad')) {
+      return 'assets/foods/salad.jpg';
+    }
+
+    if (lower.contains('sayur')) {
+      return 'assets/foods/sayur.jpg';
+    }
+
+    // SEAFOOD
+    if (lower.contains('ikan')) {
+      return 'assets/foods/ikan.jpg';
+    }
+
+    if (lower.contains('udang')) {
+      return 'assets/foods/udang.jpg';
+    }
+
+    // SARAPAN
+    if (lower.contains('oat')) {
+      return 'assets/foods/oatmeal.jpg';
+    }
+
+    if (lower.contains('roti')) {
+      return 'assets/foods/roti.jpg';
+    }
+
+    if (lower.contains('telur')) {
+      return 'assets/foods/telur.jpg';
+    }
+
+    // BUAH
+    if (lower.contains('pisang')) {
+      return 'assets/foods/pisang.jpg';
+    }
+
+    if (lower.contains('alpukat')) {
+      return 'assets/foods/alpukat.jpg';
+    }
+
+    // MIE
+    if (lower.contains('mie')) {
+      return 'assets/foods/mie.jpg';
+    }
+
+    // DEFAULT
+    return 'assets/foods/default.jpg';
+  }
+
   @override
   void initState() {
     super.initState();
-    _loadBuyIngredients();
+    double lastOffset = 0;
+
+    @override
+    void initState() {
+      super.initState();
+
+      _scrollController.addListener(() {
+        final currentOffset = _scrollController.offset;
+
+        /// scroll down
+        if (currentOffset > lastOffset + 10) {
+          if (_showBottomBar) {
+            setState(() {
+              _showBottomBar = false;
+            });
+          }
+        }
+        /// scroll up
+        else if (currentOffset < lastOffset - 10) {
+          if (!_showBottomBar) {
+            setState(() {
+              _showBottomBar = true;
+            });
+          }
+        }
+
+        lastOffset = currentOffset;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadBuyIngredients() async {
@@ -196,49 +322,79 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   Widget _ingredientItem(String name, String amount) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
+
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
         color: Colors.white,
+
         borderRadius: BorderRadius.circular(22),
+
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
+
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
         ],
       ),
+
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
           Container(
             width: 44,
             height: 44,
+
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [primary, secondary]),
+
               borderRadius: BorderRadius.circular(14),
             ),
+
             child: const Icon(
               Icons.restaurant_menu_rounded,
               color: Colors.white,
             ),
           ),
+
           const SizedBox(width: 14),
+
           Expanded(
-            child: Text(
-              name,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          Text(
-            amount,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              color: Colors.grey.shade500,
-              fontWeight: FontWeight.w500,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                Text(
+                  name,
+
+                  softWrap: true,
+
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  amount,
+
+                  softWrap: true,
+
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -340,11 +496,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   Widget nutritionTile(String title, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
+
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
           Expanded(
+            flex: 2,
+
             child: Text(
               title,
+
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontFamily: 'Poppins',
@@ -352,11 +514,25 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             ),
           ),
 
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
+          const SizedBox(width: 16),
+
+          Expanded(
+            flex: 3,
+
+            child: Text(
+              value,
+
+              textAlign: TextAlign.right,
+
+              softWrap: true,
+
+              overflow: TextOverflow.visible,
+
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+                height: 1.5,
+              ),
             ),
           ),
         ],
@@ -387,6 +563,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
           SafeArea(
             child: SingleChildScrollView(
+              controller: _scrollController,
               physics: const BouncingScrollPhysics(),
 
               child: Column(
@@ -444,14 +621,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
                   /// IMAGE
                   Hero(
-                    tag: r.imageUrl,
+                    tag: r.title,
 
                     child: Container(
                       width: 240,
                       height: 240,
 
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(38),
+                        shape: BoxShape.circle,
 
                         boxShadow: [
                           BoxShadow(
@@ -462,10 +639,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         ],
                       ),
 
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(38),
+                      child: CircleAvatar(
+                        radius: 120,
+                        backgroundColor: Colors.white,
 
-                        child: Image.network(r.imageUrl, fit: BoxFit.cover),
+                        child: CircleAvatar(
+                          radius: 112,
+                          backgroundImage: AssetImage(getFoodImage(r.title)),
+                        ),
                       ),
                     ),
                   ),
@@ -551,16 +732,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           Row(
                             children: [
                               _timeCard(
-                                "Prep",
-                                "${r.prepTime}m",
+                                "Persiapan",
+                                "${r.prepTime}menit",
                                 Icons.timer_outlined,
                               ),
 
                               const SizedBox(width: 12),
 
                               _timeCard(
-                                "Cook",
-                                "${r.cookTime}m",
+                                "Masak",
+                                "${r.cookTime}menit",
                                 Icons.local_fire_department_outlined,
                               ),
 
@@ -568,7 +749,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
                               _timeCard(
                                 "Total",
-                                "${r.totalTime}m",
+                                "${r.totalTime}menit",
                                 Icons.schedule_rounded,
                               ),
                             ],
@@ -582,7 +763,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               Expanded(
                                 child: _infoCard(
                                   Icons.favorite_rounded,
-                                  "Health Score",
+                                  "Skor Kesehatan",
                                   "${r.healthScore}/10",
                                 ),
                               ),
@@ -592,7 +773,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               Expanded(
                                 child: _infoCard(
                                   Icons.payments_outlined,
-                                  "Estimated Price",
+                                  "Estimated Harga",
                                   "Rp ${r.price.toStringAsFixed(0)}",
                                 ),
                               ),
@@ -608,50 +789,71 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               color: const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(26),
                             ),
+
                             child: Column(
                               children: [
                                 Row(
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: primary.withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(
-                                          100,
+                                    Expanded(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 8,
                                         ),
-                                      ),
-                                      child: Text(
-                                        "Health Score ${r.healthScore}/10",
-                                        style: TextStyle(
-                                          color: primary,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Poppins',
+
+                                        decoration: BoxDecoration(
+                                          color: primary.withOpacity(0.12),
+
+                                          borderRadius: BorderRadius.circular(
+                                            100,
+                                          ),
+                                        ),
+
+                                        child: Text(
+                                          "Skor Kesehatan ${r.healthScore}/10",
+
+                                          overflow: TextOverflow.ellipsis,
+
+                                          style: TextStyle(
+                                            color: primary,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Poppins',
+                                          ),
                                         ),
                                       ),
                                     ),
 
                                     const SizedBox(width: 10),
 
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.orange.withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(
-                                          100,
+                                    Expanded(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 8,
                                         ),
-                                      ),
-                                      child: Text(
-                                        r.healthyLevel,
-                                        style: const TextStyle(
-                                          color: Colors.orange,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Poppins',
+
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.withOpacity(
+                                            0.12,
+                                          ),
+
+                                          borderRadius: BorderRadius.circular(
+                                            100,
+                                          ),
+                                        ),
+
+                                        child: Text(
+                                          r.healthyLevel,
+
+                                          textAlign: TextAlign.center,
+
+                                          overflow: TextOverflow.ellipsis,
+
+                                          style: const TextStyle(
+                                            color: Colors.orange,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Poppins',
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -699,8 +901,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 const SizedBox(height: 22),
 
                                 nutritionTile("Kalori", "${r.calories} kcal"),
+
                                 nutritionTile("Gula", "${r.sugars} g"),
+
                                 nutritionTile("Sodium", "${r.sodium} mg"),
+
                                 nutritionTile("Serat", "${r.fiber} g"),
 
                                 nutritionTile(
@@ -728,7 +933,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           /// AI INSIGHT
                           Container(
                             width: double.infinity,
+
                             padding: const EdgeInsets.all(22),
+
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -736,10 +943,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   Colors.white,
                                 ],
                               ),
+
                               borderRadius: BorderRadius.circular(28),
                             ),
+
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+
                               children: [
                                 Row(
                                   children: [
@@ -751,7 +961,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                     const SizedBox(width: 10),
 
                                     const Text(
-                                      "AI Nutrition Insight",
+                                      "Giziku Nutrition Insight",
+
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontWeight: FontWeight.bold,
@@ -765,6 +976,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
                                 Text(
                                   r.healthInsight,
+
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     color: Colors.grey.shade700,
@@ -790,9 +1002,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
                             child: Row(
                               children: [
-                                _tabButton("Ingredients", 0),
+                                _tabButton("Bahan-Bahan", 0),
 
-                                _tabButton("Instructions", 1),
+                                _tabButton("Instruksi", 1),
                               ],
                             ),
                           ),
@@ -810,40 +1022,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               (e) => _instructionItem(e.key, e.value),
                             ),
 
-                          const SizedBox(height: 34),
-
-                          /// BUTTON
-                          SizedBox(
-                            width: double.infinity,
-                            height: 60,
-
-                            child: ElevatedButton(
-                              onPressed: () {},
-
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2ECC71),
-
-                                elevation: 0,
-
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(22),
-                                ),
-                              ),
-
-                              child: const Text(
-                                "Add To Eat 🍃",
-
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
+                          /// IMPORTANT
+                          /// supaya gak ketutup floating button
+                          const SizedBox(height: 120),
                         ],
                       ),
                     ),
@@ -853,6 +1034,59 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             ),
           ),
         ],
+      ),
+
+      /// FLOATING STICKY BUTTON
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+
+      floatingActionButton: AnimatedSlide(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutExpo,
+
+        offset: _showBottomBar ? Offset.zero : const Offset(0, 2),
+
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+
+          opacity: _showBottomBar ? 1 : 0,
+
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+
+            child: SizedBox(
+              width: double.infinity,
+              height: 58,
+
+              child: ElevatedButton(
+                onPressed: () {},
+
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2ECC71),
+
+                  elevation: 14,
+
+                  shadowColor: Colors.black.withOpacity(0.15),
+
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                ),
+
+                child: const Text(
+                  "Makan Makanan Ini",
+
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
