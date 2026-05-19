@@ -32,7 +32,6 @@ class _SimulationLoadingScreenState extends State<SimulationLoadingScreen>
     "Menghitung kebutuhan nutrisi...",
     "Menyesuaikan porsi makanan...",
     "Mencari menu terbaik...",
-    "Menyiapkan rekomendasi dari model...",
   ];
 
   @override
@@ -48,8 +47,16 @@ class _SimulationLoadingScreenState extends State<SimulationLoadingScreen>
   }
 
   Future<void> startLoading() async {
+    // LANGSUNG START REQUEST
+    final futureResult = SimulationService().generateMealPlan(
+      budget: widget.budget,
+      days: widget.days,
+      people: widget.people,
+    );
+
+    // ANIMASI LOADING JALAN PARALEL
     for (int i = 0; i < loadingMessages.length; i++) {
-      await Future.delayed(const Duration(milliseconds: 1200));
+      await Future.delayed(const Duration(milliseconds: 700));
 
       if (!mounted) return;
 
@@ -59,11 +66,7 @@ class _SimulationLoadingScreenState extends State<SimulationLoadingScreen>
     }
 
     try {
-      final result = await SimulationService().generateMealPlan(
-        budget: widget.budget,
-        days: widget.days,
-        people: widget.people,
-      );
+      final result = await futureResult;
 
       if (!mounted) return;
 
@@ -79,6 +82,8 @@ class _SimulationLoadingScreenState extends State<SimulationLoadingScreen>
         ),
       );
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal generate rekomendasi: $e')));

@@ -23,6 +23,8 @@ import 'services/api_client.dart';
 import 'services/auth_service.dart';
 import 'services/shared_prefs_service.dart';
 
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MyHttpOverrides extends HttpOverrides {
@@ -36,6 +38,8 @@ class MyHttpOverrides extends HttpOverrides {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeDateFormatting('id_ID', null);
 
   await dotenv.load(fileName: ".env");
 

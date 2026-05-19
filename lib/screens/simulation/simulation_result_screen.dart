@@ -344,7 +344,7 @@ class SimulationResultScreen extends StatelessWidget {
                         SizedBox(width: 10),
 
                         Text(
-                          "Ringkasan Plan",
+                          "Ringkasan Rencana",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -410,6 +410,7 @@ class SimulationResultScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Icon(
                           Icons.health_and_safety_rounded,
@@ -418,30 +419,39 @@ class SimulationResultScreen extends StatelessWidget {
 
                         const SizedBox(width: 10),
 
-                        const Text(
-                          "Healthy Score",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                        const Expanded(
+                          child: Text(
+                            "Skor Kesehatan",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
 
-                        const Spacer(),
+                        const SizedBox(width: 12),
 
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2ECC71).withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: const Text(
-                            "Excellent",
-                            style: TextStyle(
-                              color: Color(0xFF2ECC71),
-                              fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2ECC71).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                "Sangat Sehat",
+                                maxLines: 1,
+                                style: TextStyle(
+                                  color: Color(0xFF2ECC71),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -478,7 +488,7 @@ class SimulationResultScreen extends StatelessWidget {
                           const SizedBox(height: 18),
 
                           Text(
-                            "Meal plan kamu sudah cukup seimbang\nuntuk kebutuhan harian.",
+                            "Rencana makan kamu sudah cukup seimbang\nuntuk kebutuhan harianmu. Tetap jaga porsi dan variasi makanannya ya!",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               height: 1.6,
@@ -513,7 +523,7 @@ class SimulationResultScreen extends StatelessWidget {
 
                         Expanded(
                           child: buildHealthStat(
-                            "Fiber",
+                            "Serat",
                             "28g",
                             Icons.eco,
                             Colors.green,
@@ -555,6 +565,9 @@ class SimulationResultScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
+              const SizedBox(height: 24),
+
               // AI Insight
               Container(
                 padding: const EdgeInsets.all(22),
@@ -721,76 +734,6 @@ class SimulationResultScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 30),
-
-              // Nutrition Card
-              Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(26),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.favorite, color: Color(0xFF2ECC71)),
-
-                        const SizedBox(width: 10),
-
-                        const Text(
-                          "Estimasi Nutrisi",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const Spacer(),
-
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2ECC71).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: const Text(
-                            "Seimbang",
-                            style: TextStyle(
-                              color: Color(0xFF2ECC71),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        buildNutritionItem("Protein", "85g"),
-
-                        buildNutritionItem("Karbo", "210g"),
-
-                        buildNutritionItem("Lemak", "55g"),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 36),
 
               // Button
               Row(
@@ -972,7 +915,9 @@ class SimulationResultScreen extends StatelessWidget {
                         const SizedBox(height: 12),
 
                         /// HEALTH SCORE + LEVEL
-                        Row(
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 8,
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -986,7 +931,7 @@ class SimulationResultScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: Text(
-                                "Score ${meal.healthScore}/10",
+                                "Skor ${meal.healthScore}/10",
                                 style: const TextStyle(
                                   color: Color(0xFF2ECC71),
                                   fontWeight: FontWeight.bold,
@@ -994,8 +939,6 @@ class SimulationResultScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-
-                            const SizedBox(width: 10),
 
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -1008,6 +951,7 @@ class SimulationResultScreen extends StatelessWidget {
                               ),
                               child: Text(
                                 meal.healthyLevel,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   color: Colors.orange,
                                   fontWeight: FontWeight.bold,
@@ -1097,41 +1041,6 @@ class SimulationResultScreen extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 14),
-
-                        /// AI INSIGHT
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2ECC71).withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.auto_awesome_rounded,
-                                color: Color(0xFF2ECC71),
-                                size: 20,
-                              ),
-
-                              const SizedBox(width: 10),
-
-                              Expanded(
-                                child: Text(
-                                  meal.healthInsight,
-                                  style: TextStyle(
-                                    color: Colors.grey.shade700,
-                                    height: 1.5,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
 
                         Row(
                           children: [
@@ -1363,17 +1272,27 @@ class SimulationResultScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
+            flex: 2,
             child: Text(
               title,
               style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
             ),
           ),
 
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          const SizedBox(width: 12),
+
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              softWrap: true,
+              overflow: TextOverflow.visible,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
           ),
         ],
       ),

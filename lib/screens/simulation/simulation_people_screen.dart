@@ -14,7 +14,8 @@ class SimulationPeopleScreen extends StatefulWidget {
   });
 
   @override
-  State<SimulationPeopleScreen> createState() => _SimulationPeopleScreenState();
+  State<SimulationPeopleScreen> createState() =>
+      _SimulationPeopleScreenState();
 }
 
 class _SimulationPeopleScreenState extends State<SimulationPeopleScreen> {
@@ -63,25 +64,26 @@ class _SimulationPeopleScreenState extends State<SimulationPeopleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF8),
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
+    return Scaffold(
       resizeToAvoidBottomInset: true,
+      backgroundColor: const Color(0xFFF8FAF8),
 
       body: SafeArea(
         child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-
           padding: EdgeInsets.only(
             left: 24,
             right: 24,
             top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            bottom: keyboardHeight + 24,
           ),
 
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height - 100,
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top,
             ),
 
             child: IntrinsicHeight(
@@ -169,7 +171,7 @@ class _SimulationPeopleScreenState extends State<SimulationPeopleScreen> {
                     ),
                   ),
 
-                  const Spacer(),
+                  const SizedBox(height: 32),
 
                   // Icon
                   Container(
@@ -222,9 +224,7 @@ class _SimulationPeopleScreenState extends State<SimulationPeopleScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
-
                       border: Border.all(color: Colors.grey.shade200),
-
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.04),
@@ -246,7 +246,6 @@ class _SimulationPeopleScreenState extends State<SimulationPeopleScreen> {
                         Expanded(
                           child: TextField(
                             controller: _peopleController,
-
                             keyboardType: TextInputType.number,
 
                             inputFormatters: [
@@ -260,9 +259,7 @@ class _SimulationPeopleScreenState extends State<SimulationPeopleScreen> {
 
                             decoration: const InputDecoration(
                               border: InputBorder.none,
-
                               hintText: "4",
-
                               hintStyle: TextStyle(
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w500,
@@ -284,43 +281,49 @@ class _SimulationPeopleScreenState extends State<SimulationPeopleScreen> {
 
                   const Spacer(),
 
-                  // Next Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 60,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 70,
+                      top: 24,
+                    ),
 
-                    child: ElevatedButton(
-                      onPressed: isButtonEnabled ? goToNext : null,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 60,
 
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2ECC71),
+                      child: ElevatedButton(
+                        onPressed: isButtonEnabled ? goToNext : null,
 
-                        disabledBackgroundColor: Colors.grey.shade300,
-
-                        elevation: 0,
-
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(22),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2ECC71),
+                          disabledBackgroundColor: Colors.grey.shade300,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                          ),
                         ),
-                      ),
 
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
 
-                        children: [
-                          Text(
-                            "Buat Rencana Makan",
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
+                          children: [
+                            Text(
+                              "Buat Rencana Makan",
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+
+                            SizedBox(width: 10),
+
+                            Icon(
+                              Icons.auto_awesome_rounded,
                               color: Colors.white,
                             ),
-                          ),
-
-                          SizedBox(width: 10),
-
-                          Icon(Icons.auto_awesome_rounded, color: Colors.white),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -162,7 +162,7 @@ class _SimulationDaysScreenState extends State<SimulationDaysScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 32),
 
                   // Icon
                   Container(
@@ -272,46 +272,49 @@ class _SimulationDaysScreenState extends State<SimulationDaysScreen> {
 
                   const Spacer(),
 
-                  // Next Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 60,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 70, top: 24),
 
-                    child: ElevatedButton(
-                      onPressed: isButtonEnabled ? goToNext : null,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 60,
 
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2ECC71),
+                      child: ElevatedButton(
+                        onPressed: isButtonEnabled ? goToNext : null,
 
-                        disabledBackgroundColor: Colors.grey.shade300,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2ECC71),
 
-                        elevation: 0,
+                          disabledBackgroundColor: Colors.grey.shade300,
 
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(22),
+                          elevation: 0,
+
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                          ),
                         ),
-                      ),
 
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
 
-                        children: [
-                          Text(
-                            "Lanjut",
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
+                          children: [
+                            Text(
+                              "Lanjut",
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+
+                            SizedBox(width: 10),
+
+                            Icon(
+                              Icons.arrow_forward_rounded,
                               color: Colors.white,
                             ),
-                          ),
-
-                          SizedBox(width: 10),
-
-                          Icon(
-                            Icons.arrow_forward_rounded,
-                            color: Colors.white,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

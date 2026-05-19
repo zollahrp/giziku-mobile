@@ -8,6 +8,7 @@ import 'package:giziku/screens/recipe/recipe_detail_screen.dart';
 import 'package:giziku/models/recipe_model.dart';
 import 'package:giziku/screens/recipe/recipe_detail_screen.dart';
 import 'package:giziku/models/vitamins_model.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -111,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('EEEE, d MMMM yyyy').format(now);
+    String formattedDate = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(now);
 
     final String name = user?.displayName ?? "Guest User";
     final String email = user?.email ?? "No Email";
@@ -193,12 +194,27 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
+                  const SizedBox(height: 2),
+
                   Text(
-                    formattedDate,
+                    'Jaga nutrisi kamu hari ini ya',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 12,
                       color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+
+                  const SizedBox(height: 2),
+
+                  Text(
+                    formattedDate,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      color: Colors.grey[500],
                     ),
                   ),
                 ],
@@ -434,94 +450,267 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNutritionSection() {
-    final formattedDate =
-        "${selectedDate.year}-"
-        "${selectedDate.month.toString().padLeft(2, '0')}-"
-        "${selectedDate.day.toString().padLeft(2, '0')}";
+    // STATIC DULU
+    final int calories = 1840;
+    final int targetCalories = 2200;
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .collection('scheduled_meals')
-          .where('date', isEqualTo: formattedDate)
-          .snapshots(),
+    final int protein = 92;
+    final int carbs = 210;
+    final int fats = 58;
 
-      builder: (context, snapshot) {
-        final docs = snapshot.data?.docs ?? [];
+    final double progress = calories / targetCalories;
 
-        int totalProtein = 0;
-        int totalCarbs = 0;
-        int totalFats = 0;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
 
-        for (var doc in docs) {
-          totalProtein += (doc['protein'] ?? 0) as int;
-          totalCarbs += (doc['carbs'] ?? 0) as int;
-          totalFats += (doc['fats'] ?? 0) as int;
-        }
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                'Nutrition Intake',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(15),
-
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F2937),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                  children: [
-                    _buildNutritionItem(
-                      '$totalCarbs',
-                      '/250',
-                      'Carbs',
-                      (totalCarbs / 250).clamp(0.0, 1.0),
-                      Colors.white,
-                    ),
-
-                    _buildNutritionItem(
-                      '$totalProtein',
-                      '/120',
-                      'Protein',
-                      (totalProtein / 120).clamp(0.0, 1.0),
-                      const Color(0xFF2ECC71),
-                    ),
-
-                    _buildNutritionItem(
-                      '$totalFats',
-                      '/70',
-                      'Fat',
-                      (totalFats / 70).clamp(0.0, 1.0),
-                      Colors.orange,
-                    ),
-                  ],
-                ),
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
           ],
-        );
-      },
+        ),
+
+        child: Column(
+          children: [
+            /// HEADER
+            GestureDetector(
+              onTap: () {
+                // TODO:
+                // pindah ke nutrition detail screen
+              },
+
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8FFF1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+
+                    child: const Icon(
+                      Icons.monitor_heart_rounded,
+                      color: Color(0xFF2ECC71),
+                      size: 24,
+                    ),
+                  ),
+
+                  const SizedBox(width: 14),
+
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Nutrisi Harian Kamu",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  GestureDetector(
+                    onTap: () {},
+                    child: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 18,
+                      color: Color(0xFF2ECC71),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 22),
+
+            /// KALORI
+            Container(
+              padding: const EdgeInsets.all(16),
+
+              decoration: BoxDecoration(
+                color: const Color(0xFFF6FFF9),
+                borderRadius: BorderRadius.circular(22),
+              ),
+
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        "Kalori Hari Ini",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      Text(
+                        "$calories / $targetCalories kcal",
+                        style: const TextStyle(
+                          color: Color(0xFF2ECC71),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: LinearProgressIndicator(
+                      value: progress.clamp(0.0, 1.0),
+                      minHeight: 10,
+                      backgroundColor: Colors.green.shade100,
+                      valueColor: const AlwaysStoppedAnimation(
+                        Color(0xFF2ECC71),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            /// MACRO
+            Row(
+              children: [
+                Expanded(
+                  child: _buildCompactNutrition(
+                    "Protein",
+                    "${protein}g",
+                    Icons.fitness_center,
+                    Colors.blue,
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: _buildCompactNutrition(
+                    "Karbo",
+                    "${carbs}g",
+                    Icons.rice_bowl,
+                    Colors.orange,
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: _buildCompactNutrition(
+                    "Lemak",
+                    "${fats}g",
+                    Icons.opacity,
+                    Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactNutrition(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(18),
+      ),
+
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 20),
+
+          const SizedBox(height: 8),
+
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+
+          const SizedBox(height: 2),
+
+          Text(
+            title,
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 11),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNutritionRow(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Row(
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+          ),
+
+          child: Icon(icon, color: color, size: 18),
+        ),
+
+        const SizedBox(width: 12),
+
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 
@@ -653,7 +842,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
 
                       Text(
-                        DateFormat('MMMM yyyy').format(selectedDate),
+                        DateFormat('MMMM yyyy', 'id_ID').format(selectedDate),
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 13,
@@ -736,7 +925,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            DateFormat('E').format(date),
+                            DateFormat('E', 'id_ID').format(date),
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 13,
@@ -881,7 +1070,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       price: (data['estimated_price'] as num?)?.toInt() ?? 0,
 
-                      calories: (data['estimated_calories'] as num?)?.toInt() ?? 0,
+                      calories:
+                          (data['estimated_calories'] as num?)?.toInt() ?? 0,
                       protein: (data['protein'] as num?)?.toInt() ?? 0,
                       carbs: (data['carbs'] as num?)?.toInt() ?? 0,
                       fats: (data['fats'] as num?)?.toInt() ?? 0,
