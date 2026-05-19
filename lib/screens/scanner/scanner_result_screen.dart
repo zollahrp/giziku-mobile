@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 import '../../models/food_scan_model.dart';
 
@@ -462,7 +465,53 @@ class ScannerResultScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 64,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user == null) return;
+
+                    final today = DateFormat(
+                      'yyyy-MM-dd',
+                    ).format(DateTime.now());
+
+                    final docRef = FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .collection('daily_nutrition')
+                        .doc(today);
+
+                    await FirebaseFirestore.instance.runTransaction((
+                      transaction,
+                    ) async {
+                      final snapshot = await transaction.get(docRef);
+
+                      if (!snapshot.exists) {
+                        transaction.set(docRef, {
+                          'calories': result.calories,
+                          'protein': result.protein,
+                          'carbs': result.carbs,
+                          'fats': result.fats,
+                          'updated_at': FieldValue.serverTimestamp(),
+                        });
+                      } else {
+                        final data = snapshot.data()!;
+
+                        transaction.update(docRef, {
+                          'calories': (data['calories'] ?? 0) + result.calories,
+                          'protein': (data['protein'] ?? 0) + result.protein,
+                          'carbs': (data['carbs'] ?? 0) + result.carbs,
+                          'fats': (data['fats'] ?? 0) + result.fats,
+                          'updated_at': FieldValue.serverTimestamp(),
+                        });
+                      }
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Nutrisi berhasil ditambahkan!"),
+                      ),
+                    );
+                  },
 
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2AD882),

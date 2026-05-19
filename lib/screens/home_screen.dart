@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giziku/screens/nutrition_detail_screen.dart';
 import 'package:giziku/screens/simulation/simulation_budget_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -450,184 +451,213 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNutritionSection() {
-    // STATIC DULU
-    final int calories = 1840;
-    final int targetCalories = 2200;
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    final int protein = 92;
-    final int carbs = 210;
-    final int fats = 58;
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .snapshots(),
 
-    final double progress = calories / targetCalories;
+      builder: (context, userSnapshot) {
+        if (!userSnapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
+        final userData =
+            userSnapshot.data!.data() as Map<String, dynamic>? ?? {};
 
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(28),
+        final int targetCalories = (userData['daily_calories'] ?? 0);
 
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
+        return StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(user!.uid)
+              .collection('daily_nutrition')
+              .doc(today)
+              .snapshots(),
 
-        child: Column(
-          children: [
-            /// HEADER
-            GestureDetector(
-              onTap: () {
-                // TODO:
-                // pindah ke nutrition detail screen
-              },
+          builder: (context, nutritionSnapshot) {
+            final nutritionData =
+                nutritionSnapshot.data?.data() as Map<String, dynamic>?;
 
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
+            final int calories = (nutritionData?['calories'] ?? 0);
 
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8FFF1),
-                      borderRadius: BorderRadius.circular(16),
+            final int protein = (nutritionData?['protein'] ?? 0);
+
+            final int carbs = (nutritionData?['carbs'] ?? 0);
+
+            final int fats = (nutritionData?['fats'] ?? 0);
+
+            final double progress = targetCalories > 0
+                ? calories / targetCalories
+                : 0;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NutritionDetailScreen(),
                     ),
+                  );
+                },
 
-                    child: const Icon(
-                      Icons.monitor_heart_rounded,
-                      color: Color(0xFF2ECC71),
-                      size: 24,
-                    ),
-                  ),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
 
-                  const SizedBox(width: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
 
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Nutrisi Harian Kamu",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  GestureDetector(
-                    onTap: () {},
-                    child: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 18,
-                      color: Color(0xFF2ECC71),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 22),
-
-            /// KALORI
-            Container(
-              padding: const EdgeInsets.all(16),
-
-              decoration: BoxDecoration(
-                color: const Color(0xFFF6FFF9),
-                borderRadius: BorderRadius.circular(22),
-              ),
-
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      const Text(
-                        "Kalori Hari Ini",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      Text(
-                        "$calories / $targetCalories kcal",
-                        style: const TextStyle(
-                          color: Color(0xFF2ECC71),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 14),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
 
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: LinearProgressIndicator(
-                      value: progress.clamp(0.0, 1.0),
-                      minHeight: 10,
-                      backgroundColor: Colors.green.shade100,
-                      valueColor: const AlwaysStoppedAnimation(
-                        Color(0xFF2ECC71),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8FFF1),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+
+                            child: const Icon(
+                              Icons.monitor_heart_rounded,
+                              color: Color(0xFF2ECC71),
+                              size: 24,
+                            ),
+                          ),
+
+                          const SizedBox(width: 14),
+
+                          const Expanded(
+                            child: Text(
+                              "Nutrisi Harian Kamu",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
+
+                      const SizedBox(height: 22),
+
+                      // ================= KALORI =================
+                      Container(
+                        padding: const EdgeInsets.all(16),
+
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF6FFF9),
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                const Text(
+                                  "Kalori Hari Ini",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+
+                                const Spacer(),
+
+                                Text(
+                                  "$calories / $targetCalories kcal",
+
+                                  style: const TextStyle(
+                                    color: Color(0xFF2ECC71),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+
+                              child: LinearProgressIndicator(
+                                value: progress.clamp(0.0, 1.0),
+                                minHeight: 10,
+
+                                backgroundColor: Colors.green.shade100,
+
+                                valueColor: const AlwaysStoppedAnimation(
+                                  Color(0xFF2ECC71),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildCompactNutrition(
+                              "Protein",
+                              "${protein}g",
+                              Icons.fitness_center,
+                              Colors.blue,
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: _buildCompactNutrition(
+                              "Karbo",
+                              "${carbs}g",
+                              Icons.rice_bowl,
+                              Colors.orange,
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: _buildCompactNutrition(
+                              "Lemak",
+                              "${fats}g",
+                              Icons.opacity,
+                              Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-
-            const SizedBox(height: 18),
-
-            /// MACRO
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCompactNutrition(
-                    "Protein",
-                    "${protein}g",
-                    Icons.fitness_center,
-                    Colors.blue,
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: _buildCompactNutrition(
-                    "Karbo",
-                    "${carbs}g",
-                    Icons.rice_bowl,
-                    Colors.orange,
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: _buildCompactNutrition(
-                    "Lemak",
-                    "${fats}g",
-                    Icons.opacity,
-                    Colors.red,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 

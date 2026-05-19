@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:giziku/screens/home_screen.dart';
+import 'package:giziku/screens/profiles/edit_profile_screen.dart';
 import 'package:giziku/screens/recipe_screen.dart';
 import 'package:giziku/screens/profile_screen.dart';
 import 'gizi_chatbot_screen.dart';
 import 'scanner/scanner_screen.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -27,6 +31,109 @@ class _MainScreenState extends State<MainScreen> {
     GizikuChatbotScreen(),
     ProfileScreen(),
   ];
+
+  Future<bool> checkProfileCompleted() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final data = doc.data() ?? {};
+
+    bool isIncomplete(dynamic value) {
+      if (value == null) return true;
+
+      if (value is String && value.trim().isEmpty) {
+        return true;
+      }
+
+      if (value is List && value.isEmpty) {
+        return true;
+      }
+
+      return false;
+    }
+
+    final requiredFields = [
+      data['gender'],
+      data['date_of_birth'],
+      data['height'],
+      data['weight'],
+      data['daily_calories'],
+      data['activity_level'],
+      data['exercise_level'],
+      data['body_goal'],
+      data['food_type'],
+    ];
+
+    final profileComplete = !requiredFields.any(isIncomplete);
+
+    if (!profileComplete) {
+      if (!mounted) return false;
+
+      showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+
+            title: const Text(
+              'Profil Belum Lengkap',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+
+            content: const Text(
+              'Lengkapi profil terlebih dahulu untuk menggunakan fitur ini.',
+              style: TextStyle(height: 1.5),
+            ),
+
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+
+                child: const Text(
+                  'Nanti',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const EditProfileScreen(),
+                    ),
+                  );
+                },
+
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2ECC71),
+                ),
+
+                child: const Text(
+                  'Lengkapi',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      return false;
+    }
+
+    return true;
+  }
 
   @override
   void initState() {
@@ -77,22 +184,36 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
           onTap: (index) async {
-            // ================= SCANNER =================
+            // PROFILE boleh dibuka kapan aja
+            if (index == 4) {
+              setState(() {
+                _selectedIndex = index;
+              });
 
+              return;
+            }
+
+            final profileComplete = await checkProfileCompleted();
+
+            if (!profileComplete) {
+              _bottomNavigationKey.currentState?.setPage(_selectedIndex);
+
+              return;
+            }
+
+            // ================= SCANNER =================
             if (index == 2) {
               await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ScannerScreen()),
               );
 
-              // navbar balik ke page sebelumnya
               _bottomNavigationKey.currentState?.setPage(_selectedIndex);
 
               return;
             }
 
             // ================= NORMAL TAB =================
-
             setState(() {
               _selectedIndex = index;
             });
