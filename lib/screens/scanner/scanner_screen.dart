@@ -47,34 +47,27 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 
   Future<void> takePicture() async {
-  if (controller == null || !controller!.value.isInitialized) {
-    return;
-  }
+    if (controller == null || !controller!.value.isInitialized) {
+      return;
+    }
 
-  try {
+    try {
+      final image = await controller!.takePicture();
 
-    final image = await controller!.takePicture();
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ScanningScreen(
-          imageFile: File(image.path),
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ScanningScreen(imageFile: File(image.path)),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      debugPrint(e.toString());
 
-  } catch (e) {
-
-    debugPrint(e.toString());
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Error: $e"),
-      ),
-    );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
   }
-}
 
   Widget nutritionTile(IconData icon, String title, String value, Color color) {
     return Container(
@@ -119,7 +112,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
               children: [
                 /// CAMERA PREVIEW
                 Positioned.fill(
-                  child: CameraPreview(controller!),
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: SizedBox(
+                      width: controller!.value.previewSize!.height,
+                      height: controller!.value.previewSize!.width,
+                      child: CameraPreview(controller!),
+                    ),
+                  ),
                 ),
 
                 /// DARK OVERLAY
