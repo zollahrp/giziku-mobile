@@ -255,52 +255,82 @@ class OnboardingPage extends StatelessWidget {
                   const SizedBox(height: 34),
 
                   // BUTTON
-                  SizedBox(
-                    width: double.infinity,
-                    height: 60,
-
-                    child: ElevatedButton(
-                      onPressed: onButtonPressed,
-
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2ECC71),
-
-                        elevation: 0,
-
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(22),
-                        ),
-                      ),
-
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-
-                        children: [
-                          Text(
-                            item.buttonText,
-
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                              color: Colors.white,
-                            ),
-                          ),
-
-                          const SizedBox(width: 10),
-
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ),
+                  AnimatedPrimaryButton(
+                    text: item.buttonText,
+                    onPressed: onButtonPressed,
                   ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class AnimatedPrimaryButton extends StatefulWidget {
+  final String text;
+  final VoidCallback onPressed;
+
+  const AnimatedPrimaryButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+  });
+
+  @override
+  State<AnimatedPrimaryButton> createState() => _AnimatedPrimaryButtonState();
+}
+
+class _AnimatedPrimaryButtonState extends State<AnimatedPrimaryButton> {
+  bool _isPressed = false;
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          scale: _isPressed ? 0.96 : (_isHovered ? 1.02 : 1.0),
+          child: SizedBox(
+            width: double.infinity,
+            height: 60,
+            child: ElevatedButton(
+              onPressed: widget.onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2ECC71),
+                elevation: _isHovered ? 6 : 0,
+                shadowColor: const Color(0xFF2ECC71),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.text,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
