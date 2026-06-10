@@ -66,6 +66,7 @@ dependencies:
   flutter_native_splash: ^2.4.7
   flutter_launcher_icons: ^0.14.4
   flutter_image_compress: ^2.3.0
+  flutter_holo_date_picker: ^2.0.0
 
 dev_dependencies:
   flutter_test:

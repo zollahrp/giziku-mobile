@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 import 'package:flutter/material.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -171,14 +172,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     // STATUS BMI
 
-    if (bmi < 18.5) {
-      bmiStatusController.text = 'Kurus';
-    } else if (bmi < 25) {
-      bmiStatusController.text = 'Normal';
-    } else if (bmi < 30) {
-      bmiStatusController.text = 'Gemuk';
+    final age = int.tryParse(ageController.text) ?? 20;
+
+    if (age < 18) {
+      bmiStatusController.text = 'BMI Anak (Kurva WHO)';
     } else {
-      bmiStatusController.text = 'Obesitas';
+      if (bmi < 18.5) {
+        bmiStatusController.text = 'Kurus';
+      } else if (bmi < 25) {
+        bmiStatusController.text = 'Normal';
+      } else if (bmi < 30) {
+        bmiStatusController.text = 'Gemuk';
+      } else {
+        bmiStatusController.text = 'Obesitas';
+      }
     }
 
     // BERAT IDEAL
@@ -195,9 +202,56 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     // KALORI
 
-    final calories = (weight * 30).toInt();
+    double bmr;
 
-    caloriesController.text = calories.toString();
+    if (genderController.text == 'Pria') {
+      bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+    } else {
+      bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+    }
+
+    double activityFactor = 1.2;
+
+    switch (activityController.text) {
+      case 'Sedang':
+        activityFactor = 1.55;
+        break;
+
+      case 'Tinggi':
+        activityFactor = 1.725;
+        break;
+
+      default:
+        activityFactor = 1.2;
+    }
+
+    double exerciseFactor = 1.0;
+
+    switch (exerciseController.text) {
+      case '1-2x/Minggu':
+        exerciseFactor = 1.05;
+        break;
+
+      case '3-5x/Minggu':
+        exerciseFactor = 1.10;
+        break;
+
+      case 'Setiap Hari':
+        exerciseFactor = 1.15;
+        break;
+    }
+
+    double calories = bmr * activityFactor * exerciseFactor;
+
+    if (bodyGoalController.text == 'Menurunkan Berat Badan') {
+      calories -= 500;
+    }
+
+    if (bodyGoalController.text == 'Menambah Massa Otot') {
+      calories += 300;
+    }
+
+    caloriesController.text = calories.round().toString();
   }
 
   void calculateAge(DateTime birthDate) {
@@ -524,13 +578,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       appBar: AppBar(
         elevation: 0,
-
+        centerTitle: true,
         backgroundColor: const Color(0xFF2ECC71),
+
+        iconTheme: const IconThemeData(color: Colors.white),
 
         title: const Text(
           'Edit Profil',
-
-          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
 
@@ -567,14 +626,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   suffixIcon: const Icon(Icons.calendar_month),
 
                   onTap: () async {
-                    final pickedDate = await showDatePicker(
-                      context: context,
-
-                      initialDate: DateTime(2000),
-
+                    final pickedDate = await DatePicker.showSimpleDatePicker(
+                      context,
+                      initialDate: DateTime(2004, 1, 1),
                       firstDate: DateTime(1950),
-
                       lastDate: DateTime.now(),
+
+                      dateFormat: "dd-MMMM-yyyy",
+
+                      locale: DateTimePickerLocale.id,
+
+                      looping: false,
+
+                      titleText: "Pilih Tanggal Lahir",
+
+                      textColor: const Color(0xFF2ECC71),
                     );
 
                     if (pickedDate != null) {
@@ -582,6 +648,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
 
                       calculateAge(pickedDate);
+                      calculateBMI();
 
                       setState(() {});
                     }
@@ -687,6 +754,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   onChanged: (value) {
                     setState(() {
                       activityController.text = value ?? '';
+
+                      calculateBMI();
                     });
                   },
                 ),
@@ -706,6 +775,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   onChanged: (value) {
                     setState(() {
                       exerciseController.text = value ?? '';
+
+                      calculateBMI();
                     });
                   },
                 ),
@@ -724,6 +795,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   onChanged: (value) {
                     setState(() {
                       bodyGoalController.text = value ?? '';
+
+                      calculateBMI();
                     });
                   },
                 ),

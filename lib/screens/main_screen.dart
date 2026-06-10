@@ -148,10 +148,9 @@ class _MainScreenState extends State<MainScreen> {
       backgroundColor: const Color(0xFFF9F9F9),
       body: _screens[_selectedIndex],
       bottomNavigationBar: SafeArea(
+        top: false,
         child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           child: PhysicalModel(
             color: Colors.transparent,
             elevation: 12,
