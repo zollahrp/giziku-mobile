@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:giziku/screens/scanner/FoodStoryPreviewScreen.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/food_scan_model.dart';
@@ -130,12 +131,6 @@ class ScannerResultScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                          ),
-                        ],
                       ),
                       child: const Icon(
                         Icons.arrow_back_ios_new,
@@ -146,13 +141,30 @@ class ScannerResultScreen extends StatelessWidget {
 
                   const SizedBox(width: 16),
 
-                  const Text(
-                    "Hasil Giziku Scanner",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  const Expanded(
+                    child: Text(
+                      "Hasil Giziku Scanner",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+                  ),
+
+                  IconButton(
+                    icon: const Icon(Icons.ios_share_rounded, size: 28),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FoodStoryPreviewScreen(
+                            result: result,
+                            imageFile: imageFile,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

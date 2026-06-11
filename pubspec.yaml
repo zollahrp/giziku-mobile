@@ -68,6 +68,9 @@ dependencies:
   flutter_image_compress: ^2.3.0
   flutter_holo_date_picker: ^2.0.0
 
+  share_plus: ^9.0.0
+  path_provider: ^2.1.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
