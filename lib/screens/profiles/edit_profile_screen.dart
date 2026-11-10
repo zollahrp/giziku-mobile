@@ -629,7 +629,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 color: Color(0xFF0F172A),
                 fontWeight: FontWeight.w900,
                 fontFamily: 'Poppins',
-                fontSize: 18,
+                fontSize: 16,
                 letterSpacing: -0.3,
               ),
             ),
@@ -637,7 +637,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               "Perbarui data fisik & target gizi AI",
               style: TextStyle(
                 color: Color(0xFF64748B),
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: FontWeight.w500,
                 fontFamily: 'Poppins',
               ),
@@ -663,25 +663,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ),
         actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFFF1F5F9),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              "Batal",
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.w800,
+                fontFamily: 'Poppins',
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           Padding(
-            padding: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.only(right: 14),
             child: TextButton(
               onPressed: _isSaving ? null : _saveProfile,
               style: TextButton.styleFrom(
                 backgroundColor: const Color(0xFFE8F8EE),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: _isSaving
                   ? const SizedBox(
-                      width: 16,
-                      height: 16,
+                      width: 14,
+                      height: 14,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1EAB57)),
                     )
                   : Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.check_rounded, color: Color(0xFF1EAB57), size: 16),
+                        Icon(Icons.check_rounded, color: Color(0xFF1EAB57), size: 15),
                         SizedBox(width: 4),
                         Text(
                           "Simpan",
@@ -1103,6 +1125,40 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ==========================================
+            // 9. TOMBOL BATAL
+            // ==========================================
+            Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: TextButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B), size: 18),
+                label: const Text(
+                  "Batal",
+                  style: TextStyle(
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.3,
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                style: TextButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
