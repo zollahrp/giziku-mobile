@@ -27,8 +27,9 @@ class _MainScreenState extends State<MainScreen>
   // Pulse animation controller untuk tombol Scan di tengah
   late AnimationController _scanPulseController;
 
-  // Urutan Layar: Home, Resep, Plan (samping Resep), Gizibot, Peta, Profil
-  final List<Widget> _screens = [
+  // Urutan Layar: Home (0), Resep (1), Plan (2 - samping Resep), Gizibot (3), Peta (4), Profil (5)
+  // Menggunakan getter agar langsung ter-refresh seketika saat Hot Reload tanpa tertahan cache state
+  List<Widget> get _screens => [
     HomeScreen(),
     RecipeScreen(),
     const MealPlanScreen(),
