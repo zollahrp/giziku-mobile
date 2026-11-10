@@ -81,7 +81,6 @@ class _GizifyChatbotScreenState extends State<GizifyChatbotScreen>
         setState(() {
           _thinkingSeconds++;
         });
-        _scrollToBottom();
       } else {
         timer.cancel();
       }
@@ -162,20 +161,10 @@ class _GizifyChatbotScreenState extends State<GizifyChatbotScreen>
     }
   }
 
-  Future<void> _startNewChat() async {
+  void _startNewChat() {
+    _stopThinkingTimer();
     setState(() {
       _currentChatId = null;
-      _messages = [];
-      _isTyping = true;
-    });
-    _startThinkingTimer();
-
-    await Future.delayed(const Duration(milliseconds: 1500));
-
-    if (!mounted) return;
-    _stopThinkingTimer();
-
-    setState(() {
       _isTyping = false;
       _messages = [
         ChatMessage(
@@ -397,8 +386,8 @@ class _GizifyChatbotScreenState extends State<GizifyChatbotScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent + 80,
-          duration: const Duration(milliseconds: 300),
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250),
           curve: Curves.easeOut,
         );
       }
@@ -756,42 +745,56 @@ class _GizifyChatbotScreenState extends State<GizifyChatbotScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Rotating Sparkle Icon
-                          RotationTransition(
-                            turns: _animController,
-                            child: const Icon(
-                              Icons.auto_awesome_rounded,
-                              size: 15,
-                              color: Color(0xFF1EAB57),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-
-                          // Thought stage caption with cross-fade
-                          Flexible(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 250),
-                              child: Text(
-                                thoughtStage,
-                                key: ValueKey<String>(thoughtStage),
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF334155),
-                                ),
-                                overflow: TextOverflow.ellipsis,
+                      SizedBox(
+                        height: 20,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Rotating Sparkle Icon
+                            RotationTransition(
+                              turns: _animController,
+                              child: const Icon(
+                                Icons.auto_awesome_rounded,
+                                size: 15,
+                                color: Color(0xFF1EAB57),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
+                            const SizedBox(width: 8),
 
-                          // 3 Bouncing Dots (Jitter-free Transform.translate)
-                          _buildBouncingDots(),
-                        ],
+                            // Thought stage caption (stable height, no up/down motion)
+                            Flexible(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                layoutBuilder: (currentChild, previousChildren) {
+                                  return Stack(
+                                    alignment: Alignment.centerLeft,
+                                    children: <Widget>[
+                                      ...previousChildren,
+                                      if (currentChild != null) currentChild,
+                                    ],
+                                  );
+                                },
+                                child: Text(
+                                  thoughtStage,
+                                  key: ValueKey<String>(thoughtStage),
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF334155),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+
+                            // 3 Bouncing Dots (buletan kecil bouncing atas bawah)
+                            _buildBouncingDots(),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 8),
 

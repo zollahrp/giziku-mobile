@@ -49,25 +49,12 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUser = message.sender == 'user';
 
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
-      tween: Tween<double>(begin: 0.0, end: 1.0),
-      builder: (context, animValue, child) {
-        return Opacity(
-          opacity: animValue,
-          child: Transform.translate(
-            offset: Offset(0, 8 * (1.0 - animValue)),
-            child: child,
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
-        child: Row(
-          mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
+      child: Row(
+        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
           // Bot Avatar on Left
           if (!isUser) ...[
             Container(
@@ -205,9 +192,8 @@ class ChatBubble extends StatelessWidget {
           ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildImageWidget(String imageStr) {
     if (imageStr.startsWith('http')) {
