@@ -58,7 +58,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Food lists & logs
   List<Map<String, dynamic>> _todayFoodList = [];
   List<Map<String, dynamic>> _scanHistory = [];
+  List<int> _dailyData = [0, 0, 0, 0, 0, 0, 0]; // 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 24:00
   List<int> _weeklyData = [0, 0, 0, 0, 0, 0, 0]; // Senin (0) s/d Minggu (6)
+  List<int> _monthlyData = [0, 0, 0, 0, 0, 0, 0]; // 6 bulan lalu s/d bulan ini
   Set<int> _loggedDays = {};
   Set<int> _planDays = {};
 
@@ -141,23 +143,43 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         });
       }
 
-      // 2. Fetch Food Logs for this Month
+      // 2. Fetch Food Logs for Last 6 Months (Harian, Mingguan, & Bulanan)
       final now = DateTime.now();
-      final firstDayOfMonth = DateTime(now.year, now.month, 1);
       final todayStart = DateTime(now.year, now.month, now.day);
 
       // Current week Monday (Senin)
       final currentWeekday = now.weekday; // 1 (Mon) - 7 (Sun)
       final firstDayOfWeek = DateTime(now.year, now.month, now.day).subtract(Duration(days: currentWeekday - 1));
+      final sixMonthsAgo = DateTime(now.year, now.month - 6, 1);
 
       final logsSnap = await FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
           .collection('foodLogs')
-          .where('scannedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDayOfMonth))
+          .where('scannedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(sixMonthsAgo))
           .get();
 
-      List<int> weekTotals = [0, 0, 0, 0, 0, 0, 0];
+      List<int> dayTotals = [0, 0, 0, 0, 0, 0, 0]; // 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 24:00
+      List<int> weekTotals = [0, 0, 0, 0, 0, 0, 0]; // Sen (0) ... Min (6)
+      List<int> monthTotalCals = [0, 0, 0, 0, 0, 0, 0]; // 6 bulan lalu s/d bulan ini (index 6)
+      List<Set<int>> monthLoggedDays = List.generate(7, (_) => <int>{});
+
+      int getHourSlot(int hour) {
+        if (hour < 8) return 0;   // 06:00
+        if (hour < 11) return 1;  // 09:00
+        if (hour < 14) return 2;  // 12:00
+        if (hour < 17) return 3;  // 15:00
+        if (hour < 20) return 4;  // 18:00
+        if (hour < 23) return 5;  // 21:00
+        return 6;                 // 24:00
+      }
+
+      int getMonthSlot(DateTime date) {
+        final mDiff = (date.year - now.year) * 12 + (date.month - now.month);
+        final slot = 6 + mDiff;
+        return (slot >= 0 && slot < 7) ? slot : -1;
+      }
+
       int calsToday = 0;
       int pro = 0;
       int car = 0;
@@ -183,20 +205,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       for (var doc in logsSnap.docs) {
         final data = doc.data();
         DateTime scannedAt = (data['scannedAt'] as Timestamp?)?.toDate() ?? now;
+        final cals = (data['calories'] as num?)?.toInt() ?? 0;
 
-        loggedDaysSet.add(scannedAt.day);
+        // Logged days kalender jika bulan ini
+        if (scannedAt.month == now.month && scannedAt.year == now.year) {
+          loggedDaysSet.add(scannedAt.day);
+        }
 
-        // Check if within current week (Senin..Minggu)
+        // 1. Data Bulanan (6 bulan lalu s/d bulan ini)
+        final mSlot = getMonthSlot(scannedAt);
+        if (mSlot != -1) {
+          monthTotalCals[mSlot] += cals;
+          monthLoggedDays[mSlot].add(scannedAt.day);
+        }
+
+        // 2. Data Mingguan (Senin..Minggu minggu ini)
         if (!scannedAt.isBefore(firstDayOfWeek)) {
           int dayIdx = scannedAt.weekday - 1; // 0 for Mon, 6 for Sun
           if (dayIdx >= 0 && dayIdx < 7) {
-            weekTotals[dayIdx] += (data['calories'] as num?)?.toInt() ?? 0;
+            weekTotals[dayIdx] += cals;
           }
         }
 
-        // Check if today
+        // 3. Data Harian (Hari ini per jam makan)
         if (!scannedAt.isBefore(todayStart)) {
-          calsToday += (data['calories'] as num?)?.toInt() ?? 0;
+          final hSlot = getHourSlot(scannedAt.hour);
+          dayTotals[hSlot] += cals;
+
+          calsToday += cals;
           pro += (data['protein'] as num?)?.toInt() ?? 0;
           car += (data['carbs'] as num?)?.toInt() ?? 0;
           fat += (data['fat'] as num?)?.toInt() ?? 0;
@@ -210,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           todayFoods.add({
             'id': doc.id,
             'name': data['name'] ?? 'Makanan',
-            'calories': (data['calories'] as num?)?.toInt() ?? 0,
+            'calories': cals,
             'protein': (data['protein'] as num?)?.toInt() ?? 0,
             'carbs': (data['carbs'] as num?)?.toInt() ?? 0,
             'fat': (data['fat'] as num?)?.toInt() ?? 0,
@@ -220,6 +256,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           });
         }
       }
+
+      // Rata-rata kalori per hari aktif di tiap bulan
+      List<int> monthTotals = List.generate(7, (i) {
+        final daysCount = monthLoggedDays[i].length;
+        return daysCount > 0 ? (monthTotalCals[i] / daysCount).round() : 0;
+      });
 
       // 3. Fetch Recent Scan History (Latest 5 items)
       final histSnap = await FirebaseFirestore.instance
@@ -245,7 +287,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
       if (mounted) {
         setState(() {
+          _dailyData = dayTotals;
           _weeklyData = weekTotals;
+          _monthlyData = monthTotals;
           _todayCalories = calsToday;
           _todayProtein = pro;
           _todayCarbs = car;
@@ -1195,9 +1239,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // 4. CALORIE TREND CHART (Tren Konsumsi Kalori)
   // ==========================================
   Widget _buildCalorieTrendChartCard() {
-    final currentDayIdx = DateTime.now().weekday == 7 ? 6 : DateTime.now().weekday - 1;
-    final days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-    final bool hasData = _weeklyData.any((val) => val > 0);
+    final now = DateTime.now();
+
+    List<String> labels;
+    List<int> currentData;
+    int activeIdx;
+    String emptyMessage;
+
+    if (_activeTab == "Harian") {
+      labels = ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "24:00"];
+      currentData = _dailyData;
+      final hour = now.hour;
+      if (hour < 8) {
+        activeIdx = 0;
+      } else if (hour < 11) {
+        activeIdx = 1;
+      } else if (hour < 14) {
+        activeIdx = 2;
+      } else if (hour < 17) {
+        activeIdx = 3;
+      } else if (hour < 20) {
+        activeIdx = 4;
+      } else if (hour < 23) {
+        activeIdx = 5;
+      } else {
+        activeIdx = 6;
+      }
+      emptyMessage = "Belum ada data kalori hari ini.";
+    } else if (_activeTab == "Bulanan") {
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+      labels = [];
+      for (int i = 6; i >= 0; i--) {
+        final d = DateTime(now.year, now.month - i, 1);
+        labels.add(monthNames[d.month - 1]);
+      }
+      currentData = _monthlyData;
+      activeIdx = 6; // Bulan ini selalu slot ke-6
+      emptyMessage = "Belum ada data kalori beberapa bulan ini.";
+    } else {
+      // Mingguan
+      labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+      currentData = _weeklyData;
+      activeIdx = now.weekday == 7 ? 6 : now.weekday - 1;
+      emptyMessage = "Belum ada data kalori minggu ini.";
+    }
+
+    final bool hasData = currentData.any((val) => val > 0);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -1207,7 +1294,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1307,29 +1394,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _CalorieChartPainter(
-                      weeklyData: _weeklyData,
+                      data: currentData,
                       targetCals: _targetCals,
-                      currentDayIndex: currentDayIdx,
+                      activeIndex: activeIdx,
                       hasData: hasData,
                     ),
                   ),
                 ),
 
-                // Empty State Overlay if no calories recorded this week
+                // Empty State Overlay if no calories recorded
                 if (!hasData)
                   Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(
+                      children: [
+                        const Icon(
                           Icons.insights_rounded,
                           color: Color(0xFFCBD5E1),
                           size: 32,
                         ),
-                        SizedBox(height: 6),
+                        const SizedBox(height: 6),
                         Text(
-                          "Belum ada data kalori minggu ini.",
-                          style: TextStyle(
+                          emptyMessage,
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
@@ -1344,24 +1431,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 12),
 
-          // Day Labels below chart
+          // Dynamic Labels below chart (Hours, Days, or Months)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (idx) {
-              final isToday = idx == currentDayIdx;
+            children: List.generate(labels.length, (idx) {
+              final isActive = idx == activeIdx;
               return Container(
-                padding: EdgeInsets.symmetric(horizontal: isToday ? 8 : 4, vertical: 3),
+                padding: EdgeInsets.symmetric(horizontal: isActive ? 8 : 4, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isToday ? const Color(0xFFDCFCE7) : Colors.transparent,
+                  color: isActive ? const Color(0xFFDCFCE7) : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  days[idx],
+                  labels[idx],
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 10,
-                    fontWeight: isToday ? FontWeight.w900 : FontWeight.bold,
-                    color: isToday ? const Color(0xFF15803D) : const Color(0xFF94A3B8),
+                    fontWeight: isActive ? FontWeight.w900 : FontWeight.bold,
+                    color: isActive ? const Color(0xFF15803D) : const Color(0xFF94A3B8),
                   ),
                 ),
               );
@@ -3716,18 +3803,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 }
 
 // ==========================================
-// CALORIE CHART CUSTOM PAINTER
+// CALORIE CHART CUSTOM PAINTER (DINAMIS HARIAN, MINGGUAN, BULANAN)
 // ==========================================
 class _CalorieChartPainter extends CustomPainter {
-  final List<int> weeklyData;
+  final List<int> data;
   final int targetCals;
-  final int currentDayIndex;
+  final int activeIndex;
   final bool hasData;
 
   _CalorieChartPainter({
-    required this.weeklyData,
+    required this.data,
     required this.targetCals,
-    required this.currentDayIndex,
+    required this.activeIndex,
     required this.hasData,
   });
 
@@ -3779,7 +3866,7 @@ class _CalorieChartPainter extends CustomPainter {
     // Dynamic Target Calorie Line (Red Dashed)
     final double targetY = (chartHeight * (1 - (targetCals / maxVal))).clamp(10.0, chartHeight);
     final redDashPaint = Paint()
-      ..color = const Color(0xFFEF4444).withOpacity(0.7)
+      ..color = const Color(0xFFEF4444).withValues(alpha: 0.7)
       ..strokeWidth = 1.5;
 
     // Dashed line
@@ -3790,14 +3877,14 @@ class _CalorieChartPainter extends CustomPainter {
     }
     drawYLabel("$targetCals", targetY, const Color(0xFFEF4444), isBold: true);
 
-    // If no weekly data, don't draw line
+    // If no data recorded, don't draw chart line
     if (!hasData) return;
 
-    // Calculate (x, y) coordinates for the 7 days
+    // Calculate (x, y) coordinates for the 7 points
     final points = <Offset>[];
     for (int i = 0; i < 7; i++) {
       final double x = leftMargin + (i / 6.0) * chartWidth;
-      final int cals = weeklyData[i];
+      final int cals = data[i];
       final double y = (chartHeight * (1 - (cals / maxVal))).clamp(10.0, chartHeight);
       points.add(Offset(x, y));
     }
@@ -3818,8 +3905,8 @@ class _CalorieChartPainter extends CustomPainter {
     final fillPaint = Paint()
       ..shader = LinearGradient(
         colors: [
-          const Color(0xFF1EAB57).withOpacity(0.2),
-          const Color(0xFF1EAB57).withOpacity(0.0),
+          const Color(0xFF1EAB57).withValues(alpha: 0.2),
+          const Color(0xFF1EAB57).withValues(alpha: 0.0),
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -3840,10 +3927,10 @@ class _CalorieChartPainter extends CustomPainter {
     // Draw Dots
     for (int i = 0; i < points.length; i++) {
       final pt = points[i];
-      final val = weeklyData[i];
-      final isToday = i == currentDayIndex;
+      final val = data[i];
+      final isActive = i == activeIndex;
 
-      if (val > 0 || isToday) {
+      if (val > 0 || isActive) {
         // Outer dot
         canvas.drawCircle(
           pt,
@@ -3867,9 +3954,9 @@ class _CalorieChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CalorieChartPainter oldDelegate) {
-    return oldDelegate.weeklyData != weeklyData ||
+    return oldDelegate.data != data ||
         oldDelegate.targetCals != targetCals ||
-        oldDelegate.currentDayIndex != currentDayIndex ||
+        oldDelegate.activeIndex != activeIndex ||
         oldDelegate.hasData != hasData;
   }
 }
