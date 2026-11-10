@@ -517,8 +517,10 @@ class MealPlanScreen extends StatefulWidget {
 
 class _MealPlanScreenState extends State<MealPlanScreen>
     with TickerProviderStateMixin {
-  // Wizard States: 1 = Budget, 2 = Days, 3 = People, 4 = Review
+  // Wizard States: 1 = Budget, 2 = Days, 3 = People (3 Steps persis seperti di web)
   int _currentStep = 1;
+  bool _isShowingWizard = true;
+  bool _hasActiveSavedPlan = false;
 
   String _currency = 'IDR';
   final TextEditingController _budgetController =
@@ -538,13 +540,6 @@ class _MealPlanScreenState extends State<MealPlanScreen>
   // Animation controller for pulsing AI loading & step changes
   late AnimationController _pulseController;
   late AnimationController _bounceController;
-
-  final List<String> _loadingMessages = [
-    'Menganalisis budget makanan...',
-    'Menghitung kebutuhan nutrisi & kalori...',
-    'Menyesuaikan porsi untuk seluruh keluarga...',
-    'Meracik resep & estimasi gizi terbaik Gizify...',
-  ];
 
   @override
   void initState() {
@@ -605,6 +600,8 @@ class _MealPlanScreenState extends State<MealPlanScreen>
         if (mounted) {
           setState(() {
             _activePlan = loadedPlan;
+            _hasActiveSavedPlan = true;
+            _isShowingWizard = false;
           });
         }
       }
@@ -777,6 +774,8 @@ Format JSON Array yang wajib dikembalikan:
                 _activePlan = newPlan;
                 _activeDayIndex = 0;
                 _isLoadingPlan = false;
+                _isShowingWizard = false;
+                _hasActiveSavedPlan = true;
               });
               return;
             }
@@ -803,6 +802,8 @@ Format JSON Array yang wajib dikembalikan:
         _activePlan = newPlan;
         _activeDayIndex = 0;
         _isLoadingPlan = false;
+        _isShowingWizard = false;
+        _hasActiveSavedPlan = true;
       });
     }
   }
@@ -891,24 +892,24 @@ Format JSON Array yang wajib dikembalikan:
     }
   }
 
-  // Reset / Buat Ulang Plan
+  // Reset / Buat Ulang Plan (Matching web SweetAlert reset)
   void _resetPlan() {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
-          'Buat Meal Plan Baru?',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          'Reset Meal Plan?',
+          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w900, fontSize: 18),
         ),
         content: const Text(
-          'Kamu sudah memiliki Meal Plan aktif. Apakah kamu ingin mereset dan membuat menu yang baru?',
-          style: TextStyle(color: Color(0xFF64748B), height: 1.5),
+          'Jurnal meal plan kamu saat ini akan dihapus dan kamu bisa membuat rencana makanan baru dari awal.',
+          style: TextStyle(fontFamily: 'Poppins', color: Color(0xFF64748B), height: 1.5, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            child: const Text('Batal', style: TextStyle(fontFamily: 'Poppins', color: Color(0xFF94A3B8), fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -917,14 +918,27 @@ Format JSON Array yang wajib dikembalikan:
               await prefs.remove('gizify_saved_plan');
               setState(() {
                 _activePlan = null;
+                _hasActiveSavedPlan = false;
+                _isShowingWizard = true;
                 _currentStep = 1;
               });
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Meal plan kamu sudah di-reset. Kamu bisa membuat meal plan baru sekarang.'),
+                    backgroundColor: const Color(0xFF1EAB57),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1EAB57),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              backgroundColor: const Color(0xFFEF4444),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             ),
-            child: const Text('Ya, Buat Baru', style: TextStyle(color: Colors.white)),
+            child: const Text('Ya, Reset Plan', style: TextStyle(fontFamily: 'Poppins', color: Colors.white, fontWeight: FontWeight.w900)),
           ),
         ],
       ),
@@ -940,7 +954,7 @@ Format JSON Array yang wajib dikembalikan:
       return _buildLoadingView();
     }
 
-    if (_activePlan != null) {
+    if (_activePlan != null && !_isShowingWizard) {
       return _buildResultView();
     }
 
@@ -948,25 +962,32 @@ Format JSON Array yang wajib dikembalikan:
   }
 
   // ------------------------------------------
-  // 1. LOADING VIEW (PULSING GEN-Z AI ROBOT)
+  // 1. LOADING VIEW (APPLE STYLE SULTAN SINKRON WEB)
   // ------------------------------------------
   Widget _buildLoadingView() {
+    final steps = [
+      'Menganalisis preferensi & budget harian',
+      'Menghitung kebutuhan makronutrisi & kalori',
+      'Mencocokkan resep lokal bergizi seimbang',
+      'Menyusun jadwal makan & estimasi belanja',
+    ];
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAF9),
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ScaleTransition(
-                  scale: Tween<double>(begin: 0.9, end: 1.1).animate(
+                  scale: Tween<double>(begin: 0.92, end: 1.06).animate(
                     CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
                   ),
                   child: Container(
-                    width: 96,
-                    height: 96,
+                    width: 90,
+                    height: 90,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const LinearGradient(
@@ -978,7 +999,7 @@ Format JSON Array yang wajib dikembalikan:
                         BoxShadow(
                           color: const Color(0xFF1EAB57).withValues(alpha: 0.4),
                           blurRadius: 30,
-                          offset: const Offset(0, 12),
+                          offset: const Offset(0, 10),
                         ),
                       ],
                     ),
@@ -986,68 +1007,138 @@ Format JSON Array yang wajib dikembalikan:
                       child: Icon(
                         Icons.auto_awesome_rounded,
                         color: Colors.white,
-                        size: 46,
+                        size: 44,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 26),
                 const Text(
-                  'Gizify AI Sedang Meracik...',
+                  'AI Sedang Meracik Menu Sehat...',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 22,
+                    fontSize: 21,
                     fontWeight: FontWeight.w900,
                     color: Color(0xFF0F172A),
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 10),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
+                const SizedBox(height: 8),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    _loadingMessages[_loadingStep.clamp(0, 3)],
-                    key: ValueKey<int>(_loadingStep),
+                    'Menganalisis kebutuhan nutrisi, menyeimbangkan budget, dan memilih bahan terbaik untukmu.',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 13,
-                      color: Color(0xFF1EAB57),
-                      fontWeight: FontWeight.w700,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748B),
+                      height: 1.45,
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: SizedBox(
-                    width: 240,
-                    height: 10,
-                    child: LinearProgressIndicator(
-                      value: (_loadingStep + 1) / 4,
-                      backgroundColor: const Color(0xFFE2E8F0),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Color(0xFF1EAB57)),
+                const SizedBox(height: 28),
+
+                // 4 Checklist Items (Apple-style Sultan Card from Web)
+                ...List.generate(steps.length, (index) {
+                  final isDone = _loadingStep > index;
+                  final isActive = _loadingStep == index;
+
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 350),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? Colors.white
+                          : isDone
+                              ? const Color(0xFFF8FAFC)
+                              : Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isActive
+                            ? const Color(0xFF1EAB57)
+                            : isDone
+                                ? const Color(0xFFE2E8F0)
+                                : Colors.transparent,
+                        width: isActive ? 1.8 : 1.0,
+                      ),
+                      boxShadow: isActive
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFF1EAB57).withValues(alpha: 0.12),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : null,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    'Step ${_loadingStep + 1} of 4 • Calculating Macros',
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 11,
-                      color: Color(0xFF1EAB57),
-                      fontWeight: FontWeight.w700,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isDone
+                                ? const Color(0xFF1EAB57)
+                                : isActive
+                                    ? const Color(0xFFECFDF5)
+                                    : const Color(0xFFF1F5F9),
+                            border: Border.all(
+                              color: isDone || isActive
+                                  ? const Color(0xFF1EAB57)
+                                  : const Color(0xFFCBD5E1),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Center(
+                            child: isDone
+                                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                                : isActive
+                                    ? const SizedBox(
+                                        width: 13,
+                                        height: 13,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(Color(0xFF1EAB57)),
+                                        ),
+                                      )
+                                    : Text(
+                                        '${index + 1}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                      ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            steps[index],
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12.5,
+                              fontWeight:
+                                  isActive || isDone ? FontWeight.w800 : FontWeight.w600,
+                              color: isActive
+                                  ? const Color(0xFF0F172A)
+                                  : isDone
+                                      ? const Color(0xFF475569)
+                                      : const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
+                  );
+                }),
               ],
             ),
           ),
@@ -1057,7 +1148,7 @@ Format JSON Array yang wajib dikembalikan:
   }
 
   // ------------------------------------------
-  // 2. WIZARD VIEW (GEN-Z POLISHED & ANTI-NABRAK)
+  // 2. WIZARD VIEW (PERSIS DESIGN WEB GIZIFY)
   // ------------------------------------------
   Widget _buildWizardView() {
     return Scaffold(
@@ -1068,19 +1159,26 @@ Format JSON Array yang wajib dikembalikan:
             // Top App Bar
             _buildWizardAppBar(),
 
-            // Wizard Step Indicators with Gen-Z flair
-            _buildStepIndicator(),
+            // Wizard Step Indicators with Web progress bar
+            _buildWebProgressBar(),
 
             // Wizard Dynamic Content with Scrollable Body
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
-                child: _buildCurrentStepContent(),
+                padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_hasActiveSavedPlan && _activePlan != null)
+                      _buildActiveSavedPlanBanner(),
+                    _buildCurrentStepContent(),
+                  ],
+                ),
               ),
             ),
 
-            // Bottom Navigation Actions (Raised by 32dp to prevent hitting scan button!)
+            // Bottom Navigation Actions (Raised by 48dp to prevent hitting scan button!)
             _buildWizardBottomBar(),
           ],
         ),
@@ -1096,57 +1194,80 @@ Format JSON Array yang wajib dikembalikan:
         border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.2)),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.restaurant_menu_rounded,
+                    color: Color(0xFF1EAB57),
+                    size: 22,
+                  ),
+                ),
               ),
-              borderRadius: BorderRadius.circular(14),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Meal Plan Generator',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: const [
+                      Icon(Icons.auto_awesome_rounded, size: 12, color: Color(0xFF1EAB57)),
+                      SizedBox(width: 4),
+                      Text(
+                        'RENCANA MENU HEMAT & SEHAT',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF1EAB57),
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(color: const Color(0xFFA7F3D0)),
             ),
-            child: const Center(
-              child: Icon(
-                Icons.account_balance_wallet_rounded,
-                color: Color(0xFF1EAB57),
-                size: 22,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: const [
-                    Text(
-                      'Meal Plan AI',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF0F172A),
-                        letterSpacing: -0.4,
-                      ),
-                    ),
-                    SizedBox(width: 6),
-                    Text('✨', style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'ATUR BUDGET & GIZI MAKSIMAL',
+            child: Row(
+              children: const [
+                Icon(Icons.check_circle_rounded, size: 13, color: Color(0xFF1EAB57)),
+                SizedBox(width: 4),
+                Text(
+                  'GIZIFY AI',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 9.5,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1EAB57),
-                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF065F46),
+                    letterSpacing: 0.6,
                   ),
                 ),
               ],
@@ -1157,95 +1278,197 @@ Format JSON Array yang wajib dikembalikan:
     );
   }
 
-  Widget _buildStepIndicator() {
+  // PROGRESS BAR 3 SEGMEN PERSIS WEB (renderProgressBar)
+  Widget _buildWebProgressBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       color: Colors.white,
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildStepDot(1, '💸 Budget'),
-          _buildStepLine(1),
-          _buildStepDot(2, '🗓️ Durasi'),
-          _buildStepLine(2),
-          _buildStepDot(3, '👥 Porsi'),
-          _buildStepLine(3),
-          _buildStepDot(4, '🚀 Review'),
+          Row(
+            children: [
+              if (_currentStep > 1) ...[
+                GestureDetector(
+                  onTap: () => setState(() => _currentStep--),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Icon(Icons.chevron_left_rounded, size: 22, color: Color(0xFF64748B)),
+                    ),
+                  ),
+                ),
+              ],
+              Expanded(
+                child: Row(
+                  children: [
+                    _buildBarSegment(1),
+                    const SizedBox(width: 8),
+                    _buildBarSegment(2),
+                    const SizedBox(width: 8),
+                    _buildBarSegment(3),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: _currentStep > 1 ? 48 : 2, top: 8),
+            child: Text(
+              'LANGKAH $_currentStep DARI 3',
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF94A3B8),
+                letterSpacing: 1.2,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStepDot(int step, String label) {
-    final isDone = _currentStep > step;
-    final isActive = _currentStep == step;
-
-    return Column(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive
-                ? const Color(0xFF1EAB57)
-                : isDone
-                    ? const Color(0xFFECFDF5)
-                    : const Color(0xFFF8FAFC),
-            border: Border.all(
-              color: isActive || isDone
-                  ? const Color(0xFF1EAB57)
-                  : const Color(0xFFCBD5E1),
-              width: 2,
-            ),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFF1EAB57).withValues(alpha: 0.35),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Center(
-            child: isDone
-                ? const Icon(Icons.check_rounded, size: 16, color: Color(0xFF1EAB57))
-                : Text(
-                    '$step',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      color: isActive ? Colors.white : const Color(0xFF94A3B8),
-                    ),
+  Widget _buildBarSegment(int step) {
+    final isActiveOrDone = _currentStep >= step;
+    return Expanded(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: 6.5,
+        decoration: BoxDecoration(
+          color: isActiveOrDone ? const Color(0xFF1EAB57) : const Color(0xFFE2E8F0),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isActiveOrDone
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF1EAB57).withValues(alpha: 0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-          ),
+                ]
+              : null,
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 9.5,
-            fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
-            color: isActive ? const Color(0xFF1EAB57) : const Color(0xFF64748B),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildStepLine(int afterStep) {
-    final isDone = _currentStep > afterStep;
-    return Expanded(
-      child: Container(
-        height: 2.5,
-        margin: const EdgeInsets.only(bottom: 16, left: 4, right: 4),
-        decoration: BoxDecoration(
-          color: isDone ? const Color(0xFF1EAB57) : const Color(0xFFE2E8F0),
-          borderRadius: BorderRadius.circular(2),
-        ),
+  // AMBER ALERT CARD KETIKA SUDAH PUNYA SAVED PLAN (PERSIS WEB)
+  Widget _buildActiveSavedPlanBanner() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFFDE68A)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.calendar_today_rounded, color: Color(0xFFB45309), size: 18),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kamu sedang memiliki Meal Plan aktif',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    Text(
+                      'Bisa langsung kamu lihat di Resep Kamu, atau reset jika ingin merancang dari awal.',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() => _isShowingWizard = false);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(color: Color(0xFFE2E8F0)),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text(
+                    'Lihat Plan',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF334155),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _resetPlan,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFF1F2),
+                    foregroundColor: const Color(0xFFE11D48),
+                    elevation: 0,
+                    side: const BorderSide(color: Color(0xFFFECDD3)),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text(
+                    'Reset Plan',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1258,404 +1481,254 @@ Format JSON Array yang wajib dikembalikan:
         return _buildStep2Days();
       case 3:
         return _buildStep3People();
-      case 4:
-        return _buildStep4Review();
       default:
         return _buildStep1Budget();
     }
   }
 
-  // STEP 1: BUDGET (HERO CARD WITH SCALE ANIMATION)
+  // STEP 1: BUDGET (PERSIS DI WEB GIZIFY)
   Widget _buildStep1Budget() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(
-          badge: 'LANGKAH 1 DARI 4',
-          icon: Icons.savings_rounded,
+        // Web Hero Icon Box + Title + Desc
+        _buildWebHeroHeader(
+          icon: Icons.account_balance_wallet_outlined,
           title: 'Berapa Budget Belanjamu?',
           desc:
-              'Atur budget sesukamu! AI Gizify akan memaksimalkan nutrisi dan meracik resep lezat tanpa melebihi batas ini.',
+              'Tentukan batas pengeluaran untuk bahan makanan. AI akan memaksimalkan nutrisi dan variasi resep sesuai budget ini.',
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 20),
 
         // Currency Toggle
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              _buildCurrencyPill('🇮🇩 IDR (Rp)', 'IDR'),
-              _buildCurrencyPill('🇺🇸 USD (\$)', 'USD'),
-              _buildCurrencyPill('🇲🇾 MYR (RM)', 'MYR'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 18),
-
-        // Hero Input Card with bouncy feeling
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF1EAB57).withValues(alpha: 0.3), width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF1EAB57).withValues(alpha: 0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'TOTAL ANGGARAN',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF94A3B8),
-                  letterSpacing: 1.0,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    _currency == 'USD'
-                        ? '\$'
-                        : _currency == 'MYR'
-                            ? 'RM '
-                            : 'Rp ',
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1EAB57),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: _budgetController,
-                      keyboardType: TextInputType.number,
-                      onChanged: _onBudgetChanged,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF0F172A),
-                        letterSpacing: -0.5,
-                      ),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                        hintText: '100.000',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Quick Add Chips
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (_currency == 'IDR') ...[
-              _buildQuickAddChip('⚡ +50rb', 50000),
-              _buildQuickAddChip('🥗 +100rb', 100000),
-              _buildQuickAddChip('👑 +200rb', 200000),
-              _buildQuickAddChip('💎 +500rb', 500000),
-            ] else if (_currency == 'USD') ...[
-              _buildQuickAddChip('⚡ +\$5', 50000),
-              _buildQuickAddChip('🥗 +\$10', 100000),
-              _buildQuickAddChip('👑 +\$20', 200000),
-            ] else ...[
-              _buildQuickAddChip('⚡ +RM 10', 50000),
-              _buildQuickAddChip('🥗 +RM 20', 100000),
-              _buildQuickAddChip('👑 +RM 50', 200000),
-            ],
-          ],
-        ),
-        const SizedBox(height: 18),
-
-        // Gen-Z Fun Insight Card
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFA7F3D0)),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text('💡', style: TextStyle(fontSize: 20)),
-              SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Tips: AI Gizify bakal susun 3 menu lengkap per hari (Sarapan, Siang, Malam) dengan bahan lokal murah bernutrisi tinggi!',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 11.5,
-                    color: Color(0xFF065F46),
-                    fontWeight: FontWeight.w600,
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCurrencyPill(String label, String code) {
-    final isSelected = _currency == code;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _switchCurrency(code),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Center(
-            child: Text(
-              label,
+            const Text(
+              'MATA UANG',
               style: TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? const Color(0xFF1EAB57) : const Color(0xFF64748B),
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF94A3B8),
+                letterSpacing: 1.2,
               ),
             ),
-          ),
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildWebCurrencyTab('🇮🇩', 'Rp IDR', 'IDR'),
+                  _buildWebCurrencyTab('🇲🇾', 'RM MYR', 'MYR'),
+                  _buildWebCurrencyTab('🌐', '\$ USD', 'USD'),
+                ],
+              ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
+        const SizedBox(height: 14),
 
-  Widget _buildQuickAddChip(String label, int amount) {
-    return ActionChip(
-      onPressed: () => _addBudget(amount),
-      label: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 11.5,
-          fontWeight: FontWeight.w800,
-          color: Color(0xFF1EAB57),
-        ),
-      ),
-      backgroundColor: Colors.white,
-      side: const BorderSide(color: Color(0xFFA7F3D0), width: 1.5),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    );
-  }
-
-  // STEP 2: DAYS (INTERACTIVE GEN-Z PRESET CARDS)
-  Widget _buildStep2Days() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(
-          badge: 'LANGKAH 2 DARI 4',
-          icon: Icons.calendar_month_rounded,
-          title: 'Berapa Hari Rencana Menumu?',
-          desc:
-              'Pilih durasi rencana makanmu. Setiap hari akan diracik variasi menu seimbang agar kamu tidak bosan!',
-        ),
-        const SizedBox(height: 18),
-
-        // 4 Aesthetic Preset Cards
-        _buildGenZOptionCard(
-          title: '⚡ 2 Hari • Weekend Special',
-          subtitle: 'Cocok buat masak santai akhir pekan atau coba menu baru',
-          value: '2',
-          selectedValue: _daysController.text,
-          onTap: () => setState(() => _daysController.text = '2'),
-        ),
-        const SizedBox(height: 10),
-        _buildGenZOptionCard(
-          title: '🥗 3 Hari • Paling Populer (Rekomendasi)',
-          subtitle: 'Pas buat belanja bahan segar mingguan tanpa mubazir',
-          value: '3',
-          selectedValue: _daysController.text,
-          isRecommended: true,
-          onTap: () => setState(() => _daysController.text = '3'),
-        ),
-        const SizedBox(height: 10),
-        _buildGenZOptionCard(
-          title: '💼 5 Hari • Weekday Work Plan',
-          subtitle: 'Fokus kerja dari Senin sampai Jumat, bekal sehat anti jajan',
-          value: '5',
-          selectedValue: _daysController.text,
-          onTap: () => setState(() => _daysController.text = '5'),
-        ),
-        const SizedBox(height: 10),
-        _buildGenZOptionCard(
-          title: '👑 7 Hari • Full Seminggu Sehat',
-          subtitle: 'Perencanaan matang satu minggu penuh, hemat maksimal!',
-          value: '7',
-          selectedValue: _daysController.text,
-          onTap: () => setState(() => _daysController.text = '7'),
-        ),
-      ],
-    );
-  }
-
-  // STEP 3: PEOPLE (INTERACTIVE GEN-Z PRESET CARDS)
-  Widget _buildStep3People() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(
-          badge: 'LANGKAH 3 DARI 4',
-          icon: Icons.diversity_3_rounded,
-          title: 'Untuk Berapa Orang?',
-          desc:
-              'Porsi masakan dan takaran belanja akan dihitung proporsional untuk seluruh anggota yang makan.',
-        ),
-        const SizedBox(height: 18),
-
-        _buildGenZOptionCard(
-          title: '🧑 Solo Living (1 Orang)',
-          subtitle: 'Anak kos atau hidup mandiri, takaran pas untuk sendiri',
-          value: '1',
-          selectedValue: _peopleController.text,
-          onTap: () => setState(() => _peopleController.text = '1'),
-        ),
-        const SizedBox(height: 10),
-        _buildGenZOptionCard(
-          title: '👫 Duo Sehat (2 Orang)',
-          subtitle: 'Pasutri atau sahabat yang ingin pola makan sehat barengan',
-          value: '2',
-          selectedValue: _peopleController.text,
-          isRecommended: true,
-          onTap: () => setState(() => _peopleController.text = '2'),
-        ),
-        const SizedBox(height: 10),
-        _buildGenZOptionCard(
-          title: '👨‍👩‍👧 Keluarga Ceria (3 - 4 Orang)',
-          subtitle: 'Menu seporsi kenyang yang ramah untuk anak-anak & keluarga',
-          value: '3',
-          selectedValue: _peopleController.text,
-          onTap: () => setState(() => _peopleController.text = '3'),
-        ),
-        const SizedBox(height: 10),
-        _buildGenZOptionCard(
-          title: '👨‍👩‍👧‍👦 Rombongan Besar (5+ Orang)',
-          subtitle: 'Porsi masakan besar untuk seluruh anggota rumah',
-          value: '5',
-          selectedValue: _peopleController.text,
-          onTap: () => setState(() => _peopleController.text = '5'),
-        ),
-      ],
-    );
-  }
-
-  // STEP 4: REVIEW & CONFIRM (NEOMORPHIC SUMMARY)
-  Widget _buildStep4Review() {
-    final budgetStr = _budgetController.text.trim();
-    final daysStr = _daysController.text.trim();
-    final peopleStr = _peopleController.text.trim();
-
-    final daysNum = int.tryParse(daysStr) ?? 1;
-    final budgetRaw = int.tryParse(budgetStr.replaceAll('.', '')) ?? 100000;
-    final perDay = (budgetRaw / daysNum).round();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(
-          badge: 'SIAP DIRACIK OLEH AI',
-          icon: Icons.rocket_launch_rounded,
-          title: 'Cek Ringkasan Rencanamu',
-          desc:
-              'Semua parameter sudah siap! Gizify AI akan otomatis mengkombinasikan resep terbaik sesuai profil gizimu.',
-        ),
-        const SizedBox(height: 18),
-
-        // Glowing Review Card
+        // Giant Input Card (Matching web)
         Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Column(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildReviewRow('Total Anggaran', '$_currency $budgetStr', isBold: true),
-              const Divider(height: 22, color: Color(0xFFF1F5F9)),
-              _buildReviewRow('Durasi Menu', '$daysStr Hari (${daysNum * 3} Variasi Masakan)'),
-              const Divider(height: 22, color: Color(0xFFF1F5F9)),
-              _buildReviewRow('Jumlah Porsi', '$peopleStr Orang'),
-              const Divider(height: 22, color: Color(0xFFF1F5F9)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFFECFDF5),
                   borderRadius: BorderRadius.circular(14),
                 ),
+                child: Text(
+                  _currency == 'USD'
+                      ? '\$'
+                      : _currency == 'MYR'
+                          ? 'RM'
+                          : 'Rp',
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1EAB57),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: TextField(
+                  controller: _budgetController,
+                  keyboardType: TextInputType.number,
+                  onChanged: _onBudgetChanged,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.5,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                    hintText: _currency == 'USD'
+                        ? '15'
+                        : _currency == 'MYR'
+                            ? '25'
+                            : '100.000',
+                    hintStyle: const TextStyle(color: Color(0xFFCBD5E1)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Quick Add Buttons (Matching web)
+        Row(
+          children: [
+            const Text(
+              'TAMBAH CEPAT:',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF94A3B8),
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'ESTIMASI PER HARI',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF1EAB57),
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                    Text(
-                      _currency == 'IDR'
-                          ? 'Rp ${_formatNumber(perDay)}'
-                          : '$_currency ${(budgetRaw / daysNum).toStringAsFixed(1)}',
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF1EAB57),
-                      ),
-                    ),
+                    if (_currency == 'IDR') ...[
+                      _buildWebQuickAddBtn('+20rb', 20000),
+                      const SizedBox(width: 6),
+                      _buildWebQuickAddBtn('+50rb', 50000),
+                      const SizedBox(width: 6),
+                      _buildWebQuickAddBtn('+100rb', 100000),
+                    ] else if (_currency == 'MYR') ...[
+                      _buildWebQuickAddBtn('+RM 5', 50000),
+                      const SizedBox(width: 6),
+                      _buildWebQuickAddBtn('+RM 10', 100000),
+                      const SizedBox(width: 6),
+                      _buildWebQuickAddBtn('+RM 20', 200000),
+                    ] else ...[
+                      _buildWebQuickAddBtn('+\$5', 50000),
+                      const SizedBox(width: 6),
+                      _buildWebQuickAddBtn('+\$10', 100000),
+                      const SizedBox(width: 6),
+                      _buildWebQuickAddBtn('+\$20', 200000),
+                    ],
                   ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // STEP 2: DAYS (PERSIS DI WEB GIZIFY)
+  Widget _buildStep2Days() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildWebHeroHeader(
+          icon: Icons.calendar_month_outlined,
+          title: 'Berapa Hari Rencana Makanmu?',
+          desc:
+              'Rencanakan menu harianmu mulai dari 1 hingga maksimal 7 hari untuk efisiensi belanja.',
+        ),
+        const SizedBox(height: 20),
+
+        // Giant Input Card (Matching web)
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECFDF5),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.access_time_rounded,
+                    color: Color(0xFF1EAB57), size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: TextField(
+                  controller: _daysController,
+                  keyboardType: TextInputType.number,
+                  onChanged: (val) {
+                    final num = int.tryParse(val) ?? 0;
+                    if (num > 7) {
+                      _daysController.text = '7';
+                      _daysController.selection =
+                          const TextSelection.collapsed(offset: 1);
+                    }
+                  },
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.5,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                    hintText: '2',
+                    hintStyle: TextStyle(color: Color(0xFFCBD5E1)),
+                  ),
+                ),
+              ),
+              const Text(
+                'HARI',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 1.0,
                 ),
               ),
             ],
@@ -1663,43 +1736,184 @@ Format JSON Array yang wajib dikembalikan:
         ),
         const SizedBox(height: 16),
 
-        // User Health Profile Box
+        // Quick Preset Chips (Web style)
+        Row(
+          children: [
+            const Text(
+              'PILIHAN CEPAT:',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF94A3B8),
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    _buildWebPresetChip('2 Hari', '2', _daysController),
+                    const SizedBox(width: 6),
+                    _buildWebPresetChip('3 Hari', '3', _daysController),
+                    const SizedBox(width: 6),
+                    _buildWebPresetChip('5 Hari', '5', _daysController),
+                    const SizedBox(width: 6),
+                    _buildWebPresetChip('7 Hari', '7', _daysController),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // STEP 3: PEOPLE (PERSIS DI WEB GIZIFY)
+  Widget _buildStep3People() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildWebHeroHeader(
+          icon: Icons.group_outlined,
+          title: 'Untuk Berapa Orang Menu Ini?',
+          desc:
+              'Porsi bahan makanan dan takaran gizi akan disesuaikan otomatis untuk seluruh anggota keluarga.',
+        ),
+        const SizedBox(height: 20),
+
+        // Giant Input Card (Matching web)
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECFDF5),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.people_alt_rounded,
+                    color: Color(0xFF1EAB57), size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: TextField(
+                  controller: _peopleController,
+                  keyboardType: TextInputType.number,
+                  onChanged: (val) {
+                    final num = int.tryParse(val) ?? 0;
+                    if (num > 10) {
+                      _peopleController.text = '10';
+                      _peopleController.selection =
+                          const TextSelection.collapsed(offset: 2);
+                    }
+                  },
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.5,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                    hintText: '1',
+                    hintStyle: TextStyle(color: Color(0xFFCBD5E1)),
+                  ),
+                ),
+              ),
+              const Text(
+                'ORANG',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Quick Preset Chips (Web style)
+        Row(
+          children: [
+            const Text(
+              'PILIHAN CEPAT:',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF94A3B8),
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    _buildWebPresetChip('1 Orang', '1', _peopleController),
+                    const SizedBox(width: 6),
+                    _buildWebPresetChip('2 Orang', '2', _peopleController),
+                    const SizedBox(width: 6),
+                    _buildWebPresetChip('4 Orang', '4', _peopleController),
+                    const SizedBox(width: 6),
+                    _buildWebPresetChip('5+ Orang', '5', _peopleController),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+
+        // Profile Sync Card (Informasi Profil AI)
+        Container(
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: const Color(0xFFF0FDF4),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFA7F3D0)),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('✨', style: TextStyle(fontSize: 20)),
+              const Icon(Icons.verified_user_rounded,
+                  color: Color(0xFF1EAB57), size: 22),
               const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Profil Kesehatanmu Tersinkronisasi',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF065F46),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Target: ${_userProfile?['body_goal'] ?? _userProfile?['bodyGoal'] ?? 'Menjaga Berat Badan'} • Kebutuhan: ${_userProfile?['daily_calories'] ?? _userProfile?['calories'] ?? 2000} Kkal/hari',
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 11,
-                        color: Color(0xFF047857),
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'AI otomatis menyesuaikan porsi untuk ${_userProfile?['name'] ?? 'kamu'} (${_userProfile?['body_goal'] ?? 'Pola Makan Sehat'}).',
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF065F46),
+                  ),
                 ),
               ),
             ],
@@ -1709,118 +1923,7 @@ Format JSON Array yang wajib dikembalikan:
     );
   }
 
-  // Gen-Z Option Card (Card Pilihan Interaktif dengan Border Hijau)
-  Widget _buildGenZOptionCard({
-    required String title,
-    required String subtitle,
-    required String value,
-    required String selectedValue,
-    required VoidCallback onTap,
-    bool isRecommended = false,
-  }) {
-    final isSelected = selectedValue == value;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFECFDF5) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF1EAB57) : const Color(0xFFE2E8F0),
-            width: isSelected ? 2.0 : 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? const Color(0xFF1EAB57).withValues(alpha: 0.12)
-                  : Colors.black.withValues(alpha: 0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w800,
-                            color: isSelected
-                                ? const Color(0xFF065F46)
-                                : const Color(0xFF0F172A),
-                          ),
-                        ),
-                      ),
-                      if (isRecommended)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1EAB57),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'POPULER',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 11,
-                      color: isSelected
-                          ? const Color(0xFF047857)
-                          : const Color(0xFF64748B),
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? const Color(0xFF1EAB57) : Colors.transparent,
-                border: Border.all(
-                  color: isSelected ? const Color(0xFF1EAB57) : const Color(0xFFCBD5E1),
-                  width: 2,
-                ),
-              ),
-              child: isSelected
-                  ? const Icon(Icons.check, size: 14, color: Colors.white)
-                  : null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader({
-    required String badge,
+  Widget _buildWebHeroHeader({
     required IconData icon,
     required String title,
     required String desc,
@@ -1829,41 +1932,34 @@ Format JSON Array yang wajib dikembalikan:
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          width: 58,
+          height: 58,
           decoration: BoxDecoration(
             color: const Color(0xFFECFDF5),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(color: const Color(0xFFA7F3D0)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1EAB57).withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
-          child: Text(
-            badge,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 9.5,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF1EAB57),
-              letterSpacing: 0.8,
-            ),
+          child: Center(
+            child: Icon(icon, color: const Color(0xFF1EAB57), size: 28),
           ),
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Icon(icon, color: const Color(0xFF1EAB57), size: 24),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF0F172A),
-                  letterSpacing: -0.3,
-                ),
-              ),
-            ),
-          ],
+        const SizedBox(height: 14),
+        Text(
+          title,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 22,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF0F172A),
+            letterSpacing: -0.5,
+          ),
         ),
         const SizedBox(height: 6),
         Text(
@@ -1871,6 +1967,7 @@ Format JSON Array yang wajib dikembalikan:
           style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 12.5,
+            fontWeight: FontWeight.w500,
             color: Color(0xFF64748B),
             height: 1.4,
           ),
@@ -1879,29 +1976,109 @@ Format JSON Array yang wajib dikembalikan:
     );
   }
 
-  Widget _buildReviewRow(String label, String value, {bool isBold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
+  Widget _buildWebCurrencyTab(String flag, String label, String code) {
+    final isSelected = _currency == code;
+    return GestureDetector(
+      onTap: () => _switchCurrency(code),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF1EAB57) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF1EAB57).withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(flag, style: const TextStyle(fontSize: 12)),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
+                color: isSelected ? Colors.white : const Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWebQuickAddBtn(String label, int amount) {
+    return GestureDetector(
+      onTap: () => _addBudget(amount),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Text(
           label,
           style: const TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 12.5,
-            color: Color(0xFF64748B),
-            fontWeight: FontWeight.w600,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF334155),
           ),
         ),
-        Text(
-          value,
+      ),
+    );
+  }
+
+  Widget _buildWebPresetChip(
+      String label, String value, TextEditingController controller) {
+    final isSelected = controller.text == value;
+    return GestureDetector(
+      onTap: () => setState(() => controller.text = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF1EAB57) : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF1EAB57) : const Color(0xFFE2E8F0),
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF1EAB57).withValues(alpha: 0.25),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
           style: TextStyle(
             fontFamily: 'Poppins',
-            fontSize: isBold ? 15 : 13.5,
-            fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
-            color: const Color(0xFF0F172A),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: isSelected ? Colors.white : const Color(0xFF475569),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -1951,7 +2128,7 @@ Format JSON Array yang wajib dikembalikan:
             flex: 2,
             child: ElevatedButton(
               onPressed: () {
-                if (_currentStep < 4) {
+                if (_currentStep < 3) {
                   setState(() => _currentStep++);
                 } else {
                   _generateMealPlan();
@@ -1970,7 +2147,7 @@ Format JSON Array yang wajib dikembalikan:
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _currentStep == 4 ? 'Mulai Racik Menu AI' : 'Lanjut',
+                    _currentStep == 3 ? 'Mulai Racik Menu AI' : 'Lanjut',
                     style: const TextStyle(
                       fontFamily: 'Poppins',
                       color: Colors.white,
@@ -1980,7 +2157,9 @@ Format JSON Array yang wajib dikembalikan:
                   ),
                   const SizedBox(width: 6),
                   Icon(
-                    _currentStep == 4 ? Icons.auto_awesome_rounded : Icons.arrow_forward_rounded,
+                    _currentStep == 3
+                        ? Icons.auto_awesome_rounded
+                        : Icons.arrow_forward_rounded,
                     size: 18,
                     color: Colors.white,
                   ),
@@ -2026,6 +2205,56 @@ Format JSON Array yang wajib dikembalikan:
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Summary Badge & Titles (Matching web)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFECFDF5),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFA7F3D0)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.auto_awesome_rounded, size: 12, color: Color(0xFF1EAB57)),
+                          SizedBox(width: 4),
+                          Text(
+                            'MENU SUDAH SIAP',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF1EAB57),
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Rencana Menu Spesialmu Siap!',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'AI telah merancang variasi makanan lezat bergizi tinggi sesuai batasan anggaranmu.',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF64748B),
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
                     // Target Budget Card (Emerald Gradient)
                     Container(
                       width: double.infinity,
@@ -2332,8 +2561,9 @@ Format JSON Array yang wajib dikembalikan:
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
+                  color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: const Center(
                   child: Icon(Icons.restaurant_menu_rounded,
@@ -2343,48 +2573,94 @@ Format JSON Array yang wajib dikembalikan:
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Jadwal Menu Siap!',
+                children: [
+                  const Text(
+                    'Meal Plan Generator',
                     style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 16,
+                      fontSize: 15.5,
                       fontWeight: FontWeight.w900,
                       color: Color(0xFF0F172A),
                     ),
                   ),
-                  Text(
-                    'GIZIFY MEAL PLANNER',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1EAB57),
-                      letterSpacing: 0.8,
-                    ),
+                  Row(
+                    children: const [
+                      Icon(Icons.auto_awesome_rounded, size: 11, color: Color(0xFF1EAB57)),
+                      SizedBox(width: 4),
+                      Text(
+                        'RENCANA MENU HEMAT & SEHAT',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF1EAB57),
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
           ),
-          TextButton.icon(
-            onPressed: _resetPlan,
-            icon: const Icon(Icons.add_circle_outline_rounded,
-                size: 16, color: Color(0xFF1EAB57)),
-            label: const Text(
-              'Baru',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF1EAB57),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: _resetPlan,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF1F2),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFFECDD3)),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.refresh_rounded, size: 13, color: Color(0xFFE11D48)),
+                      SizedBox(width: 4),
+                      Text(
+                        'RESET',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFFE11D48),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFFECFDF5),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            ),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () => setState(() => _isShowingWizard = true),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.add_rounded, size: 14, color: Color(0xFF334155)),
+                      SizedBox(width: 3),
+                      Text(
+                        'BARU',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF334155),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
