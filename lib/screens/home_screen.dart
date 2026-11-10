@@ -16,8 +16,12 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final User? currentUser = FirebaseAuth.instance.currentUser;
+
+  // Animation Controllers for Staggered Entrance & Ambient Pulses
+  late AnimationController _entranceController;
+  late AnimationController _pulseController;
 
   // Tab State: Harian, Mingguan, Bulanan
   String _activeTab = "Harian";
@@ -73,6 +77,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    );
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat(reverse: true);
+
     _fetchUserDataAndLogs();
     _listenToNotifications();
     _fetchScheduledMeals();
@@ -80,6 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _entranceController.dispose();
+    _pulseController.dispose();
     _searchController.dispose();
     _notifSubscription?.cancel();
     super.dispose();
@@ -244,10 +259,14 @@ class _HomeScreenState extends State<HomeScreen> {
           _scanHistory = history;
           _isLoading = false;
         });
+        _entranceController.forward(from: 0.0);
       }
     } catch (e) {
       debugPrint("Error fetching home data: $e");
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _entranceController.forward(from: 0.0);
+      }
     }
   }
 
@@ -415,6 +434,29 @@ class _HomeScreenState extends State<HomeScreen> {
   int get _targetCarbs => ((_targetCals * 0.4) / 4).round();
   int get _targetFat => ((_targetCals * 0.3) / 9).round();
 
+  // Helper Staggered Entrance Animation
+  Widget _buildAnimatedSection(Widget child, double startInterval) {
+    final double endInterval = (startInterval + 0.35).clamp(0.0, 1.0);
+    final animation = CurvedAnimation(
+      parent: _entranceController,
+      curve: Interval(startInterval, endInterval, curve: Curves.easeOutCubic),
+    );
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        final double value = animation.value;
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 16 * (1.0 - value)),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -474,47 +516,47 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 1. BRAND TOP APP BAR (Gizify Logo + Flag + Action Icons)
-                _buildTopBrandHeader(),
+                _buildAnimatedSection(_buildTopBrandHeader(), 0.0),
                 const SizedBox(height: 12),
 
                 // 2. SEARCH BAR & NOTIFICATION BELL
-                _buildSearchBar(unreadNotifCount),
+                _buildAnimatedSection(_buildSearchBar(unreadNotifCount), 0.08),
                 const SizedBox(height: 16),
 
                 // 3. HERO DASHBOARD BANNER (Greeting, Goals, Calorie Target, Scan CTA, Tabs)
-                _buildHeroBanner(),
+                _buildAnimatedSection(_buildHeroBanner(), 0.16),
                 const SizedBox(height: 16),
 
                 // 4. CALORIE TREND CHART (Tren Konsumsi Kalori)
-                _buildCalorieTrendChartCard(),
+                _buildAnimatedSection(_buildCalorieTrendChartCard(), 0.24),
                 const SizedBox(height: 16),
 
                 // 5. 4 PILAR METRIK MAKRO (Sisa Kalori, Protein, Karbo, Lemak)
-                _buildMacroCardsGrid(),
+                _buildAnimatedSection(_buildMacroCardsGrid(), 0.32),
                 const SizedBox(height: 16),
 
                 // 6. KONDISI TUBUH & BUTTON DETAIL NUTRISI
-                _buildBodyConditionCard(),
+                _buildAnimatedSection(_buildBodyConditionCard(), 0.40),
                 const SizedBox(height: 16),
 
                 // 7. AI RINGKASAN HARIAN WIDGET
-                _buildAiSummaryWidget(),
+                _buildAnimatedSection(_buildAiSummaryWidget(), 0.48),
                 const SizedBox(height: 16),
 
                 // 8. KALENDER INTERAKTIF
-                _buildInteractiveCalendarCard(),
+                _buildAnimatedSection(_buildInteractiveCalendarCard(), 0.56),
                 const SizedBox(height: 16),
 
                 // 9. JADWAL MAKAN HARI INI (Timeline)
-                _buildMealScheduleCard(),
+                _buildAnimatedSection(_buildMealScheduleCard(), 0.64),
                 const SizedBox(height: 16),
 
                 // 10. RIWAYAT SCAN GIZIFY VISION TERAKHIR
-                _buildRecentScanHistoryCard(),
+                _buildAnimatedSection(_buildRecentScanHistoryCard(), 0.72),
                 const SizedBox(height: 16),
 
-                // 11. REKOMENDASI INSTAN WIDGET (GiziBot)
-                _buildGiziBotRecommendationCard(),
+                // 11. REKOMENDASI INSTAN WIDGET (Gizibot)
+                _buildAnimatedSection(_buildGiziBotRecommendationCard(), 0.80),
                 const SizedBox(height: 24),
               ],
             ),
@@ -898,33 +940,42 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Greeting & Sparkle Badge
+          // Greeting & Sparkle Badge with Ambient Pulse
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1EAB57), Color(0xFF127236)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1EAB57).withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+              AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, _) {
+                  final scale = 1.0 + 0.04 * _pulseController.value;
+                  return Transform.scale(
+                    scale: scale,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF1EAB57), Color(0xFF127236)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1EAB57).withOpacity(0.25 + 0.15 * _pulseController.value),
+                            blurRadius: 8 + 6 * _pulseController.value,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.auto_awesome_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
+                  );
+                },
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1021,9 +1072,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       text: TextSpan(
                         style: const TextStyle(fontFamily: 'Poppins', fontSize: 11),
                         children: [
-                          TextSpan(
-                            text: "$consumed",
-                            style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 900),
+                              curve: Curves.easeOutCubic,
+                              tween: Tween<double>(begin: 0, end: consumed.toDouble()),
+                              builder: (context, val, _) => Text(
+                                "${val.round()}",
+                                style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF0F172A), fontSize: 11, fontFamily: 'Poppins'),
+                              ),
+                            ),
                           ),
                           TextSpan(
                             text: " / $target kcal Terpakai",
@@ -1055,7 +1114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // Scan Button CTA
+              // Scan Button CTA with Breathing Glow Pulse
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -1063,19 +1122,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(builder: (_) => const ScannerScreen()),
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1EAB57),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1EAB57).withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                child: AnimatedBuilder(
+                  animation: _pulseController,
+                  builder: (context, child) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1EAB57),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1EAB57).withOpacity(0.25 + 0.2 * _pulseController.value),
+                            blurRadius: 6 + 6 * _pulseController.value,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                      child: child,
+                    );
+                  },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
@@ -1479,12 +1544,21 @@ class _HomeScreenState extends State<HomeScreen> {
             text: TextSpan(
               style: const TextStyle(fontFamily: 'Poppins'),
               children: [
-                TextSpan(
-                  text: value,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF0F172A),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 900),
+                    curve: Curves.easeOutCubic,
+                    tween: Tween<double>(begin: 0, end: double.tryParse(value) ?? 0),
+                    builder: (context, val, _) => Text(
+                      "${val.round()}",
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
                   ),
                 ),
                 TextSpan(
@@ -1501,11 +1575,16 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 5,
-              backgroundColor: const Color(0xFFF1F5F9),
-              valueColor: AlwaysStoppedAnimation(progressColor),
+            child: TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 1000),
+              curve: Curves.easeOutCubic,
+              tween: Tween<double>(begin: 0.0, end: progress),
+              builder: (context, animProgress, _) => LinearProgressIndicator(
+                value: animProgress,
+                minHeight: 5,
+                backgroundColor: const Color(0xFFF1F5F9),
+                valueColor: AlwaysStoppedAnimation(progressColor),
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -2491,14 +2570,23 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
+              AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: 1.0 + 0.08 * _pulseController.value,
+                    child: child,
+                  );
+                },
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 16),
                 ),
-                child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 16),
               ),
               const SizedBox(width: 8),
               const Text(
