@@ -506,7 +506,7 @@ List<MealPlanDay> getWebFallbackPlan(String currency, String peopleStr) {
 }
 
 // ==========================================
-// UTAMA: MEAL PLAN SCREEN
+// UTAMA: MEAL PLAN SCREEN (GEN-Z AESTHETIC)
 // ==========================================
 class MealPlanScreen extends StatefulWidget {
   const MealPlanScreen({super.key});
@@ -516,7 +516,7 @@ class MealPlanScreen extends StatefulWidget {
 }
 
 class _MealPlanScreenState extends State<MealPlanScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   // Wizard States: 1 = Budget, 2 = Days, 3 = People, 4 = Review
   int _currentStep = 1;
 
@@ -524,7 +524,7 @@ class _MealPlanScreenState extends State<MealPlanScreen>
   final TextEditingController _budgetController =
       TextEditingController(text: '100.000');
   final TextEditingController _daysController =
-      TextEditingController(text: '2');
+      TextEditingController(text: '3');
   final TextEditingController _peopleController =
       TextEditingController(text: '1');
 
@@ -535,8 +535,9 @@ class _MealPlanScreenState extends State<MealPlanScreen>
   int _loadingStep = 0;
   Map<String, dynamic>? _userProfile;
 
-  // Animation controller for pulsing AI loading
+  // Animation controller for pulsing AI loading & step changes
   late AnimationController _pulseController;
+  late AnimationController _bounceController;
 
   final List<String> _loadingMessages = [
     'Menganalisis budget makanan...',
@@ -554,6 +555,11 @@ class _MealPlanScreenState extends State<MealPlanScreen>
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
 
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
     _loadUserData();
     _loadSavedPlan();
   }
@@ -561,6 +567,7 @@ class _MealPlanScreenState extends State<MealPlanScreen>
   @override
   void dispose() {
     _pulseController.dispose();
+    _bounceController.dispose();
     _budgetController.dispose();
     _daysController.dispose();
     _peopleController.dispose();
@@ -621,6 +628,7 @@ class _MealPlanScreenState extends State<MealPlanScreen>
   }
 
   void _addBudget(int amount) {
+    _bounceController.forward(from: 0.0);
     if (_currency == 'USD' || _currency == 'MYR') {
       final current =
           double.tryParse(_budgetController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ??
@@ -680,7 +688,7 @@ class _MealPlanScreenState extends State<MealPlanScreen>
     });
 
     final budgetStr = _budgetController.text.trim();
-    final daysNum = int.tryParse(_daysController.text.trim()) ?? 2;
+    final daysNum = int.tryParse(_daysController.text.trim()) ?? 3;
     final peopleNum = int.tryParse(_peopleController.text.trim()) ?? 1;
 
     try {
@@ -776,10 +784,10 @@ Format JSON Array yang wajib dikembalikan:
         }
       }
     } catch (e) {
-      debugPrint('Gemini Meal Plan Error (using high quality fallback): $e');
+      debugPrint('Gemini Meal Plan Error (using fallback): $e');
     }
 
-    // Fallback jika API error / rate limit
+    // Fallback jika API error / offline
     final fallbackDays = getWebFallbackPlan(_currency, peopleNum.toString());
     final newPlan = MealPlanData(
       budget: budgetStr,
@@ -940,7 +948,7 @@ Format JSON Array yang wajib dikembalikan:
   }
 
   // ------------------------------------------
-  // 1. LOADING VIEW DENGAN ANIMASI SINKRON WEB
+  // 1. LOADING VIEW (PULSING GEN-Z AI ROBOT)
   // ------------------------------------------
   Widget _buildLoadingView() {
     return Scaffold(
@@ -957,8 +965,8 @@ Format JSON Array yang wajib dikembalikan:
                     CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
                   ),
                   child: Container(
-                    width: 90,
-                    height: 90,
+                    width: 96,
+                    height: 96,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const LinearGradient(
@@ -968,9 +976,9 @@ Format JSON Array yang wajib dikembalikan:
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF1EAB57).withValues(alpha: 0.35),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
+                          color: const Color(0xFF1EAB57).withValues(alpha: 0.4),
+                          blurRadius: 30,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
@@ -978,21 +986,23 @@ Format JSON Array yang wajib dikembalikan:
                       child: Icon(
                         Icons.auto_awesome_rounded,
                         color: Colors.white,
-                        size: 42,
+                        size: 46,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
                 const Text(
-                  'Meracik Meal Plan AI...',
+                  'Gizify AI Sedang Meracik...',
                   style: TextStyle(
+                    fontFamily: 'Poppins',
                     fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w900,
                     color: Color(0xFF0F172A),
+                    letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: Text(
@@ -1000,18 +1010,19 @@ Format JSON Array yang wajib dikembalikan:
                     key: ValueKey<int>(_loadingStep),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontFamily: 'Poppins',
+                      fontSize: 13,
                       color: Color(0xFF1EAB57),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   child: SizedBox(
-                    width: 220,
-                    height: 8,
+                    width: 240,
+                    height: 10,
                     child: LinearProgressIndicator(
                       value: (_loadingStep + 1) / 4,
                       backgroundColor: const Color(0xFFE2E8F0),
@@ -1021,12 +1032,20 @@ Format JSON Array yang wajib dikembalikan:
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Langkah ${_loadingStep + 1} dari 4',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF94A3B8),
-                    fontWeight: FontWeight.w500,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFECFDF5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Step ${_loadingStep + 1} of 4 • Calculating Macros',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      color: Color(0xFF1EAB57),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -1038,7 +1057,7 @@ Format JSON Array yang wajib dikembalikan:
   }
 
   // ------------------------------------------
-  // 2. WIZARD VIEW (STEP 1 - 4)
+  // 2. WIZARD VIEW (GEN-Z POLISHED & ANTI-NABRAK)
   // ------------------------------------------
   Widget _buildWizardView() {
     return Scaffold(
@@ -1049,19 +1068,19 @@ Format JSON Array yang wajib dikembalikan:
             // Top App Bar
             _buildWizardAppBar(),
 
-            // Wizard Step Indicators
+            // Wizard Step Indicators with Gen-Z flair
             _buildStepIndicator(),
 
-            // Wizard Dynamic Content
+            // Wizard Dynamic Content with Scrollable Body
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
                 child: _buildCurrentStepContent(),
               ),
             ),
 
-            // Bottom Navigation Actions (Kembali / Lanjut)
+            // Bottom Navigation Actions (Raised by 32dp to prevent hitting scan button!)
             _buildWizardBottomBar(),
           ],
         ),
@@ -1074,7 +1093,7 @@ Format JSON Array yang wajib dikembalikan:
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.2)),
       ),
       child: Row(
         children: [
@@ -1082,9 +1101,13 @@ Format JSON Array yang wajib dikembalikan:
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xFFECFDF5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFD1FAE5), width: 1),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFA7F3D0)),
             ),
             child: const Center(
               child: Icon(
@@ -1098,21 +1121,29 @@ Format JSON Array yang wajib dikembalikan:
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Meal Plan Generator',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
-                    letterSpacing: -0.3,
-                  ),
+              children: [
+                Row(
+                  children: const [
+                    Text(
+                      'Meal Plan AI',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                    SizedBox(width: 6),
+                    Text('✨', style: TextStyle(fontSize: 16)),
+                  ],
                 ),
-                SizedBox(height: 2),
-                Text(
-                  'RENCANA MENU HEMAT & SEHAT',
+                const SizedBox(height: 2),
+                const Text(
+                  'ATUR BUDGET & GIZI MAKSIMAL',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontFamily: 'Poppins',
+                    fontSize: 9.5,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF1EAB57),
                     letterSpacing: 0.8,
@@ -1128,17 +1159,17 @@ Format JSON Array yang wajib dikembalikan:
 
   Widget _buildStepIndicator() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       color: Colors.white,
       child: Row(
         children: [
-          _buildStepDot(1, 'Budget'),
+          _buildStepDot(1, '💸 Budget'),
           _buildStepLine(1),
-          _buildStepDot(2, 'Hari'),
+          _buildStepDot(2, '🗓️ Durasi'),
           _buildStepLine(2),
-          _buildStepDot(3, 'Porsi'),
+          _buildStepDot(3, '👥 Porsi'),
           _buildStepLine(3),
-          _buildStepDot(4, 'Review'),
+          _buildStepDot(4, '🚀 Review'),
         ],
       ),
     );
@@ -1152,30 +1183,40 @@ Format JSON Array yang wajib dikembalikan:
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 250),
-          width: 30,
-          height: 30,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isActive
                 ? const Color(0xFF1EAB57)
                 : isDone
                     ? const Color(0xFFECFDF5)
-                    : const Color(0xFFF1F5F9),
+                    : const Color(0xFFF8FAFC),
             border: Border.all(
               color: isActive || isDone
                   ? const Color(0xFF1EAB57)
-                  : const Color(0xFFE2E8F0),
-              width: 1.5,
+                  : const Color(0xFFCBD5E1),
+              width: 2,
             ),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF1EAB57).withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
             child: isDone
-                ? const Icon(Icons.check, size: 16, color: Color(0xFF1EAB57))
+                ? const Icon(Icons.check_rounded, size: 16, color: Color(0xFF1EAB57))
                 : Text(
                     '$step',
                     style: TextStyle(
+                      fontFamily: 'Poppins',
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                       color: isActive ? Colors.white : const Color(0xFF94A3B8),
                     ),
                   ),
@@ -1185,9 +1226,10 @@ Format JSON Array yang wajib dikembalikan:
         Text(
           label,
           style: TextStyle(
-            fontSize: 10,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-            color: isActive ? const Color(0xFF1EAB57) : const Color(0xFF94A3B8),
+            fontFamily: 'Poppins',
+            fontSize: 9.5,
+            fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
+            color: isActive ? const Color(0xFF1EAB57) : const Color(0xFF64748B),
           ),
         ),
       ],
@@ -1198,9 +1240,12 @@ Format JSON Array yang wajib dikembalikan:
     final isDone = _currentStep > afterStep;
     return Expanded(
       child: Container(
-        height: 2,
+        height: 2.5,
         margin: const EdgeInsets.only(bottom: 16, left: 4, right: 4),
-        color: isDone ? const Color(0xFF1EAB57) : const Color(0xFFE2E8F0),
+        decoration: BoxDecoration(
+          color: isDone ? const Color(0xFF1EAB57) : const Color(0xFFE2E8F0),
+          borderRadius: BorderRadius.circular(2),
+        ),
       ),
     );
   }
@@ -1220,77 +1265,103 @@ Format JSON Array yang wajib dikembalikan:
     }
   }
 
-  // STEP 1: BUDGET
+  // STEP 1: BUDGET (HERO CARD WITH SCALE ANIMATION)
   Widget _buildStep1Budget() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
         _buildSectionHeader(
-          icon: Icons.savings_outlined,
+          badge: 'LANGKAH 1 DARI 4',
+          icon: Icons.savings_rounded,
           title: 'Berapa Budget Belanjamu?',
           desc:
-              'Tentukan batas pengeluaran untuk bahan makanan. AI akan memaksimalkan nutrisi dan variasi resep sesuai budget ini.',
+              'Atur budget sesukamu! AI Gizify akan memaksimalkan nutrisi dan meracik resep lezat tanpa melebihi batas ini.',
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
 
         // Currency Toggle
-        Row(
-          children: [
-            _buildCurrencyPill('IDR (Rp)', 'IDR'),
-            const SizedBox(width: 8),
-            _buildCurrencyPill('USD (\$)', 'USD'),
-            const SizedBox(width: 8),
-            _buildCurrencyPill('MYR (RM)', 'MYR'),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        // Input Box
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Row(
             children: [
-              Text(
-                _currency == 'USD'
-                    ? '\$'
-                    : _currency == 'MYR'
-                        ? 'RM'
-                        : 'Rp',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1EAB57),
+              _buildCurrencyPill('🇮🇩 IDR (Rp)', 'IDR'),
+              _buildCurrencyPill('🇺🇸 USD (\$)', 'USD'),
+              _buildCurrencyPill('🇲🇾 MYR (RM)', 'MYR'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+
+        // Hero Input Card with bouncy feeling
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFF1EAB57).withValues(alpha: 0.3), width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1EAB57).withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'TOTAL ANGGARAN',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 1.0,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _budgetController,
-                  keyboardType: TextInputType.number,
-                  onChanged: _onBudgetChanged,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
+              const SizedBox(height: 6),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    _currency == 'USD'
+                        ? '\$'
+                        : _currency == 'MYR'
+                            ? 'RM '
+                            : 'Rp ',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1EAB57),
+                    ),
                   ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '100.000',
+                  Expanded(
+                    child: TextField(
+                      controller: _budgetController,
+                      keyboardType: TextInputType.number,
+                      onChanged: _onBudgetChanged,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.5,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        hintText: '100.000',
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -1303,19 +1374,50 @@ Format JSON Array yang wajib dikembalikan:
           runSpacing: 8,
           children: [
             if (_currency == 'IDR') ...[
-              _buildQuickAddChip('+Rp 50.000', 50000),
-              _buildQuickAddChip('+Rp 100.000', 100000),
-              _buildQuickAddChip('+Rp 200.000', 200000),
+              _buildQuickAddChip('⚡ +50rb', 50000),
+              _buildQuickAddChip('🥗 +100rb', 100000),
+              _buildQuickAddChip('👑 +200rb', 200000),
+              _buildQuickAddChip('💎 +500rb', 500000),
             ] else if (_currency == 'USD') ...[
-              _buildQuickAddChip('+\$5', 50000),
-              _buildQuickAddChip('+\$10', 100000),
-              _buildQuickAddChip('+\$20', 200000),
+              _buildQuickAddChip('⚡ +\$5', 50000),
+              _buildQuickAddChip('🥗 +\$10', 100000),
+              _buildQuickAddChip('👑 +\$20', 200000),
             ] else ...[
-              _buildQuickAddChip('+RM 10', 50000),
-              _buildQuickAddChip('+RM 20', 100000),
-              _buildQuickAddChip('+RM 50', 200000),
+              _buildQuickAddChip('⚡ +RM 10', 50000),
+              _buildQuickAddChip('🥗 +RM 20', 100000),
+              _buildQuickAddChip('👑 +RM 50', 200000),
             ],
           ],
+        ),
+        const SizedBox(height: 18),
+
+        // Gen-Z Fun Insight Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFECFDF5),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFA7F3D0)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text('💡', style: TextStyle(fontSize: 20)),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Tips: AI Gizify bakal susun 3 menu lengkap per hari (Sarapan, Siang, Malam) dengan bahan lokal murah bernutrisi tinggi!',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 11.5,
+                    color: Color(0xFF065F46),
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -1330,19 +1432,26 @@ Format JSON Array yang wajib dikembalikan:
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF1EAB57) : Colors.white,
+            color: isSelected ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? const Color(0xFF1EAB57) : const Color(0xFFE2E8F0),
-            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : const Color(0xFF64748B),
+                fontFamily: 'Poppins',
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected ? const Color(0xFF1EAB57) : const Color(0xFF64748B),
               ),
             ),
           ),
@@ -1357,178 +1466,121 @@ Format JSON Array yang wajib dikembalikan:
       label: Text(
         label,
         style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontFamily: 'Poppins',
+          fontSize: 11.5,
+          fontWeight: FontWeight.w800,
           color: Color(0xFF1EAB57),
         ),
       ),
-      backgroundColor: const Color(0xFFECFDF5),
-      side: const BorderSide(color: Color(0xFFD1FAE5)),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      backgroundColor: Colors.white,
+      side: const BorderSide(color: Color(0xFFA7F3D0), width: 1.5),
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
-  // STEP 2: DAYS
+  // STEP 2: DAYS (INTERACTIVE GEN-Z PRESET CARDS)
   Widget _buildStep2Days() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
         _buildSectionHeader(
-          icon: Icons.calendar_today_rounded,
+          badge: 'LANGKAH 2 DARI 4',
+          icon: Icons.calendar_month_rounded,
           title: 'Berapa Hari Rencana Menumu?',
           desc:
-              'Pilih durasi meal plan (1 hingga 7 hari). Setiap hari akan disusun lengkap: Sarapan, Makan Siang, dan Makan Malam.',
+              'Pilih durasi rencana makanmu. Setiap hari akan diracik variasi menu seimbang agar kamu tidak bosan!',
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
 
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.date_range_rounded, color: Color(0xFF1EAB57)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _daysController,
-                  keyboardType: TextInputType.number,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
-                  ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '2',
-                    suffixText: 'Hari',
-                  ),
-                  onChanged: (val) {
-                    final n = int.tryParse(val);
-                    if (n != null && n > 7) {
-                      _daysController.text = '7';
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
+        // 4 Aesthetic Preset Cards
+        _buildGenZOptionCard(
+          title: '⚡ 2 Hari • Weekend Special',
+          subtitle: 'Cocok buat masak santai akhir pekan atau coba menu baru',
+          value: '2',
+          selectedValue: _daysController.text,
+          onTap: () => setState(() => _daysController.text = '2'),
         ),
-        const SizedBox(height: 16),
-
-        Wrap(
-          spacing: 8,
-          children: ['2 Hari', '3 Hari', '5 Hari', '7 Hari'].map((d) {
-            final numStr = d.split(' ')[0];
-            final isSel = _daysController.text == numStr;
-            return ChoiceChip(
-              label: Text(d),
-              selected: isSel,
-              selectedColor: const Color(0xFF1EAB57),
-              labelStyle: TextStyle(
-                color: isSel ? Colors.white : const Color(0xFF1EAB57),
-                fontWeight: FontWeight.bold,
-              ),
-              backgroundColor: const Color(0xFFECFDF5),
-              side: const BorderSide(color: Color(0xFFD1FAE5)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() => _daysController.text = numStr);
-                }
-              },
-            );
-          }).toList(),
+        const SizedBox(height: 10),
+        _buildGenZOptionCard(
+          title: '🥗 3 Hari • Paling Populer (Rekomendasi)',
+          subtitle: 'Pas buat belanja bahan segar mingguan tanpa mubazir',
+          value: '3',
+          selectedValue: _daysController.text,
+          isRecommended: true,
+          onTap: () => setState(() => _daysController.text = '3'),
+        ),
+        const SizedBox(height: 10),
+        _buildGenZOptionCard(
+          title: '💼 5 Hari • Weekday Work Plan',
+          subtitle: 'Fokus kerja dari Senin sampai Jumat, bekal sehat anti jajan',
+          value: '5',
+          selectedValue: _daysController.text,
+          onTap: () => setState(() => _daysController.text = '5'),
+        ),
+        const SizedBox(height: 10),
+        _buildGenZOptionCard(
+          title: '👑 7 Hari • Full Seminggu Sehat',
+          subtitle: 'Perencanaan matang satu minggu penuh, hemat maksimal!',
+          value: '7',
+          selectedValue: _daysController.text,
+          onTap: () => setState(() => _daysController.text = '7'),
         ),
       ],
     );
   }
 
-  // STEP 3: PEOPLE
+  // STEP 3: PEOPLE (INTERACTIVE GEN-Z PRESET CARDS)
   Widget _buildStep3People() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
         _buildSectionHeader(
-          icon: Icons.people_outline_rounded,
+          badge: 'LANGKAH 3 DARI 4',
+          icon: Icons.diversity_3_rounded,
           title: 'Untuk Berapa Orang?',
           desc:
-              'Porsi dan takaran bahan belanja akan dihitung secara proporsional sesuai jumlah anggota yang makan.',
+              'Porsi masakan dan takaran belanja akan dihitung proporsional untuk seluruh anggota yang makan.',
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
 
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.person_rounded, color: Color(0xFF1EAB57)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _peopleController,
-                  keyboardType: TextInputType.number,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
-                  ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '1',
-                    suffixText: 'Orang',
-                  ),
-                  onChanged: (val) {
-                    final n = int.tryParse(val);
-                    if (n != null && n > 10) {
-                      _peopleController.text = '10';
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
+        _buildGenZOptionCard(
+          title: '🧑 Solo Living (1 Orang)',
+          subtitle: 'Anak kos atau hidup mandiri, takaran pas untuk sendiri',
+          value: '1',
+          selectedValue: _peopleController.text,
+          onTap: () => setState(() => _peopleController.text = '1'),
         ),
-        const SizedBox(height: 16),
-
-        Wrap(
-          spacing: 8,
-          children: ['1 Orang', '2 Orang', '4 Orang', '5 Orang'].map((p) {
-            final numStr = p.split(' ')[0];
-            final isSel = _peopleController.text == numStr;
-            return ChoiceChip(
-              label: Text(p),
-              selected: isSel,
-              selectedColor: const Color(0xFF1EAB57),
-              labelStyle: TextStyle(
-                color: isSel ? Colors.white : const Color(0xFF1EAB57),
-                fontWeight: FontWeight.bold,
-              ),
-              backgroundColor: const Color(0xFFECFDF5),
-              side: const BorderSide(color: Color(0xFFD1FAE5)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() => _peopleController.text = numStr);
-                }
-              },
-            );
-          }).toList(),
+        const SizedBox(height: 10),
+        _buildGenZOptionCard(
+          title: '👫 Duo Sehat (2 Orang)',
+          subtitle: 'Pasutri atau sahabat yang ingin pola makan sehat barengan',
+          value: '2',
+          selectedValue: _peopleController.text,
+          isRecommended: true,
+          onTap: () => setState(() => _peopleController.text = '2'),
+        ),
+        const SizedBox(height: 10),
+        _buildGenZOptionCard(
+          title: '👨‍👩‍👧 Keluarga Ceria (3 - 4 Orang)',
+          subtitle: 'Menu seporsi kenyang yang ramah untuk anak-anak & keluarga',
+          value: '3',
+          selectedValue: _peopleController.text,
+          onTap: () => setState(() => _peopleController.text = '3'),
+        ),
+        const SizedBox(height: 10),
+        _buildGenZOptionCard(
+          title: '👨‍👩‍👧‍👦 Rombongan Besar (5+ Orang)',
+          subtitle: 'Porsi masakan besar untuk seluruh anggota rumah',
+          value: '5',
+          selectedValue: _peopleController.text,
+          onTap: () => setState(() => _peopleController.text = '5'),
         ),
       ],
     );
   }
 
-  // STEP 4: REVIEW & CONFIRM
+  // STEP 4: REVIEW & CONFIRM (NEOMORPHIC SUMMARY)
   Widget _buildStep4Review() {
     final budgetStr = _budgetController.text.trim();
     final daysStr = _daysController.text.trim();
@@ -1541,44 +1593,70 @@ Format JSON Array yang wajib dikembalikan:
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
         _buildSectionHeader(
-          icon: Icons.check_circle_outline_rounded,
-          title: 'Konfirmasi Kebutuhan Meal Plan',
+          badge: 'SIAP DIRACIK OLEH AI',
+          icon: Icons.rocket_launch_rounded,
+          title: 'Cek Ringkasan Rencanamu',
           desc:
-              'Periksa kembali parameter rencana menumu sebelum Gizify AI menyusun resep dan takaran belanja.',
+              'Semua parameter sudah siap! Gizify AI akan otomatis mengkombinasikan resep terbaik sesuai profil gizimu.',
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
 
-        // Review Card
+        // Glowing Review Card
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(color: const Color(0xFFE2E8F0)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Column(
             children: [
-              _buildReviewRow('Total Budget', '$_currency $budgetStr'),
-              const Divider(height: 20, color: Color(0xFFF1F5F9)),
-              _buildReviewRow('Durasi Menu', '$daysStr Hari'),
-              const Divider(height: 20, color: Color(0xFFF1F5F9)),
-              _buildReviewRow('Porsi Masakan', '$peopleStr Orang'),
-              const Divider(height: 20, color: Color(0xFFF1F5F9)),
-              _buildReviewRow(
-                'Estimasi per Hari',
-                _currency == 'IDR'
-                    ? 'Rp ${_formatNumber(perDay)} / hari'
-                    : '$_currency ${(budgetRaw / daysNum).toStringAsFixed(1)} / hari',
-                isHighlight: true,
+              _buildReviewRow('Total Anggaran', '$_currency $budgetStr', isBold: true),
+              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+              _buildReviewRow('Durasi Menu', '$daysStr Hari (${daysNum * 3} Variasi Masakan)'),
+              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+              _buildReviewRow('Jumlah Porsi', '$peopleStr Orang'),
+              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECFDF5),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'ESTIMASI PER HARI',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1EAB57),
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                    Text(
+                      _currency == 'IDR'
+                          ? 'Rp ${_formatNumber(perDay)}'
+                          : '$_currency ${(budgetRaw / daysNum).toStringAsFixed(1)}',
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF1EAB57),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1589,31 +1667,37 @@ Format JSON Array yang wajib dikembalikan:
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFD1FAE5)),
+            color: const Color(0xFFF0FDF4),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFA7F3D0)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.favorite_rounded, color: Color(0xFF1EAB57), size: 22),
-              const SizedBox(width: 12),
+              const Text('✨', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Otomatis Disesuaikan dengan Profilmu',
+                      'Profil Kesehatanmu Tersinkronisasi',
                       style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                        fontFamily: 'Poppins',
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF065F46),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Target Tubuh: ${_userProfile?['body_goal'] ?? _userProfile?['bodyGoal'] ?? 'Menjaga Berat Badan'} • Kebutuhan: ${_userProfile?['daily_calories'] ?? _userProfile?['calories'] ?? 2000} Kkal/hari',
-                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), height: 1.4),
+                      'Target: ${_userProfile?['body_goal'] ?? _userProfile?['bodyGoal'] ?? 'Menjaga Berat Badan'} • Kebutuhan: ${_userProfile?['daily_calories'] ?? _userProfile?['calories'] ?? 2000} Kkal/hari',
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 11,
+                        color: Color(0xFF047857),
+                        height: 1.4,
+                      ),
                     ),
                   ],
                 ),
@@ -1625,7 +1709,118 @@ Format JSON Array yang wajib dikembalikan:
     );
   }
 
+  // Gen-Z Option Card (Card Pilihan Interaktif dengan Border Hijau)
+  Widget _buildGenZOptionCard({
+    required String title,
+    required String subtitle,
+    required String value,
+    required String selectedValue,
+    required VoidCallback onTap,
+    bool isRecommended = false,
+  }) {
+    final isSelected = selectedValue == value;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFECFDF5) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF1EAB57) : const Color(0xFFE2E8F0),
+            width: isSelected ? 2.0 : 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? const Color(0xFF1EAB57).withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: isSelected
+                                ? const Color(0xFF065F46)
+                                : const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ),
+                      if (isRecommended)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1EAB57),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'POPULER',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      color: isSelected
+                          ? const Color(0xFF047857)
+                          : const Color(0xFF64748B),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? const Color(0xFF1EAB57) : Colors.transparent,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF1EAB57) : const Color(0xFFCBD5E1),
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSectionHeader({
+    required String badge,
     required IconData icon,
     required String title,
     required String desc,
@@ -1633,6 +1828,25 @@ Format JSON Array yang wajib dikembalikan:
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFECFDF5),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFA7F3D0)),
+          ),
+          child: Text(
+            badge,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 9.5,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF1EAB57),
+              letterSpacing: 0.8,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
         Row(
           children: [
             Icon(icon, color: const Color(0xFF1EAB57), size: 24),
@@ -1641,9 +1855,11 @@ Format JSON Array yang wajib dikembalikan:
               child: Text(
                 title,
                 style: const TextStyle(
+                  fontFamily: 'Poppins',
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                   color: Color(0xFF0F172A),
+                  letterSpacing: -0.3,
                 ),
               ),
             ),
@@ -1653,23 +1869,25 @@ Format JSON Array yang wajib dikembalikan:
         Text(
           desc,
           style: const TextStyle(
-            fontSize: 13,
+            fontFamily: 'Poppins',
+            fontSize: 12.5,
             color: Color(0xFF64748B),
-            height: 1.5,
+            height: 1.4,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildReviewRow(String label, String value, {bool isHighlight = false}) {
+  Widget _buildReviewRow(String label, String value, {bool isBold = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: const TextStyle(
-            fontSize: 13,
+            fontFamily: 'Poppins',
+            fontSize: 12.5,
             color: Color(0xFF64748B),
             fontWeight: FontWeight.w600,
           ),
@@ -1677,21 +1895,31 @@ Format JSON Array yang wajib dikembalikan:
         Text(
           value,
           style: TextStyle(
-            fontSize: isHighlight ? 15 : 14,
-            fontWeight: FontWeight.bold,
-            color: isHighlight ? const Color(0xFF1EAB57) : const Color(0xFF0F172A),
+            fontFamily: 'Poppins',
+            fontSize: isBold ? 15 : 13.5,
+            fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
+            color: const Color(0xFF0F172A),
           ),
         ),
       ],
     );
   }
 
+  // WIZARD BOTTOM BAR DENGAN PADDING AMAN (TIDAK NABRAK TOMBOL SCAN MELAYANG!)
   Widget _buildWizardBottomBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: const BoxDecoration(
+      // Padding bottom 48dp memberikan clearance sangat aman sehingga tombol Scan melayang tidak nabrak!
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
+      decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+        border: const Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -1702,14 +1930,18 @@ Format JSON Array yang wajib dikembalikan:
                 onPressed: () => setState(() => _currentStep--),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                  side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 child: const Text(
                   'Kembali',
-                  style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
@@ -1729,17 +1961,30 @@ Format JSON Array yang wajib dikembalikan:
                 backgroundColor: const Color(0xFF1EAB57),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                elevation: 2,
+                elevation: 4,
+                shadowColor: const Color(0xFF1EAB57).withValues(alpha: 0.4),
               ),
-              child: Text(
-                _currentStep == 4 ? 'Mulai Racik Menu AI ✨' : 'Lanjut',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _currentStep == 4 ? 'Mulai Racik Menu AI' : 'Lanjut',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    _currentStep == 4 ? Icons.auto_awesome_rounded : Icons.arrow_forward_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ],
               ),
             ),
           ),
@@ -1749,7 +1994,7 @@ Format JSON Array yang wajib dikembalikan:
   }
 
   // ------------------------------------------
-  // 3. RESULT VIEW (JADWAL MENU SIAP)
+  // 3. RESULT VIEW (JADWAL MENU SIAP - HIGH END)
   // ------------------------------------------
   Widget _buildResultView() {
     final plan = _activePlan!;
@@ -1777,7 +2022,7 @@ Format JSON Array yang wajib dikembalikan:
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1794,8 +2039,8 @@ Format JSON Array yang wajib dikembalikan:
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF1EAB57).withValues(alpha: 0.3),
-                            blurRadius: 18,
+                            color: const Color(0xFF1EAB57).withValues(alpha: 0.35),
+                            blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
                         ],
@@ -1809,10 +2054,11 @@ Format JSON Array yang wajib dikembalikan:
                                   color: Color(0xFFD1FAE5), size: 18),
                               SizedBox(width: 8),
                               Text(
-                                'TARGET PENGELUARAN MAKAN',
+                                'TARGET ANGGARAN & PORSI',
                                 style: TextStyle(
+                                  fontFamily: 'Poppins',
                                   fontSize: 10,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w900,
                                   color: Color(0xFFD1FAE5),
                                   letterSpacing: 1.0,
                                 ),
@@ -1844,8 +2090,9 @@ Format JSON Array yang wajib dikembalikan:
                                 const Text(
                                   'ESTIMASI PER HARI',
                                   style: TextStyle(
+                                    fontFamily: 'Poppins',
                                     fontSize: 10,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w900,
                                     color: Colors.white,
                                     letterSpacing: 0.8,
                                   ),
@@ -1857,8 +2104,9 @@ Format JSON Array yang wajib dikembalikan:
                                           ? 'RM ${(budgetNum / daysNum).toStringAsFixed(1)}'
                                           : 'Rp ${_formatNumber(perDay)}',
                                   style: const TextStyle(
+                                    fontFamily: 'Poppins',
                                     fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w900,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -1899,8 +2147,9 @@ Format JSON Array yang wajib dikembalikan:
                               child: Text(
                                 '9.5',
                                 style: TextStyle(
+                                  fontFamily: 'Poppins',
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w900,
                                   color: Color(0xFF1EAB57),
                                 ),
                               ),
@@ -1916,8 +2165,9 @@ Format JSON Array yang wajib dikembalikan:
                                     const Text(
                                       'Health Score AI',
                                       style: TextStyle(
+                                        fontFamily: 'Poppins',
                                         fontSize: 14,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A),
                                       ),
                                     ),
@@ -1932,8 +2182,9 @@ Format JSON Array yang wajib dikembalikan:
                                       child: const Text(
                                         'OPTIMAL',
                                         style: TextStyle(
+                                          fontFamily: 'Poppins',
                                           fontSize: 9,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w900,
                                           color: Color(0xFF1EAB57),
                                         ),
                                       ),
@@ -1944,6 +2195,7 @@ Format JSON Array yang wajib dikembalikan:
                                 const Text(
                                   'Gizi seimbang, kaya serat & vitamin, serta minim lemak jenuh.',
                                   style: TextStyle(
+                                    fontFamily: 'Poppins',
                                     fontSize: 11,
                                     color: Color(0xFF64748B),
                                     height: 1.3,
@@ -1973,9 +2225,10 @@ Format JSON Array yang wajib dikembalikan:
                                 selected: isSel,
                                 selectedColor: const Color(0xFF1EAB57),
                                 labelStyle: TextStyle(
+                                  fontFamily: 'Poppins',
                                   color: isSel ? Colors.white : const Color(0xFF1EAB57),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 12.5,
                                 ),
                                 backgroundColor: const Color(0xFFECFDF5),
                                 side: const BorderSide(color: Color(0xFFD1FAE5)),
@@ -2002,12 +2255,19 @@ Format JSON Array yang wajib dikembalikan:
               ),
             ),
 
-            // Bottom Actions: Simpan ke Jurnal & Buat Baru
+            // Bottom Actions: Simpan ke Jurnal & Buat Baru (Anti-Nabrak dengan Scan Button!)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: const BoxDecoration(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 48),
+              decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+                border: const Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1.2)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 16,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
@@ -2018,8 +2278,9 @@ Format JSON Array yang wajib dikembalikan:
                       label: const Text(
                         'Simpan ke Jurnal',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                           color: Colors.white,
                         ),
                       ),
@@ -2027,7 +2288,7 @@ Format JSON Array yang wajib dikembalikan:
                         backgroundColor: const Color(0xFF1EAB57),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 0,
                       ),
@@ -2041,7 +2302,7 @@ Format JSON Array yang wajib dikembalikan:
                     style: IconButton.styleFrom(
                       backgroundColor: const Color(0xFFF1F5F9),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       padding: const EdgeInsets.all(12),
                     ),
@@ -2060,7 +2321,7 @@ Format JSON Array yang wajib dikembalikan:
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.2)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2086,16 +2347,18 @@ Format JSON Array yang wajib dikembalikan:
                   Text(
                     'Jadwal Menu Siap!',
                     style: TextStyle(
+                      fontFamily: 'Poppins',
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                       color: Color(0xFF0F172A),
                     ),
                   ),
                   Text(
                     'GIZIFY MEAL PLANNER',
                     style: TextStyle(
+                      fontFamily: 'Poppins',
                       fontSize: 9,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                       color: Color(0xFF1EAB57),
                       letterSpacing: 0.8,
                     ),
@@ -2111,8 +2374,9 @@ Format JSON Array yang wajib dikembalikan:
             label: const Text(
               'Baru',
               style: TextStyle(
+                fontFamily: 'Poppins',
                 fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
                 color: Color(0xFF1EAB57),
               ),
             ),
@@ -2134,8 +2398,9 @@ Format JSON Array yang wajib dikembalikan:
         Text(
           label.toUpperCase(),
           style: const TextStyle(
+            fontFamily: 'Poppins',
             fontSize: 9,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
             color: Color(0xFFD1FAE5),
             letterSpacing: 0.6,
           ),
@@ -2144,8 +2409,9 @@ Format JSON Array yang wajib dikembalikan:
         Text(
           value,
           style: const TextStyle(
+            fontFamily: 'Poppins',
             fontSize: 15,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
         ),
@@ -2158,12 +2424,12 @@ Format JSON Array yang wajib dikembalikan:
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: const Color(0xFFF1F5F9)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -2177,11 +2443,11 @@ Format JSON Array yang wajib dikembalikan:
             children: [
               Image.network(
                 meal.image,
-                height: 160,
+                height: 165,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (ctx, err, stack) => Container(
-                  height: 160,
+                  height: 165,
                   color: const Color(0xFFE2E8F0),
                   child: const Center(
                     child: Icon(Icons.restaurant, color: Colors.grey, size: 40),
@@ -2196,7 +2462,7 @@ Format JSON Array yang wajib dikembalikan:
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.1),
@@ -2219,8 +2485,9 @@ Format JSON Array yang wajib dikembalikan:
                       Text(
                         '${meal.type} • ${meal.time}',
                         style: const TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A),
                         ),
                       ),
@@ -2233,13 +2500,13 @@ Format JSON Array yang wajib dikembalikan:
                 top: 12,
                 right: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1EAB57),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF1EAB57).withValues(alpha: 0.3),
+                        color: const Color(0xFF1EAB57).withValues(alpha: 0.35),
                         blurRadius: 6,
                       ),
                     ],
@@ -2247,8 +2514,9 @@ Format JSON Array yang wajib dikembalikan:
                   child: Text(
                     '${meal.matchScore}% Cocok',
                     style: const TextStyle(
+                      fontFamily: 'Poppins',
                       fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),
                   ),
@@ -2259,15 +2527,16 @@ Format JSON Array yang wajib dikembalikan:
 
           // Meal Body
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   meal.title,
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins',
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A),
                   ),
                 ),
@@ -2275,9 +2544,10 @@ Format JSON Array yang wajib dikembalikan:
                 Text(
                   meal.description,
                   style: const TextStyle(
+                    fontFamily: 'Poppins',
                     fontSize: 12,
                     color: Color(0xFF64748B),
-                    height: 1.4,
+                    height: 1.45,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -2303,7 +2573,11 @@ Format JSON Array yang wajib dikembalikan:
                     const SizedBox(width: 4),
                     Text(
                       'Masak: ${meal.cookTime}',
-                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 11,
+                        color: Color(0xFF64748B),
+                      ),
                     ),
                     const SizedBox(width: 14),
                     const Icon(Icons.payments_outlined, size: 14, color: Color(0xFF64748B)),
@@ -2311,9 +2585,10 @@ Format JSON Array yang wajib dikembalikan:
                     Text(
                       meal.totalBudget,
                       style: const TextStyle(
+                        fontFamily: 'Poppins',
                         fontSize: 11,
                         color: Color(0xFF1EAB57),
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -2329,8 +2604,9 @@ Format JSON Array yang wajib dikembalikan:
                     title: const Text(
                       'Bahan & Cara Memasak',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                         color: Color(0xFF1EAB57),
                       ),
                     ),
@@ -2339,8 +2615,9 @@ Format JSON Array yang wajib dikembalikan:
                       const Text(
                         'BAHAN-BAHAN:',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                           color: Color(0xFF94A3B8),
                           letterSpacing: 0.5,
                         ),
@@ -2359,6 +2636,7 @@ Format JSON Array yang wajib dikembalikan:
                                 child: Text(
                                   ing,
                                   style: const TextStyle(
+                                    fontFamily: 'Poppins',
                                     fontSize: 12,
                                     color: Color(0xFF334155),
                                   ),
@@ -2372,8 +2650,9 @@ Format JSON Array yang wajib dikembalikan:
                       const Text(
                         'CARA MEMASAK:',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                           color: Color(0xFF94A3B8),
                           letterSpacing: 0.5,
                         ),
@@ -2388,8 +2667,9 @@ Format JSON Array yang wajib dikembalikan:
                               Text(
                                 '${entry.key + 1}. ',
                                 style: const TextStyle(
+                                  fontFamily: 'Poppins',
                                   fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w800,
                                   color: Color(0xFF1EAB57),
                                 ),
                               ),
@@ -2397,6 +2677,7 @@ Format JSON Array yang wajib dikembalikan:
                                 child: Text(
                                   entry.value,
                                   style: const TextStyle(
+                                    fontFamily: 'Poppins',
                                     fontSize: 12,
                                     color: Color(0xFF334155),
                                     height: 1.4,
@@ -2428,8 +2709,9 @@ Format JSON Array yang wajib dikembalikan:
       child: Text(
         text,
         style: const TextStyle(
+          fontFamily: 'Poppins',
           fontSize: 10,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: Color(0xFF334155),
         ),
       ),
