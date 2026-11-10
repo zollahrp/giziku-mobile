@@ -17,12 +17,14 @@ class AuthWrapper extends StatelessWidget {
     final onboardingDone =
         prefs.getBool('onboarding_done') ?? false;
 
+    final rememberMe =
+        prefs.getBool('remember_me') ?? true;
+
     final user =
         FirebaseAuth.instance.currentUser;
 
     // ================= BELUM ONBOARDING =================
     if (!onboardingDone) {
-
       return OnboardingScreen(
         nextScreen: const LoginScreen(),
       );
@@ -30,6 +32,11 @@ class AuthWrapper extends StatelessWidget {
 
     // ================= SUDAH LOGIN =================
     if (user != null) {
+      if (!rememberMe) {
+        // User memilih untuk tidak mengingat sesi saat login
+        await FirebaseAuth.instance.signOut();
+        return const LoginScreen();
+      }
       return const MainScreen();
     }
 

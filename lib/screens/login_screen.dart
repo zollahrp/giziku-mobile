@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,10 +43,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       final savedEmail = prefs.getString('saved_email');
       final remember = prefs.getBool('remember_me') ?? true;
-      if (savedEmail != null && remember) {
+      if (mounted) {
         setState(() {
-          _emailController.text = savedEmail;
-          _rememberMe = true;
+          _rememberMe = remember;
+          if (savedEmail != null && remember) {
+            _emailController.text = savedEmail;
+          }
         });
       }
     } catch (_) {}
@@ -55,7 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (_rememberMe) {
-        await prefs.setString('saved_email', _emailController.text.trim());
+        final emailToSave = _emailController.text.trim().isNotEmpty
+            ? _emailController.text.trim()
+            : (FirebaseAuth.instance.currentUser?.email ?? '');
+        if (emailToSave.isNotEmpty) {
+          await prefs.setString('saved_email', emailToSave);
+        }
         await prefs.setBool('remember_me', true);
       } else {
         await prefs.remove('saved_email');
@@ -87,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (success) {
       await _saveCredentials();
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const MainScreen()),
@@ -110,6 +119,8 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isGoogleLoading = false);
 
     if (success) {
+      await _saveCredentials();
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const MainScreen()),
