@@ -3,8 +3,8 @@ import 'package:gizify/screens/home_screen.dart';
 import 'package:gizify/screens/maps_screen.dart';
 import 'package:gizify/screens/profiles/edit_profile_screen.dart';
 import 'package:gizify/screens/recipe_screen.dart';
+import 'package:gizify/screens/meal_plan_screen.dart';
 import 'package:gizify/screens/profile_screen.dart';
-import 'package:gizify/screens/simulation/simulation_budget_screen.dart';
 import 'gizi_chatbot_screen.dart';
 import 'scanner/scanner_screen.dart';
 
@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
     RecipeScreen(),
     const MapsScreen(),
     const GizifyChatbotScreen(),
-    const SimulationBudgetScreen(),
+    const MealPlanScreen(),
     ProfileScreen(),
   ];
 

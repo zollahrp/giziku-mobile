@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:gizify/screens/scanner/scanner_screen.dart';
 import 'package:gizify/screens/gizi_chatbot_screen.dart';
-import 'package:gizify/screens/simulation/simulation_budget_screen.dart';
+import 'package:gizify/screens/meal_plan_screen.dart';
 import 'package:gizify/screens/profile_screen.dart';
 
 
@@ -2134,7 +2134,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const SimulationBudgetScreen()),
+                    MaterialPageRoute(builder: (_) => const MealPlanScreen()),
                   );
                 },
                 child: const Text(
@@ -2193,7 +2193,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const SimulationBudgetScreen()),
+                        MaterialPageRoute(builder: (_) => const MealPlanScreen()),
                       );
                     },
                     child: Container(
@@ -2625,7 +2625,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const SimulationBudgetScreen()),
+                      MaterialPageRoute(builder: (_) => const MealPlanScreen()),
                     );
                   },
                   child: Container(
