@@ -41,53 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDescekWWnJEVPdroRFUc3-RSPFhw8GzvQ',
-    appId: '1:286230054282:web:9b7e5ca06bce0944a4f473',
-    messagingSenderId: '286230054282',
-    projectId: 'giziku-mobile',
-    authDomain: 'giziku-mobile.firebaseapp.com',
-    storageBucket: 'giziku-mobile.firebasestorage.app',
-    measurementId: 'G-JL8H2X2S9Q',
+    apiKey: 'AIzaSyBQvYqPmtyI6767r8hDMO7p89wrT2UZYIs',
+    appId: '1:840411135689:web:efea17d39c17e112d31718',
+    messagingSenderId: '840411135689',
+    projectId: 'giziku-19ded',
+    authDomain: 'auth.gizify.id',
+    storageBucket: 'giziku-19ded.firebasestorage.app',
+    measurementId: 'G-9DRG03SC30',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCQyj-I-k95l38NIgKzv5J1-nz_dJcHUbE',
-    appId: '1:286230054282:android:61efa276acb3d198a4f473',
-    messagingSenderId: '286230054282',
-    projectId: 'giziku-mobile',
-    storageBucket: 'giziku-mobile.firebasestorage.app',
+    apiKey: 'AIzaSyCaNnZVtMKY_7JjLHNLL7SFKo0o0to-yQ8',
+    appId: '1:840411135689:android:f9248daf74082f70d31718',
+    messagingSenderId: '840411135689',
+    projectId: 'giziku-19ded',
+    storageBucket: 'giziku-19ded.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDQ-OQwstWhKrE4UxDa2wt2r6d_dFakJd0',
-    appId: '1:286230054282:ios:668f6e89f0ed33f9a4f473',
-    messagingSenderId: '286230054282',
-    projectId: 'giziku-mobile',
-    storageBucket: 'giziku-mobile.firebasestorage.app',
-    androidClientId: '286230054282-723d23otqnbh4fcpcuk7p1beb9cilkul.apps.googleusercontent.com',
-    iosClientId: '286230054282-bvadj6dogipi4othu44cvck9h1o18fph.apps.googleusercontent.com',
-    iosBundleId: 'com.example.giziku',
+    apiKey: 'AIzaSyCaNnZVtMKY_7JjLHNLL7SFKo0o0to-yQ8',
+    appId: '1:840411135689:ios:f9248daf74082f70d31718',
+    messagingSenderId: '840411135689',
+    projectId: 'giziku-19ded',
+    storageBucket: 'giziku-19ded.firebasestorage.app',
+    iosBundleId: 'com.example.gizify',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDQ-OQwstWhKrE4UxDa2wt2r6d_dFakJd0',
-    appId: '1:286230054282:ios:668f6e89f0ed33f9a4f473',
-    messagingSenderId: '286230054282',
-    projectId: 'giziku-mobile',
-    storageBucket: 'giziku-mobile.firebasestorage.app',
-    androidClientId: '286230054282-723d23otqnbh4fcpcuk7p1beb9cilkul.apps.googleusercontent.com',
-    iosClientId: '286230054282-bvadj6dogipi4othu44cvck9h1o18fph.apps.googleusercontent.com',
-    iosBundleId: 'com.example.giziku',
+    apiKey: 'AIzaSyCaNnZVtMKY_7JjLHNLL7SFKo0o0to-yQ8',
+    appId: '1:840411135689:ios:f9248daf74082f70d31718',
+    messagingSenderId: '840411135689',
+    projectId: 'giziku-19ded',
+    storageBucket: 'giziku-19ded.firebasestorage.app',
+    iosBundleId: 'com.example.gizify',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDescekWWnJEVPdroRFUc3-RSPFhw8GzvQ',
-    appId: '1:286230054282:web:ee51f3fae128bdc7a4f473',
-    messagingSenderId: '286230054282',
-    projectId: 'giziku-mobile',
-    authDomain: 'giziku-mobile.firebaseapp.com',
-    storageBucket: 'giziku-mobile.firebasestorage.app',
-    measurementId: 'G-SYZRTTXFWS',
+    apiKey: 'AIzaSyBQvYqPmtyI6767r8hDMO7p89wrT2UZYIs',
+    appId: '1:840411135689:web:efea17d39c17e112d31718',
+    messagingSenderId: '840411135689',
+    projectId: 'giziku-19ded',
+    authDomain: 'auth.gizify.id',
+    storageBucket: 'giziku-19ded.firebasestorage.app',
+    measurementId: 'G-9DRG03SC30',
   );
 
 }

@@ -1,4 +1,4 @@
-name: giziku
+name: gizify
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -70,6 +70,7 @@ dependencies:
 
   share_plus: ^9.0.0
   path_provider: ^2.1.5
+  geolocator: ^12.0.0
 
 dev_dependencies:
   flutter_test:
@@ -159,7 +160,7 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 flutter_native_splash:
   color: "#2ECC71"
-  image: assets/gizikulogo.png
+  image: assets/gizifylogo.png
 
   android: true
   ios: true
@@ -168,11 +169,11 @@ flutter_native_splash:
 
   android_12:
     color: "#2ECC71"
-    image: assets/gizikulogo.png
+    image: assets/gizifylogo.png
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/gizikulogo.png"
+  image_path: "assets/gizifylogo.png"
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/icon.png"
+  adaptive_icon_foreground: "assets/gizifyicon.png"

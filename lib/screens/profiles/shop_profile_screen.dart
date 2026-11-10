@@ -8,7 +8,7 @@ class StoreProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final storeName = "Giziku Store";
+    final storeName = "Gizify Store";
     final storeLocation = "Bogor, Indonesia";
     final productCount = 255;
 
@@ -17,7 +17,7 @@ class StoreProfileScreen extends StatelessWidget {
         title: "Sayur Bayam",
         description: "Sayur segar dari petani lokal.",
         price: 49000,
-        storeName: "Giziku Store",
+        storeName: "Gizify Store",
         location: ProductLocation(latitude: -6.5, longitude: 106.8, address: "Bogor, Indonesia"),
         imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
         expiredDate: "29/10/2025",
@@ -26,7 +26,7 @@ class StoreProfileScreen extends StatelessWidget {
         title: "Daging Wagyu",
         description: "Daging wagyu premium.",
         price: 49000,
-        storeName: "Giziku Store",
+        storeName: "Gizify Store",
         location: ProductLocation(latitude: -6.5, longitude: 106.8, address: "Bogor, Indonesia"),
         imageUrl: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c",
         expiredDate: "29/10/2025",

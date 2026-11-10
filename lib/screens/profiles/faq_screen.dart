@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../profile_screen.dart';
+import '../main_screen.dart';
 
 class FAQScreen extends StatelessWidget {
   const FAQScreen({super.key});
@@ -25,12 +25,16 @@ class FAQScreen extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: InkWell(
-                      onTap: () {
-                        Navigator.push(
+                  onTap: () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                        );
-                      },
+                        MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 4)),
+                      );
+                    }
+                  },
                   borderRadius: BorderRadius.circular(24),
                   child: Container(
                     width: 40,

@@ -151,7 +151,7 @@ class _SimulationLoadingScreenState extends State<SimulationLoadingScreen>
 
                   // Title
                   const Text(
-                    "Giziku Sedang Membuat\nRencana Makananmu",
+                    "Gizify Sedang Membuat\nRencana Makananmu",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 26,
@@ -277,7 +277,7 @@ class _SimulationLoadingScreenState extends State<SimulationLoadingScreen>
 
                         Expanded(
                           child: Text(
-                            "Giziku akan membuat rekomendasi menu berdasarkan budget, durasi, dan jumlah orang.",
+                            "Gizify akan membuat rekomendasi menu berdasarkan budget, durasi, dan jumlah orang.",
                             style: TextStyle(
                               height: 1.5,
                               fontSize: 14,

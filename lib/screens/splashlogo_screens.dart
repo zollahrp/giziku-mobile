@@ -47,7 +47,7 @@ class _SplashLogoScreenState extends State<SplashLogoScreen> {
             height: 200,
             child: Center(
               child: Image.asset(
-                'assets/gizikulogo.png',
+                'assets/gizifylogo.png',
                 width: 150,
                 height: 150,
                 fit: BoxFit.contain,

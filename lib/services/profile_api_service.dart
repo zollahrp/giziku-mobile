@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:giziku/models/user_profile.dart';
+import 'package:gizify/models/user_profile.dart';
 
 class ProfileApiService {
   // Base URL untuk API - ganti dengan URL API Anda

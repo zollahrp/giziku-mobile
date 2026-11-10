@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:giziku/screens/chat_memory.dart';
+import 'package:gizify/screens/chat_memory.dart';
 
 import '../../models/chat_message.dart';
 import '../../services/giziku_chatbot_service.dart';
 import '../../widgets/chat_bubble.dart';
 
-class GizikuChatbotScreen extends StatefulWidget {
-  const GizikuChatbotScreen({super.key});
+class GizifyChatbotScreen extends StatefulWidget {
+  const GizifyChatbotScreen({super.key});
 
   @override
-  State<GizikuChatbotScreen> createState() => _GizikuChatbotScreenState();
+  State<GizifyChatbotScreen> createState() => _GizifyChatbotScreenState();
 }
 
-class _GizikuChatbotScreenState extends State<GizikuChatbotScreen> {
+class _GizifyChatbotScreenState extends State<GizifyChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
 
   final ScrollController _scrollController = ScrollController();
 
-  final GizikuChatbotService _chatService = GizikuChatbotService();
+  final GizifyChatbotService _chatService = GizifyChatbotService();
 
   List<ChatMessage> _messages = ChatMemory.messages;
 

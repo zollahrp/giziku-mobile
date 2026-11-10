@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:giziku/screens/nutrition_detail_screen.dart';
-import 'package:giziku/screens/simulation/simulation_budget_screen.dart';
+import 'package:gizify/screens/nutrition_detail_screen.dart';
+import 'package:gizify/screens/simulation/simulation_budget_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:giziku/screens/recipe/recipe_detail_screen.dart';
-import 'package:giziku/models/recipe_model.dart';
-import 'package:giziku/screens/recipe/recipe_detail_screen.dart';
-import 'package:giziku/models/vitamins_model.dart';
+import 'package:gizify/screens/recipe/recipe_detail_screen.dart';
+import 'package:gizify/models/recipe_model.dart';
+import 'package:gizify/screens/recipe/recipe_detail_screen.dart';
+import 'package:gizify/models/vitamins_model.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -467,7 +467,12 @@ class _HomeScreenState extends State<HomeScreen> {
         final userData =
             userSnapshot.data!.data() as Map<String, dynamic>? ?? {};
 
-        final int targetCalories = (userData['daily_calories'] ?? 0);
+        final int targetCalories = int.tryParse(
+              userData['daily_calories']?.toString() ??
+                  userData['calories']?.toString() ??
+                  '',
+            ) ??
+            0;
 
         return StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance

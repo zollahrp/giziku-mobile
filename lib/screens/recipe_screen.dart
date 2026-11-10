@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../models/recipe_model.dart';
 import '../../models/vitamins_model.dart';
-import 'package:giziku/screens/recipe/recipe_detail_screen.dart';
+import 'package:gizify/screens/recipe/recipe_detail_screen.dart';
 
 import 'package:intl/intl.dart';
 
@@ -133,7 +133,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset('assets/gizikulogohitam.png', width: 80),
+                        Image.asset('assets/gizifylogo.png', width: 80),
 
                         const SizedBox(height: 12),
 

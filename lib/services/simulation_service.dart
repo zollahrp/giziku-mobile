@@ -33,15 +33,23 @@ class SimulationService {
 
     final favoriteFoods = userData['favorite_foods'] ?? '';
 
-    final dislikedFoods = userData['disliked_foods'] ?? '';
+    final dislikedFoods = userData['disliked_foods'] ?? userData['dislikedFoods'] ?? '';
 
-    final bodyGoal = userData['body_goal'] ?? '';
+    final bodyGoal = userData['body_goal'] ?? userData['bodyGoal'] ?? '';
 
-    final calories = userData['daily_calories'] ?? 2000;
+    final calories = int.tryParse(userData['daily_calories']?.toString() ?? userData['calories']?.toString() ?? '') ?? 2000;
 
-    final diseases = List<String>.from(userData['chronic_disease'] ?? []);
+    final diseases = userData['chronic_disease'] is List
+        ? List<String>.from(userData['chronic_disease'])
+        : (userData['chronicDisease'] is List
+            ? List<String>.from(userData['chronicDisease'])
+            : (userData['medicalHistory'] != null ? [userData['medicalHistory'].toString()] : <String>[]));
 
-    final foodTypes = List<String>.from(userData['food_type'] ?? []);
+    final foodTypes = userData['food_type'] is List
+        ? List<String>.from(userData['food_type'])
+        : (userData['dietTypes'] is List
+            ? List<String>.from(userData['dietTypes'])
+            : (userData['dietType'] != null ? [userData['dietType'].toString()] : <String>[]));
 
     final prompt =
         '''

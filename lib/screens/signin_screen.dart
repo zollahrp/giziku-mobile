@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:giziku/screens/main_screen.dart';
+import 'package:gizify/screens/main_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -118,9 +118,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 20.0),
                   child: Image.asset(
-                    'assets/gizikulabel.png',
+                    'assets/gizifylogo.png',
                     height: 70,
-                    color: const Color(0xFF2ECC71),
                   ),
                 ),
               ),

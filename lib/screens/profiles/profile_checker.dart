@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:giziku/screens/profiles/edit_profile_screen.dart';
+import 'package:gizify/screens/profiles/edit_profile_screen.dart';
 
 class ProfileChecker {
   static Future<bool> checkProfileCompleted(
@@ -33,14 +33,14 @@ class ProfileChecker {
     final requiredFields = [
       data['name'],
       data['gender'],
-      data['date_of_birth'],
+      data['date_of_birth'] ?? data['birthDate'] ?? data['dateOfBirth'],
       data['height'],
       data['weight'],
-      data['daily_calories'],
-      data['activity_level'],
-      data['exercise_level'],
-      data['body_goal'],
-      data['food_type'],
+      data['daily_calories'] ?? data['calories'] ?? data['dailyCalories'],
+      data['activity_level'] ?? data['activity'] ?? data['activityLevel'],
+      data['exercise_level'] ?? data['exercise'] ?? data['exerciseLevel'],
+      data['body_goal'] ?? data['bodyGoal'],
+      data['food_type'] ?? data['dietTypes'] ?? data['dietType'],
     ];
 
     final profileComplete = !requiredFields.any(isIncomplete);

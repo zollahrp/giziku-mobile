@@ -47,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Hidup Sehat Jadi Mudah',
 
       description:
-          'Bangun kebiasaan sehat setiap hari bersama Giziku dengan pengalaman yang personal dan interaktif.',
+          'Bangun kebiasaan sehat setiap hari bersama Gizify dengan pengalaman yang personal dan interaktif.',
 
       buttonText: 'Mulai',
     ),
@@ -179,7 +179,7 @@ class OnboardingPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
 
               child: Row(
-                children: [Image.asset('assets/gizikulogo.png', height: 34)],
+                children: [Image.asset('assets/gizifylogo.png', height: 34)],
               ),
             ),
 

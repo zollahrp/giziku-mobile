@@ -208,7 +208,7 @@ class _FoodStoryPreviewScreenState extends State<FoodStoryPreviewScreen> {
                                     ),
                                   ),
                                   child: Image.asset(
-                                    'assets/gizikulogo_ceper.png',
+                                    'assets/gizifylogo.png',
                                     height: 42,
                                   ),
                                 ),
@@ -261,7 +261,7 @@ class _FoodStoryPreviewScreenState extends State<FoodStoryPreviewScreen> {
                               const SizedBox(height: 16),
 
                               Text(
-                                "Dipindai dengan GIZIKU",
+                                "Dipindai dengan GIZIFY",
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(.7),
                                   fontSize: 12,
@@ -364,13 +364,13 @@ class _FoodStoryPreviewScreenState extends State<FoodStoryPreviewScreen> {
 
       final dir = await getTemporaryDirectory();
 
-      final file = File('${dir.path}/giziku_story.png');
+      final file = File('${dir.path}/gizify_story.png');
 
       await file.writeAsBytes(pngBytes);
 
       await Share.shareXFiles([
         XFile(file.path),
-      ], text: 'Lihat hasil analisis dan informasi nutrisi makananmu dengan GIZIKU.');
+      ], text: 'Lihat hasil analisis dan informasi nutrisi makananmu dengan GIZIFY.');
     } catch (e) {
       debugPrint('Share error: $e');
     }

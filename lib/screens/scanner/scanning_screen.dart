@@ -42,7 +42,7 @@ class _ScanningScreenState extends State<ScanningScreen>
     "Mendeteksi jenis makanan",
     "Menghitung kalori & protein",
     "Menganalisa kandungan nutrisi",
-    "Membuat Giziku health insight",
+    "Membuat Gizify health insight",
   ];
 
   Future<void> startScanning() async {
@@ -181,7 +181,7 @@ class _ScanningScreenState extends State<ScanningScreen>
                           SizedBox(width: 8),
 
                           Text(
-                            "Giziku Vision",
+                            "Gizify Vision",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

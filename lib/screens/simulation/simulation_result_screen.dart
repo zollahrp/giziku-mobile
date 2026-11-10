@@ -306,7 +306,7 @@ class SimulationResultScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               Text(
-                "Giziku telah membuat rekomendasi makanan berdasarkan budget dan kebutuhanmu.",
+                "Gizify telah membuat rekomendasi makanan berdasarkan budget dan kebutuhanmu.",
                 style: TextStyle(
                   fontSize: 16,
                   height: 1.7,
@@ -592,7 +592,7 @@ class SimulationResultScreen extends StatelessWidget {
                         SizedBox(width: 10),
 
                         Text(
-                          "Insight Giziku",
+                          "Insight Gizify",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

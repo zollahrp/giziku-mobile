@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:giziku/screens/scanner/FoodStoryPreviewScreen.dart';
+import 'package:gizify/screens/scanner/FoodStoryPreviewScreen.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/food_scan_model.dart';
@@ -143,7 +143,7 @@ class ScannerResultScreen extends StatelessWidget {
 
                   const Expanded(
                     child: Text(
-                      "Hasil Giziku Scanner",
+                      "Hasil Gizify Scanner",
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 24,
@@ -280,8 +280,8 @@ class ScannerResultScreen extends StatelessWidget {
 
                               Text(
                                 result.isEdible
-                                    ? "Giziku mendeteksi makanan masih aman dikonsumsi"
-                                    : "Giziku mendeteksi kualitas makanan kurang baik",
+                                    ? "Gizify mendeteksi makanan masih aman dikonsumsi"
+                                    : "Gizify mendeteksi kualitas makanan kurang baik",
 
                                 style: TextStyle(
                                   fontSize: 13.5,
@@ -482,7 +482,7 @@ class ScannerResultScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Giziku Insight",
+                      "Gizify Insight",
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 22,
@@ -525,7 +525,7 @@ class ScannerResultScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Apakah hasil Giziku Vision sesuai?",
+                      "Apakah hasil Gizify Vision sesuai?",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -536,7 +536,7 @@ class ScannerResultScreen extends StatelessWidget {
                     const SizedBox(height: 8),
 
                     Text(
-                      "Bantu Giziku meningkatkan akurasi hasil scan makanan.",
+                      "Bantu Gizify meningkatkan akurasi hasil scan makanan.",
                       style: TextStyle(
                         color: Colors.grey.shade600,
                         height: 1.5,
@@ -553,7 +553,7 @@ class ScannerResultScreen extends StatelessWidget {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                    "Terima kasih atas feedback kamu ❤️",
+                                    "Terima kasih atas feedback kamu â¤ï¸",
                                   ),
                                 ),
                               );
@@ -675,7 +675,7 @@ class ScannerResultScreen extends StatelessWidget {
                                 const SizedBox(height: 10),
 
                                 Text(
-                                  "Mohon tunggu sebentar ya ✨",
+                                  "Mohon tunggu sebentar ya âœ¨",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.grey.shade600,

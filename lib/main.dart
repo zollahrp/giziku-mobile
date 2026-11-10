@@ -9,9 +9,11 @@ import 'firebase_options.dart';
 import 'config/api_config.dart';
 
 import 'screens/auth_wrapper.dart';
+import 'screens/main_screen.dart';
 
 import 'screens/onboarding_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/profiles/edit_profile_screen.dart';
 
@@ -89,7 +91,7 @@ class MyApp extends StatelessWidget {
       ],
 
       child: MaterialApp(
-        title: 'Giziku',
+        title: 'Gizify',
 
         debugShowCheckedModeBanner: false,
 
@@ -136,8 +138,9 @@ class MyApp extends StatelessWidget {
         home: const AuthWrapper(),
 
         routes: {
-          '/profile': (context) => const ProfileScreen(),
-
+          '/login': (context) => const LoginScreen(),
+          '/register': (context) => const RegisterScreen(),
+          '/profile': (context) => const MainScreen(initialIndex: 4),
           '/edit_profile': (context) => const EditProfileScreen(),
         },
       ),

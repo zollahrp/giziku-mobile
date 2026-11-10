@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gizify/widgets/avatar_helper.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileDetailScreen extends StatelessWidget {
@@ -10,10 +11,6 @@ class ProfileDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final uid = user!.uid;
-
-    final String name = user.displayName ?? "Guest User";
-    final String email = user.email ?? "No Email";
-    final String photo = user.photoURL ?? "";
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -31,11 +28,34 @@ class ProfileDetailScreen extends StatelessWidget {
 
           final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
 
+          final String name = data['name'] ?? user.displayName ?? "Guest User";
+          final String email = data['email'] ?? user.email ?? "No Email";
+          final String photo = data['photoURL'] ?? data['photo_url'] ?? user.photoURL ?? "";
+
+          final String birthDate = data['date_of_birth'] ?? data['birthDate'] ?? data['dateOfBirth'] ?? '';
+          final String calories = data['daily_calories']?.toString() ?? data['calories']?.toString() ?? data['dailyCalories']?.toString() ?? '';
+          final String activity = data['activity_level'] ?? data['activity'] ?? data['activityLevel'] ?? '';
+          final String exercise = data['exercise_level'] ?? data['exercise'] ?? data['exerciseLevel'] ?? '';
+          final String bodyGoal = data['body_goal'] ?? data['bodyGoal'] ?? '';
+          final String bmiStatus = data['bmi_category'] ?? data['bmiStatus'] ?? data['bmiCategory'] ?? '';
+          final String idealWeight = data['ideal_weight']?.toString() ?? data['idealWeight']?.toString() ?? '';
+
+          dynamic rawFood = data['food_type'] ?? data['dietTypes'] ?? data['dietType'];
+          final String foodType = rawFood is List ? rawFood.join(', ') : (rawFood?.toString() ?? '');
+
+          final String favoriteFoods = data['favorite_foods'] ?? data['favoriteFoods'] ?? '';
+          final String dislikedFoods = data['disliked_foods'] ?? data['dislikedFoods'] ?? '';
+
+          dynamic rawAllergies = data['allergies'];
+          final String allergiesStr = rawAllergies is List ? (rawAllergies.isEmpty ? 'Tidak ada' : rawAllergies.join(', ')) : (rawAllergies?.toString() ?? 'Tidak ada');
+
+          dynamic rawDisease = data['chronic_disease'] ?? data['chronicDisease'] ?? data['medicalHistory'];
+          final String diseaseStr = rawDisease is List ? (rawDisease.isEmpty ? 'Tidak ada' : rawDisease.join(', ')) : (rawDisease?.toString() ?? 'Tidak ada');
+
           String v(dynamic value, [String suffix = '']) {
-            if (value == null || value.toString().isEmpty) {
+            if (value == null || value.toString().trim().isEmpty) {
               return '-';
             }
-
             return '$value$suffix';
           }
 
@@ -100,18 +120,7 @@ class ProfileDetailScreen extends StatelessWidget {
                             child: CircleAvatar(
                               radius: 50,
                               backgroundColor: Colors.white,
-
-                              backgroundImage: photo.isNotEmpty
-                                  ? NetworkImage(photo)
-                                  : null,
-
-                              child: photo.isEmpty
-                                  ? const Icon(
-                                      Icons.person,
-                                      size: 55,
-                                      color: Color(0xFF2ECC71),
-                                    )
-                                  : null,
+                              backgroundImage: getProfileImageProvider(photo),
                             ),
                           ),
 
@@ -159,7 +168,7 @@ class ProfileDetailScreen extends StatelessWidget {
                                 Expanded(
                                   child: _MiniStat(
                                     title: 'Kalori',
-                                    value: "${v(data['daily_calories'])} kcal",
+                                    value: "${v(calories)} kcal",
                                   ),
                                 ),
 
@@ -168,18 +177,13 @@ class ProfileDetailScreen extends StatelessWidget {
                                 Expanded(
                                   child: _MiniStat(
                                     title: 'Target',
-
-                                    value:
-                                        data['body_goal'] ==
-                                            'Menambah Massa Otot'
+                                    value: bodyGoal == 'Menambah Massa Otot'
                                         ? 'Bulking'
-                                        : data['body_goal'] ==
-                                              'Menurunkan Berat Badan'
-                                        ? 'Cutting'
-                                        : data['body_goal'] ==
-                                              'Menjaga Berat Badan'
-                                        ? 'Maintain'
-                                        : '-',
+                                        : bodyGoal == 'Menurunkan Berat Badan'
+                                            ? 'Cutting'
+                                            : bodyGoal == 'Menjaga Berat Badan'
+                                                ? 'Maintain'
+                                                : v(bodyGoal),
                                   ),
                                 ),
                               ],
@@ -235,7 +239,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.cake_outlined,
                             title: 'Tanggal Lahir',
-                            value: v(data['date_of_birth']),
+                            value: v(birthDate),
                           ),
 
                           const _InfoDivider(),
@@ -284,7 +288,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.favorite,
                             title: 'Status BMI',
-                            value: v(data['bmi_category']),
+                            value: v(bmiStatus),
                           ),
 
                           const _InfoDivider(),
@@ -292,7 +296,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.fitness_center,
                             title: 'Berat Ideal',
-                            value: v(data['ideal_weight'], ' kg'),
+                            value: v(idealWeight, ' kg'),
                           ),
 
                           const _InfoDivider(),
@@ -300,7 +304,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.local_fire_department,
                             title: 'Kebutuhan Kalori',
-                            value: v(data['daily_calories'], ' kcal'),
+                            value: v(calories, ' kcal'),
                           ),
 
                           const _InfoDivider(),
@@ -308,7 +312,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.directions_run,
                             title: 'Tingkat Aktivitas',
-                            value: v(data['activity_level']),
+                            value: v(activity),
                           ),
 
                           const _InfoDivider(),
@@ -316,7 +320,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.sports_gymnastics,
                             title: 'Tingkat Olahraga',
-                            value: v(data['exercise_level']),
+                            value: v(exercise),
                           ),
 
                           const _InfoDivider(),
@@ -324,7 +328,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.track_changes,
                             title: 'Target Tubuh',
-                            value: v(data['body_goal']),
+                            value: v(bodyGoal),
                           ),
                         ],
                       ),
@@ -341,7 +345,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.restaurant,
                             title: 'Tipe Makanan',
-                            value: v(data['food_type']),
+                            value: v(foodType),
                           ),
 
                           const _InfoDivider(),
@@ -349,7 +353,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.favorite_outline,
                             title: 'Makanan Favorit',
-                            value: v(data['favorite_foods']),
+                            value: v(favoriteFoods),
                           ),
 
                           const _InfoDivider(),
@@ -357,7 +361,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.thumb_down_alt_outlined,
                             title: 'Makanan Tidak Disukai',
-                            value: v(data['disliked_foods']),
+                            value: v(dislikedFoods),
                           ),
 
                           const _InfoDivider(),
@@ -365,7 +369,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.warning_amber_outlined,
                             title: 'Alergi',
-                            value: v(data['allergies']),
+                            value: allergiesStr,
                           ),
                         ],
                       ),
@@ -382,7 +386,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           _InfoTile(
                             icon: Icons.medical_services_outlined,
                             title: 'Riwayat Penyakit',
-                            value: v(data['chronic_disease']),
+                            value: diseaseStr,
                           ),
                         ],
                       ),

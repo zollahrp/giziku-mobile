@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-class GizikuChatbotService {
+class GizifyChatbotService {
   final model = GenerativeModel(
     model: 'models/gemini-3.1-flash-lite',
     apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
@@ -57,11 +57,11 @@ class GizikuChatbotService {
         "gender": userData['gender'] ?? '',
         "weight": userData['weight'] ?? 0,
         "height": userData['height'] ?? 0,
-        "daily_calories": userData['daily_calories'] ?? 2000,
-        "body_goal": userData['body_goal'] ?? '',
-        "activity_level": userData['activity_level'] ?? '',
+        "daily_calories": userData['daily_calories'] ?? userData['calories'] ?? 2000,
+        "body_goal": userData['body_goal'] ?? userData['bodyGoal'] ?? '',
+        "activity_level": userData['activity_level'] ?? userData['activity'] ?? '',
         "allergies": userData['allergies'] ?? [],
-        "chronic_disease": userData['chronic_disease'] ?? [],
+        "chronic_disease": userData['chronic_disease'] ?? userData['chronicDisease'] ?? (userData['medicalHistory'] != null ? [userData['medicalHistory']] : []),
       };
 
       // ================= CONVERT JSON =================
@@ -74,7 +74,7 @@ class GizikuChatbotService {
 
       final prompt =
           """
-Kamu adalah GiziBot, AI nutrition assistant modern milik aplikasi Giziku.
+Kamu adalah GiziBot, AI nutrition assistant modern milik aplikasi Gizify.
 
 PERSONALITY:
 - Professional
@@ -117,7 +117,7 @@ KAMU HANYA BOLEH MENJAWAB:
 - cutting
 
 JIKA DI LUAR TOPIK:
-Jawab dengan sopan bahwa kamu hanya fokus pada nutrisi dan kesehatan pengguna di aplikasi Giziku.
+Jawab dengan sopan bahwa kamu hanya fokus pada nutrisi dan kesehatan pengguna di aplikasi Gizify.
 
 ATURAN PENTING:
 - Gunakan data user asli

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:giziku/models/user_profile.dart';
-import 'package:giziku/services/profile_api_service.dart';
+import 'package:gizify/models/user_profile.dart';
+import 'package:gizify/services/profile_api_service.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final ProfileApiService _apiService = ProfileApiService();

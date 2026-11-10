@@ -1052,7 +1052,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                     const SizedBox(width: 10),
 
                                     const Text(
-                                      "Giziku Nutrition Insight",
+                                      "Gizify Nutrition Insight",
 
                                       style: TextStyle(
                                         fontFamily: 'Poppins',

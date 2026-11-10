@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:giziku/screens/home_screen.dart';
-import 'package:giziku/screens/profiles/edit_profile_screen.dart';
-import 'package:giziku/screens/recipe_screen.dart';
-import 'package:giziku/screens/profile_screen.dart';
+import 'package:gizify/screens/home_screen.dart';
+import 'package:gizify/screens/profiles/edit_profile_screen.dart';
+import 'package:gizify/screens/recipe_screen.dart';
+import 'package:gizify/screens/profile_screen.dart';
 import 'gizi_chatbot_screen.dart';
 import 'scanner/scanner_screen.dart';
 
@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     RecipeScreen(),
     ScannerScreen(),
-    GizikuChatbotScreen(),
+    GizifyChatbotScreen(),
     ProfileScreen(),
   ];
 
@@ -57,15 +57,16 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     final requiredFields = [
+      data['name'],
       data['gender'],
-      data['date_of_birth'],
+      data['date_of_birth'] ?? data['birthDate'] ?? data['dateOfBirth'],
       data['height'],
       data['weight'],
-      data['daily_calories'],
-      data['activity_level'],
-      data['exercise_level'],
-      data['body_goal'],
-      data['food_type'],
+      data['daily_calories'] ?? data['calories'] ?? data['dailyCalories'],
+      data['activity_level'] ?? data['activity'] ?? data['activityLevel'],
+      data['exercise_level'] ?? data['exercise'] ?? data['exerciseLevel'],
+      data['body_goal'] ?? data['bodyGoal'],
+      data['food_type'] ?? data['dietTypes'] ?? data['dietType'],
     ];
 
     final profileComplete = !requiredFields.any(isIncomplete);
