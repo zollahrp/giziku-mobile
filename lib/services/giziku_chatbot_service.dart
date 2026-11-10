@@ -1,157 +1,218 @@
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:http/http.dart' as http;
+import '../models/chat_message.dart';
+
+class GiziBotResponse {
+  final String text;
+  final bool hasWidget;
+  final Map<String, dynamic>? widgetData;
+
+  GiziBotResponse({
+    required this.text,
+    this.hasWidget = false,
+    this.widgetData,
+  });
+}
 
 class GizifyChatbotService {
-  final model = GenerativeModel(
-    model: 'models/gemini-3.1-flash-lite',
-    apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
-    generationConfig: GenerationConfig(temperature: 0.5),
-  );
+  String get _apiKey {
+    return dotenv.env['GEMINI_API_KEY'] ?? '';
+  }
 
-  final user = FirebaseAuth.instance.currentUser;
+  static const String systemInstruction = """
+Kamu adalah Gizibot, asisten nutrisi AI eksklusif untuk aplikasi Gizify. Gunakan bahasa Indonesia santai, asik, pakai kata "Kamu" atau "Mu", sedikit humoris dan berikan semangat.
 
-  Future<String> sendMessage(String userMessage) async {
-    try {
-      // ================= USER PROFILE =================
+FLEKSIBILITAS BAHASA:
+Kamu fasih dwibahasa (Bahasa Indonesia dan Bahasa Inggris). Kamu bisa memahami pertanyaan baik dalam Bahasa Indonesia maupun Bahasa Inggris dengan sangat baik. Pengguna bebas bertanya menggunakan bahasa apa pun. Jika pengguna bertanya cara mengubah bahasa aplikasi, jelaskan dengan ramah bahwa mereka dapat mengatur preferensi bahasa kapan saja di menu "Profil Saya" (My Profile).
 
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .get();
+BATASAN SANGAT PENTING:
+1. KUNCI TOPIK: Kamu HANYA BOLEH menjawab pertanyaan seputar makanan, gizi, diet, resep, kalori, dan kesehatan. Jika user bertanya di luar ranah ini (seperti matematika, coding, politik, dsb), tolak dengan sopan tapi kocak, dan arahkan kembali ke nutrisi.
+2. ANTI-EMOJI: DILARANG KERAS menggunakan emoji apapun dalam balasanmu. Gunakan tanda baca standar saja.
+3. MATA AI: Jika mendapat kiriman gambar/foto, identifikasilah sebagai makanan dan hitung gizinya.
 
-      final userData = userDoc.data() ?? {};
+ATURAN FORMAT BALASAN (WAJIB JSON):
+Kamu HANYA BOLEH merespon dalam format JSON murni.
+Struktur JSON WAJIB seperti ini:
+{
+  "text": "Pesan balasanmu di sini (pastikan 100% tanpa emoji, gunakan \\n\\n untuk enter)",
+  "hasWidget": true/false,
+  "widgetData": null atau { "title": "Nama Makanan", "calories": 300, "protein": 20, "carbs": 30, "fat": 10, "image": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=600&auto=format&fit=crop" }
+}
 
-      // ================= DAILY NUTRITION =================
-
-      final nutritionSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .collection('daily_nutrition')
-          .limit(30)
-          .get();
-
-      final nutritionHistory = nutritionSnapshot.docs.map((doc) {
-        final data = doc.data();
-
-        return {
-          "date": doc.id,
-          "calories": data['calories'] ?? 0,
-          "protein": data['protein'] ?? 0,
-          "carbs": data['carbs'] ?? 0,
-          "fats": data['fats'] ?? 0,
-          "updated_at": data['updated_at'] != null
-              ? (data['updated_at'] as Timestamp).toDate().toIso8601String()
-              : null,
-        };
-      }).toList();
-
-      // ================= PROFILE DATA =================
-
-      final profileData = {
-        "name": userData['name'] ?? '',
-        "age": userData['age'] ?? 0,
-        "gender": userData['gender'] ?? '',
-        "weight": userData['weight'] ?? 0,
-        "height": userData['height'] ?? 0,
-        "daily_calories": userData['daily_calories'] ?? userData['calories'] ?? 2000,
-        "body_goal": userData['body_goal'] ?? userData['bodyGoal'] ?? '',
-        "activity_level": userData['activity_level'] ?? userData['activity'] ?? '',
-        "allergies": userData['allergies'] ?? [],
-        "chronic_disease": userData['chronic_disease'] ?? userData['chronicDisease'] ?? (userData['medicalHistory'] != null ? [userData['medicalHistory']] : []),
-      };
-
-      // ================= CONVERT JSON =================
-
-      final nutritionJson = jsonEncode(nutritionHistory);
-
-      final profileJson = jsonEncode(profileData);
-
-      // ================= AI PROMPT =================
-
-      final prompt =
-          """
-Kamu adalah GiziBot, AI nutrition assistant modern milik aplikasi Gizify.
-
-PERSONALITY:
-- Professional
-- Smart
-- Modern
-- Friendly
-- Calm
-- Natural seperti AI assistant modern
-- Jangan terlalu formal
-- Jangan terlalu kaku
-- Jangan terlalu banyak emoji
-- Gunakan Bahasa Indonesia modern
-- Jawaban harus clean dan enak dibaca
-
-STYLE JAWABAN:
-- Singkat tapi insightful
-- Gunakan formatting yang rapi
-- Boleh gunakan bullet point seperlunya
-- Jangan terlalu panjang kecuali diminta
-- Jangan terdengar seperti robot lama
-
-KAMU HANYA BOLEH MENJAWAB:
-- nutrisi
-- kalori
-- protein
-- carbs
-- fats
-- pola makan
-- meal tracking
-- progress nutrisi
-- insight kesehatan
-- konsumsi harian
-- konsumsi mingguan
-- perbandingan target kalori
-- analisis nutrisi
-- rekomendasi makanan sehat
-- evaluasi pola makan
-- diet
-- bulking
-- cutting
-
-JIKA DI LUAR TOPIK:
-Jawab dengan sopan bahwa kamu hanya fokus pada nutrisi dan kesehatan pengguna di aplikasi Gizify.
-
-ATURAN PENTING:
-- Gunakan data user asli
-- Jangan mengarang data
-- Jika data tidak ada, bilang data belum tersedia
-- Boleh menghitung total mingguan atau rata-rata
-- Boleh memberi insight berdasarkan pola makan user
-- Fokus pada data nutrisi yang tersedia
-
-PROFILE USER:
-$profileJson
-
-DATA DAILY NUTRITION USER:
-$nutritionJson
-
-PERTANYAAN USER:
-$userMessage
+Jika user meminta saran makanan/resep, set "hasWidget" menjadi true dan isi "widgetData" dengan estimasi gizinya.
 """;
 
-      // ================= GENERATE AI =================
+  /// Send message history to Gemini and receive structured GiziBotResponse
+  Future<GiziBotResponse> sendChat({
+    required List<ChatMessage> messages,
+    String locale = "id",
+  }) async {
+    final apiKey = _apiKey;
+    if (apiKey.isEmpty) {
+      return GiziBotResponse(
+        text: "API Key Gemini belum terpasang di file konfigurasi .env.",
+        hasWidget: false,
+        widgetData: null,
+      );
+    }
 
-      final response = await model.generateContent([Content.text(prompt)]);
+    // =================================================================
+    // 1. FILTER HISTORY SESUAI ATURAN GEMINI (PERSIS WEB)
+    // =================================================================
+    final List<Map<String, dynamic>> formattedHistory = [];
+    String lastRole = "";
 
-      final text = response.text;
+    for (final m in messages) {
+      final role = m.sender == 'user' ? 'user' : 'model';
 
-      if (text == null || text.isEmpty) {
-        return "Maaf, saya gagal menganalisis data nutrisi Anda.";
+      // RULES 1: Jangan biarkan bot bicara duluan di memory API
+      if (formattedHistory.isEmpty && role == 'model') continue;
+
+      // RULES 2: Role harus selang-seling (User -> Model -> User)
+      if (role == lastRole) continue;
+
+      final List<Map<String, dynamic>> parts = [];
+      if (m.text.trim().isNotEmpty) {
+        parts.add({'text': m.text.trim()});
       }
 
-      return text.trim();
-    } catch (e) {
-      print("GIZIBOT ERROR: $e");
+      // Kalau user kirim gambar (base64)
+      if (m.image != null && role == 'user' && m.image!.isNotEmpty) {
+        try {
+          String base64Data = m.image!;
+          String mimeType = 'image/jpeg';
 
-      return "Terjadi kesalahan saat mengambil data nutrisi.";
+          if (base64Data.contains(',')) {
+            final header = base64Data.split(',')[0];
+            base64Data = base64Data.split(',')[1];
+            if (header.contains(':') && header.contains(';')) {
+              mimeType = header.split(';')[0].split(':')[1];
+            }
+          }
+
+          parts.add({
+            'inline_data': {
+              'mime_type': mimeType,
+              'data': base64Data,
+            }
+          });
+        } catch (e) {
+          debugPrint("Error parsing image base64: $e");
+        }
+      }
+
+      if (parts.isNotEmpty) {
+        formattedHistory.add({'role': role, 'parts': parts});
+        lastRole = role;
+      }
     }
+
+    // Pastikan turn terakhir adalah 'user'
+    while (formattedHistory.isNotEmpty && formattedHistory.last['role'] != 'user') {
+      formattedHistory.removeLast();
+    }
+
+    // Fallback jika history kosong
+    if (formattedHistory.isEmpty) {
+      formattedHistory.add({
+        'role': 'user',
+        'parts': [
+          {'text': 'Halo GiziBot!'}
+        ]
+      });
+    }
+
+    final payload = {
+      'system_instruction': {
+        'parts': [
+          {'text': systemInstruction}
+        ]
+      },
+      'contents': formattedHistory,
+      'generationConfig': {
+        'response_mime_type': 'application/json',
+      }
+    };
+
+    // Model list to try in order
+    final models = [
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-pro',
+    ];
+
+    for (final modelName in models) {
+      try {
+        final url = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
+        );
+
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(payload),
+        );
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final candidates = data['candidates'] as List<dynamic>?;
+          if (candidates != null && candidates.isNotEmpty) {
+            final contentParts = candidates[0]['content']?['parts'] as List<dynamic>?;
+            if (contentParts != null && contentParts.isNotEmpty) {
+              String textResult = contentParts[0]['text']?.toString() ?? '';
+              textResult = textResult
+                  .replaceAll('```json', '')
+                  .replaceAll('```', '')
+                  .trim();
+
+              try {
+                final parsedJson = jsonDecode(textResult);
+                return GiziBotResponse(
+                  text: parsedJson['text']?.toString() ?? textResult,
+                  hasWidget: parsedJson['hasWidget'] == true,
+                  widgetData: parsedJson['widgetData'] != null
+                      ? Map<String, dynamic>.from(parsedJson['widgetData'] as Map)
+                      : null,
+                );
+              } catch (_) {
+                return GiziBotResponse(
+                  text: textResult,
+                  hasWidget: false,
+                  widgetData: null,
+                );
+              }
+            }
+          }
+        } else {
+          debugPrint("Gemini $modelName HTTP ${response.statusCode}: ${response.body}");
+        }
+      } catch (e) {
+        debugPrint("Error calling Gemini $modelName: $e");
+      }
+    }
+
+    // Fallback response if all API endpoints fail
+    return GiziBotResponse(
+      text: "Saat ini Gizibot sedang menyesuaikan koneksi dengan server AI. Silakan tanyakan kembali seputar gizi, resep, atau target kalorimu ya!",
+      hasWidget: false,
+      widgetData: null,
+    );
+  }
+
+  /// Backward-compatible single message method
+  Future<String> sendMessage(String userMessage) async {
+    final res = await sendChat(
+      messages: [
+        ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch,
+          sender: 'user',
+          text: userMessage,
+          time: 'now',
+        ),
+      ],
+    );
+    return res.text;
   }
 }

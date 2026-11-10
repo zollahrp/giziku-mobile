@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -533,7 +532,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   {'text': 'Akses 1000+ Resep Premium', 'included': true},
                   {'text': 'Tracking Makro & Mikro Lengkap', 'included': true},
                   {'text': 'Custom Meal Plan AI Otomatis', 'included': true},
-                  {'text': 'GiziBot Assistant 24/7', 'included': true},
+                  {'text': 'Gizibot Assistant 24/7', 'included': true},
                 ],
               },
               {
@@ -2807,41 +2806,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // =========================================================================
-  // WIDGET HELPER: PILL BADGE
-  // =========================================================================
-  Widget _buildPillBadge({
-    required IconData icon,
-    required String text,
-    required Color bg,
-    required Color fg,
-    BoxBorder? border,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(16),
-        border: border,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: fg),
-          const SizedBox(width: 4),
-          Text(
-            text,
-            style: TextStyle(
-              color: fg,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              fontFamily: 'Poppins',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   // =========================================================================
   // DIALOG: HAPUS AKUN
