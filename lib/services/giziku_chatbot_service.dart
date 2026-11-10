@@ -136,11 +136,9 @@ Jika user meminta saran makanan/resep, set "hasWidget" menjadi true dan isi "wid
       }
     };
 
-    // Model list to try in order
+    // Model persis 100% sama dengan route.ts di web dashboard: gemini-3.1-flash-lite
     final models = [
-      'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'gemini-1.5-pro',
+      'gemini-3.1-flash-lite',
     ];
 
     for (final modelName in models) {
