@@ -27,12 +27,13 @@ class _MainScreenState extends State<MainScreen>
   // Pulse animation controller untuk tombol Scan di tengah
   late AnimationController _scanPulseController;
 
+  // Urutan Layar: Home, Resep, Plan (samping Resep), Gizibot, Peta, Profil
   final List<Widget> _screens = [
     HomeScreen(),
     RecipeScreen(),
-    const MapsScreen(),
-    const GizifyChatbotScreen(),
     const MealPlanScreen(),
+    const GizifyChatbotScreen(),
+    const MapsScreen(),
     ProfileScreen(),
   ];
 
@@ -172,7 +173,7 @@ class _MainScreenState extends State<MainScreen>
     );
   }
 
-  // Widget Item Navigasi Standar dengan Icon & Label Text
+  // Nav Item Standar (Anti-Overflow, Responsif)
   Widget _buildNavItem({
     required int index,
     required String label,
@@ -190,12 +191,12 @@ class _MainScreenState extends State<MainScreen>
           splashColor: const Color(0xFF1EAB57).withValues(alpha: 0.12),
           highlightColor: Colors.transparent,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 2),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icon Container dengan animasi pill aktif
+                // Active pill background di sekitar icon
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeInOut,
@@ -204,7 +205,7 @@ class _MainScreenState extends State<MainScreen>
                     color: isSelected
                         ? const Color(0xFFECFDF5)
                         : Colors.transparent,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     isSelected ? iconActive : iconInactive,
@@ -216,21 +217,20 @@ class _MainScreenState extends State<MainScreen>
                 ),
                 const SizedBox(height: 2),
 
-                // Label Text di bawah icon
-                AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 200),
+                // Teks Label
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 10,
+                    fontSize: 9.5,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                     color: isSelected
                         ? const Color(0xFF1EAB57)
                         : const Color(0xFF94A3B8),
                     letterSpacing: -0.2,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  child: Text(label),
                 ),
               ],
             ),
@@ -240,72 +240,39 @@ class _MainScreenState extends State<MainScreen>
     );
   }
 
-  // Widget Tombol Scanner Melayang di Tengah dengan Text "Scan"
-  Widget _buildCenterScanItem() {
+  // Placeholder slot tengah untuk menjaga spacing & menaruh label "Scan"
+  Widget _buildCenterPlaceholder() {
     return Expanded(
-      child: GestureDetector(
-        onTap: _openScanner,
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            // Floating Button dengan animasi subtle glow pulse
-            Transform.translate(
-              offset: const Offset(0, -14),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.96, end: 1.04).animate(
-                  CurvedAnimation(
-                    parent: _scanPulseController,
-                    curve: Curves.easeInOut,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _openScanner,
+          borderRadius: BorderRadius.circular(16),
+          splashColor: const Color(0xFF1EAB57).withValues(alpha: 0.12),
+          highlightColor: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: const [
+                // Spacer setinggi icon agar label "Scan" sejajar sempurna
+                SizedBox(height: 27),
+                SizedBox(height: 2),
+                Text(
+                  'Scan',
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1EAB57),
+                    letterSpacing: -0.2,
                   ),
                 ),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF1EAB57), Color(0xFF0D5929)],
-                    ),
-                    border: Border.all(color: Colors.white, width: 3.5),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1EAB57).withValues(alpha: 0.45),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.qr_code_scanner_rounded,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ),
-              ),
+              ],
             ),
-
-            // Label "Scan" di bawah tombol floating
-            Transform.translate(
-              offset: const Offset(0, -10),
-              child: const Text(
-                'Scan',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1EAB57),
-                  letterSpacing: -0.2,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -333,7 +300,7 @@ class _MainScreenState extends State<MainScreen>
               offset: const Offset(0, -6),
             ),
             BoxShadow(
-              color: const Color(0xFF1EAB57).withValues(alpha: 0.03),
+              color: const Color(0xFF1EAB57).withValues(alpha: 0.04),
               blurRadius: 30,
               offset: const Offset(0, -10),
             ),
@@ -341,67 +308,117 @@ class _MainScreenState extends State<MainScreen>
         ),
         child: SafeArea(
           top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(4, 6, 4, 4),
-            child: SizedBox(
-              height: 58,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // 1. Home
-                  _buildNavItem(
-                    index: 0,
-                    label: 'Home',
-                    iconInactive: Icons.home_outlined,
-                    iconActive: Icons.home_rounded,
-                  ),
+          bottom: true, // Pastikan tidak tertutup tombol back/home sistem Android
+          minimum: const EdgeInsets.only(bottom: 6),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.bottomCenter,
+            children: [
+              // Row Navigasi 7 Slot Sejajar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 6, 4, 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // 1. Home
+                    _buildNavItem(
+                      index: 0,
+                      label: 'Home',
+                      iconInactive: Icons.home_outlined,
+                      iconActive: Icons.home_rounded,
+                    ),
 
-                  // 2. Resep
-                  _buildNavItem(
-                    index: 1,
-                    label: 'Resep',
-                    iconInactive: Icons.menu_book_outlined,
-                    iconActive: Icons.menu_book_rounded,
-                  ),
+                    // 2. Resep
+                    _buildNavItem(
+                      index: 1,
+                      label: 'Resep',
+                      iconInactive: Icons.menu_book_outlined,
+                      iconActive: Icons.menu_book_rounded,
+                    ),
 
-                  // 3. Peta Belanja
-                  _buildNavItem(
-                    index: 2,
-                    label: 'Peta',
-                    iconInactive: Icons.map_outlined,
-                    iconActive: Icons.map_rounded,
-                  ),
+                    // 3. Plan (Rencana Menu Budget - Samping Resep!)
+                    _buildNavItem(
+                      index: 2,
+                      label: 'Plan',
+                      iconInactive: Icons.account_balance_wallet_outlined,
+                      iconActive: Icons.account_balance_wallet_rounded,
+                    ),
 
-                  // 4. Center Elevated Scanner
-                  _buildCenterScanItem(),
+                    // 4. Center Placeholder untuk Tombol Scan
+                    _buildCenterPlaceholder(),
 
-                  // 5. Gizibot AI
-                  _buildNavItem(
-                    index: 3,
-                    label: 'Gizibot',
-                    iconInactive: Icons.smart_toy_outlined,
-                    iconActive: Icons.smart_toy_rounded,
-                  ),
+                    // 5. Gizibot AI
+                    _buildNavItem(
+                      index: 3,
+                      label: 'Gizibot',
+                      iconInactive: Icons.smart_toy_outlined,
+                      iconActive: Icons.smart_toy_rounded,
+                    ),
 
-                  // 6. Rencana Menu Budget (Meal Plan)
-                  _buildNavItem(
-                    index: 4,
-                    label: 'Plan',
-                    iconInactive: Icons.account_balance_wallet_outlined,
-                    iconActive: Icons.account_balance_wallet_rounded,
-                  ),
+                    // 6. Peta Belanja (Maps)
+                    _buildNavItem(
+                      index: 4,
+                      label: 'Peta',
+                      iconInactive: Icons.map_outlined,
+                      iconActive: Icons.map_rounded,
+                    ),
 
-                  // 7. Profil Saya
-                  _buildNavItem(
-                    index: 5,
-                    label: 'Profil',
-                    iconInactive: Icons.person_outline_rounded,
-                    iconActive: Icons.person_rounded,
-                  ),
-                ],
+                    // 7. Profil Saya
+                    _buildNavItem(
+                      index: 5,
+                      label: 'Profil',
+                      iconInactive: Icons.person_outline_rounded,
+                      iconActive: Icons.person_rounded,
+                    ),
+                  ],
+                ),
               ),
-            ),
+
+              // Tombol Floating Scanner di Tengah (Melayang Rapi di atas Text 'Scan')
+              Positioned(
+                top: -20,
+                child: GestureDetector(
+                  onTap: _openScanner,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.96, end: 1.04).animate(
+                      CurvedAnimation(
+                        parent: _scanPulseController,
+                        curve: Curves.easeInOut,
+                      ),
+                    ),
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFF1EAB57), Color(0xFF0D5929)],
+                        ),
+                        border: Border.all(color: Colors.white, width: 3.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1EAB57).withValues(alpha: 0.45),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.qr_code_scanner_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
