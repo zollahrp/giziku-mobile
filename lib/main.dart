@@ -11,10 +11,8 @@ import 'config/api_config.dart';
 import 'screens/auth_wrapper.dart';
 import 'screens/main_screen.dart';
 
-import 'screens/onboarding_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
-import 'screens/profile_screen.dart';
 import 'screens/profiles/edit_profile_screen.dart';
 
 import 'providers/profile_provider.dart';
@@ -140,7 +138,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
-          '/profile': (context) => const MainScreen(initialIndex: 4),
+          '/profile': (context) => const MainScreen(initialIndex: 5),
           '/edit_profile': (context) => const EditProfileScreen(),
         },
       ),

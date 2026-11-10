@@ -120,7 +120,9 @@ class _SimulationBudgetScreenState extends State<SimulationBudgetScreen> {
                     ),
                     child: IconButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        }
                       },
                       icon: const Icon(
                         Icons.arrow_back_ios_new_rounded,
