@@ -460,42 +460,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
-        body: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1EAB57).withOpacity(0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF1EAB57),
-                      strokeWidth: 3,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Memuat Dashboard...",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+      return _buildHomeSkeleton();
     }
 
     final unreadNotifCount = _notifications.where((n) => n['isRead'] == false).length;
@@ -3555,6 +3520,199 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
+  // ==========================================
+  // SKELETON LOADING WIDGETS
+  // ==========================================
+  Widget _buildHomeSkeleton() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: SafeArea(
+        child: ShimmerLoading(
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. HEADER SKELETON
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildSkeletonBlock(width: 110, height: 32, borderRadius: 10),
+                    Row(
+                      children: [
+                        _buildSkeletonBlock(width: 44, height: 32, borderRadius: 16),
+                        const SizedBox(width: 8),
+                        _buildSkeletonBlock(width: 34, height: 34, borderRadius: 17),
+                        const SizedBox(width: 8),
+                        _buildSkeletonBlock(width: 34, height: 34, borderRadius: 17),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // 2. SEARCH BAR SKELETON
+                _buildSkeletonBlock(height: 48, borderRadius: 18),
+                const SizedBox(height: 16),
+
+                // 3. HERO BANNER SKELETON
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          _buildSkeletonBlock(width: 44, height: 44, borderRadius: 14),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSkeletonBlock(width: 150, height: 18, borderRadius: 6),
+                              const SizedBox(height: 6),
+                              _buildSkeletonBlock(width: 110, height: 14, borderRadius: 12),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _buildSkeletonBlock(width: 125, height: 30, borderRadius: 10),
+                          _buildSkeletonBlock(width: 155, height: 30, borderRadius: 10),
+                          _buildSkeletonBlock(width: 115, height: 30, borderRadius: 10),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSkeletonBlock(height: 36, borderRadius: 12),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 4. CHART SKELETON
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSkeletonBlock(width: 160, height: 16, borderRadius: 6),
+                              const SizedBox(height: 6),
+                              _buildSkeletonBlock(width: 120, height: 11, borderRadius: 4),
+                            ],
+                          ),
+                          _buildSkeletonBlock(width: 40, height: 14, borderRadius: 6),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _buildSkeletonBlock(height: 100, borderRadius: 12),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: List.generate(
+                          7,
+                          (_) => _buildSkeletonBlock(width: 28, height: 16, borderRadius: 6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 5. 4 PILAR MAKRO SKELETON (Grid 2x2)
+                Row(
+                  children: [
+                    Expanded(child: _buildMetricCardSkeleton()),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildMetricCardSkeleton()),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: _buildMetricCardSkeleton()),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildMetricCardSkeleton()),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // 6. BOTTOM PROMO / GIZIBOT SKELETON
+                _buildSkeletonBlock(height: 90, borderRadius: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetricCardSkeleton() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildSkeletonBlock(width: 60, height: 11, borderRadius: 4),
+              _buildSkeletonBlock(width: 26, height: 26, borderRadius: 13),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _buildSkeletonBlock(width: 75, height: 22, borderRadius: 6),
+          const SizedBox(height: 10),
+          _buildSkeletonBlock(height: 5, borderRadius: 5),
+          const SizedBox(height: 8),
+          _buildSkeletonBlock(width: 90, height: 10, borderRadius: 4),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonBlock({
+    double? width,
+    required double height,
+    double borderRadius = 8,
+    Color color = const Color(0xFFE2E8F0),
+    EdgeInsetsGeometry? margin,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      margin: margin,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+    );
+  }
 }
 
 // ==========================================
@@ -3736,5 +3894,74 @@ class _DayHeader extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ==========================================
+// SHIMMER LOADING EFFECT (SHADOW/LIGHT WAVE)
+// ==========================================
+class ShimmerLoading extends StatefulWidget {
+  final Widget child;
+  const ShimmerLoading({super.key, required this.child});
+
+  @override
+  State<ShimmerLoading> createState() => _ShimmerLoadingState();
+}
+
+class _ShimmerLoadingState extends State<ShimmerLoading>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _shimmerController,
+      builder: (context, child) {
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) {
+            return LinearGradient(
+              begin: const Alignment(-1.2, -0.3),
+              end: const Alignment(1.2, 0.3),
+              stops: const [0.1, 0.3, 0.5],
+              colors: const [
+                Color(0xFFE2E8F0),
+                Color(0xFFF8FAFC),
+                Color(0xFFE2E8F0),
+              ],
+              transform: _SlidingGradientTransform(slidePercent: _shimmerController.value),
+            ).createShader(bounds);
+          },
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class _SlidingGradientTransform extends GradientTransform {
+  const _SlidingGradientTransform({required this.slidePercent});
+
+  final double slidePercent;
+
+  @override
+  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+    return Matrix4.translationValues(bounds.width * (slidePercent * 2 - 1), 0.0, 0.0);
   }
 }
