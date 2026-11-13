@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gizify/screens/home_screen.dart';
-import 'package:gizify/screens/maps_screen.dart';
+import 'package:gizify/screens/lainnya_screen.dart';
 import 'package:gizify/screens/meal_plan_screen.dart';
 import 'package:gizify/screens/profiles/edit_profile_screen.dart';
 import 'package:gizify/screens/recipe_screen.dart';
-import 'package:gizify/screens/profile_screen.dart';
-import 'gizi_chatbot_screen.dart';
 import 'scanner/scanner_screen.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,15 +25,17 @@ class _MainScreenState extends State<MainScreen>
   // Pulse animation controller untuk tombol Scan di tengah
   late AnimationController _scanPulseController;
 
-  // Urutan Layar: Home (0), Resep (1), Plan (2 - samping Resep), Gizibot (3), Peta (4), Profil (5)
-  // Menggunakan getter agar langsung ter-refresh seketika saat Hot Reload tanpa tertahan cache state
+  // 5 Tab Bersih & Lega ala Bank Jago:
+  // 0: Beranda (Home)
+  // 1: Resep (Katalog Makanan)
+  // [Tengah]: Scan (Floating AI Vision)
+  // 2: Plan (Rencana Menu & Budget)
+  // 3: Lainnya (Hub Fitur: Gizibot AI, Peta Belanja, Profil, dll.)
   List<Widget> get _screens => [
     HomeScreen(),
     RecipeScreen(),
     const MealPlanScreen(),
-    const GizifyChatbotScreen(),
-    const MapsScreen(),
-    ProfileScreen(),
+    const LainnyaScreen(),
   ];
 
   Future<bool> checkProfileCompleted() async {
@@ -151,8 +151,8 @@ class _MainScreenState extends State<MainScreen>
   }
 
   Future<void> _onTabTapped(int index) async {
-    // Profil (index 5) selalu bisa diakses kapan saja
-    if (index == 5) {
+    // Menu "Lainnya" (index 3) selalu bisa diakses kapan saja
+    if (index == 3) {
       setState(() => _selectedIndex = index);
       return;
     }
@@ -174,7 +174,7 @@ class _MainScreenState extends State<MainScreen>
     );
   }
 
-  // Nav Item Standar (Anti-Overflow, Responsif)
+  // Nav Item Modern Ala Bank Jago (Spacious, Tap Target Lebar, Micro-interaction)
   Widget _buildNavItem({
     required int index,
     required String label,
@@ -188,44 +188,44 @@ class _MainScreenState extends State<MainScreen>
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _onTabTapped(index),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           splashColor: const Color(0xFF1EAB57).withValues(alpha: 0.12),
           highlightColor: Colors.transparent,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Active pill background di sekitar icon
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
+                  duration: const Duration(milliseconds: 250),
                   curve: Curves.easeInOut,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? const Color(0xFFECFDF5)
                         : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
                     isSelected ? iconActive : iconInactive,
                     color: isSelected
                         ? const Color(0xFF1EAB57)
                         : const Color(0xFF94A3B8),
-                    size: 21,
+                    size: 23,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
 
-                // Teks Label
+                // Teks Label Bersih
                 Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 9.5,
+                    fontSize: 10.5,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                     color: isSelected
                         ? const Color(0xFF1EAB57)
@@ -248,24 +248,24 @@ class _MainScreenState extends State<MainScreen>
         color: Colors.transparent,
         child: InkWell(
           onTap: _openScanner,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           splashColor: const Color(0xFF1EAB57).withValues(alpha: 0.12),
           highlightColor: Colors.transparent,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.end,
               children: const [
                 // Spacer setinggi icon agar label "Scan" sejajar sempurna
-                SizedBox(height: 27),
-                SizedBox(height: 2),
+                SizedBox(height: 31),
+                SizedBox(height: 3),
                 Text(
                   'Scan',
                   maxLines: 1,
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 9.5,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF1EAB57),
                     letterSpacing: -0.2,
@@ -290,18 +290,18 @@ class _MainScreenState extends State<MainScreen>
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           border: const Border(
             top: BorderSide(color: Color(0xFFF1F5F9), width: 1.2),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 20,
               offset: const Offset(0, -6),
             ),
             BoxShadow(
-              color: const Color(0xFF1EAB57).withValues(alpha: 0.04),
+              color: const Color(0xFF1EAB57).withValues(alpha: 0.03),
               blurRadius: 30,
               offset: const Offset(0, -10),
             ),
@@ -315,17 +315,17 @@ class _MainScreenState extends State<MainScreen>
             clipBehavior: Clip.none,
             alignment: Alignment.bottomCenter,
             children: [
-              // Row Navigasi 7 Slot Sejajar
+              // Row Navigasi 5 Slot Sejajar Ala Bank Jago
               Padding(
-                padding: const EdgeInsets.fromLTRB(4, 6, 4, 4),
+                padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 1. Home
+                    // 1. Beranda (Home)
                     _buildNavItem(
                       index: 0,
-                      label: 'Home',
+                      label: 'Beranda',
                       iconInactive: Icons.home_outlined,
                       iconActive: Icons.home_rounded,
                     ),
@@ -338,7 +338,10 @@ class _MainScreenState extends State<MainScreen>
                       iconActive: Icons.menu_book_rounded,
                     ),
 
-                    // 3. Plan (Rencana Menu Budget - Samping Resep!)
+                    // 3. Center Placeholder untuk Tombol Scan
+                    _buildCenterPlaceholder(),
+
+                    // 4. Plan (Meal Planner & Budget)
                     _buildNavItem(
                       index: 2,
                       label: 'Plan',
@@ -346,31 +349,12 @@ class _MainScreenState extends State<MainScreen>
                       iconActive: Icons.account_balance_wallet_rounded,
                     ),
 
-                    // 4. Center Placeholder untuk Tombol Scan
-                    _buildCenterPlaceholder(),
-
-                    // 5. Gizibot AI
+                    // 5. Lainnya (Hub Fitur Ala Bank Jago: Gizibot, Peta, Profil, dll.)
                     _buildNavItem(
                       index: 3,
-                      label: 'Gizibot',
-                      iconInactive: Icons.smart_toy_outlined,
-                      iconActive: Icons.smart_toy_rounded,
-                    ),
-
-                    // 6. Peta Belanja (Maps)
-                    _buildNavItem(
-                      index: 4,
-                      label: 'Peta',
-                      iconInactive: Icons.map_outlined,
-                      iconActive: Icons.map_rounded,
-                    ),
-
-                    // 7. Profil Saya
-                    _buildNavItem(
-                      index: 5,
-                      label: 'Profil',
-                      iconInactive: Icons.person_outline_rounded,
-                      iconActive: Icons.person_rounded,
+                      label: 'Lainnya',
+                      iconInactive: Icons.grid_view_outlined,
+                      iconActive: Icons.grid_view_rounded,
                     ),
                   ],
                 ),
@@ -389,8 +373,8 @@ class _MainScreenState extends State<MainScreen>
                       ),
                     ),
                     child: Container(
-                      width: 52,
-                      height: 52,
+                      width: 54,
+                      height: 54,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const LinearGradient(
@@ -412,7 +396,7 @@ class _MainScreenState extends State<MainScreen>
                         child: Icon(
                           Icons.qr_code_scanner_rounded,
                           color: Colors.white,
-                          size: 24,
+                          size: 25,
                         ),
                       ),
                     ),
